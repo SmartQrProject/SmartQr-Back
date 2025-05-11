@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { LoggerMiddleware } from './middleware/logger/logger.middleware';
+import { auth } from 'express-openid-connect';
+import { config } from './config/auth0.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +16,14 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // auth router attaches /login, /logout, and /callback routes to the baseURL
+  app.use(auth(config));
+
+  // // req.isAuthenticated is provided from the auth router
+  // app.get('/', (req, res) => {
+  //   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+  // });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Smart Qr API')

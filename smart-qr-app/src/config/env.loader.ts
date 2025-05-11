@@ -16,3 +16,6 @@ export const SALT_ROUNDS = Number(process.env.SALT_ROUNDS || '10');
 
 export const JWT_SECRET = process.env.JWT_SECRET;
 export const JWT_EXPIRE_TIME = process.env.JWT_EXPIRE_TIME || '1h';
+
+export const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
+export const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_AUDIENCE;

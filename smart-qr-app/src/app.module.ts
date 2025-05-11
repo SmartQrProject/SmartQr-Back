@@ -11,6 +11,7 @@ import { OrderItemsModule } from './modules/order-items/order-items.module';
 import { RewardCodeModule } from './modules/reward-code/reward-code.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './db/database.module';
+import { StripeModule } from './modules/stripe/stripe.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DatabaseModule } from './db/database.module';
     OrderItemsModule,
     RewardCodeModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    StripeModule,
   ],
   controllers: [],
   providers: [],

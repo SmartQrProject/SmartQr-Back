@@ -1,6 +1,8 @@
 import { config as dotenvConfig } from 'dotenv';
 
-dotenvConfig({ path: '.env.development' });
+if (process.env.NODE_ENV !== 'production') {
+  dotenvConfig({ path: '.env.development' });
+}
 
 export const DB_NAME = process.env.DB_NAME;
 export const DB_HOST = process.env.DB_HOST;

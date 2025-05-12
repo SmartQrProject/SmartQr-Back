@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { IsBoolean, IsEmail, IsString, IsUUID, Length } from 'class-validator';
 import { User } from './user.entity';
@@ -13,6 +15,7 @@ import { Customer } from './customer.entity';
 import { Product } from './product.entity';
 import { Category } from './category.entity';
 import { RewardCode } from './reward-code.entity';
+import { Subscription } from './subscription.entity';
 
 @Entity('restaurants')
 export class Restaurant {
@@ -61,4 +64,11 @@ export class Restaurant {
 
   @OneToMany(() => RewardCode, (code) => code.restaurant)
   rewardCodes: RewardCode[];
+
+  @OneToOne(() => Subscription, (subscription) => subscription.restaurant, {
+    cascade: true,
+    eager: true,
+  })
+  @JoinColumn()
+  subscription: Subscription;
 }

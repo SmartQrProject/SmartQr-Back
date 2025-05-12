@@ -1,8 +1,23 @@
+import {
+  AUTH0_BASEURL,
+  AUTH0_CLIENTID,
+  AUTH0_ISSUER_URL,
+  AUTH0_SECRET,
+  AUTH0_AUDIENCE,
+  AUTH0_CLIENT_SECRET,
+} from './env.loader';
+
 export const config = {
   authRequired: false,
   auth0Logout: true,
-  secret: 'a long, randomly-generated string stored in env',
-  baseURL: 'http://localhost:3000',
-  clientID: 'krjft9v8lXnE0Lbq7wHJAZe1cThC8qoi',
-  issuerBaseURL: 'https://dev-yxlpehy8hq451y84.us.auth0.com',
+  secret: AUTH0_SECRET,
+  baseURL: AUTH0_BASEURL,
+  clientSecret: AUTH0_CLIENT_SECRET,
+  clientID: AUTH0_CLIENTID,
+  issuerBaseURL: AUTH0_ISSUER_URL,
+  authorizationParams: {
+    response_type: 'code', // Asegura que el flujo de autorización incluya el código para obtener el token
+    scope: 'openid profile email offline_access', // Incluye los permisos necesarios
+  },
+  //   audience: AUTH0_AUDIENCE,
 };

@@ -1,20 +1,24 @@
-import { Controller, UseGuards, Get, Req } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-
+import { Controller, UseGuards, Get, Req, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { AuthService } from './auth.service';
 
 @ApiTags('User creation (SignUP) and user login (SignIn) using Auth0')
 @Controller('auth')
 export class AuthController {
-  //constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @ApiOperation({ summary: 'protected endpoint for testing purpose ' })
-  //@UseGuards(AuthGuard('jwt'))
-  @Get('whoAmI')
-  getProfile(@Req() req) {
-    // console.log(req.oidc.accessToken);
+  @Get('login')
+  async getAuth0Login(@Req() req) {
+    console.log(req.oidc.accessToken);
     console.log(JSON.stringify(req.oidc.user));
     return JSON.stringify(req.oidc.user);
   }
+
+  // @ApiOperation({ summary: 'protected endpoint for testing purpose ' })
+  // @Post('login')
+  // async localLogin(@Req() req) {
+  //   await console.log(req.oidc.accessToken);
+  //   console.log(JSON.stringify(req.oidc.user));
+  //   return JSON.stringify(req.oidc.user);
+  // }
 }

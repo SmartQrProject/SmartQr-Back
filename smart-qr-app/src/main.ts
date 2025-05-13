@@ -17,15 +17,15 @@ async function bootstrap() {
     }),
   );
 
-  console.log(
-    config.clientID,
-    config.baseURL,
-    config.secret,
-    config.clientSecret,
-  );
-  // auth router attaches /login, /logout, and /callback routes to the baseURL
-  app.use(auth(config));
-
+  // console.log(
+  //   config.clientID,
+  //   config.baseURL,
+  //   config.secret,
+  //   config.clientSecret,
+  // );
+  // app.get('/authorized', (req: Request, res:Response	) => {
+  //   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+  // });
   // // req.isAuthenticated is provided from the auth router
   // app.get('/', (req, res) => {
   //   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');

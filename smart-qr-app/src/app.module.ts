@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { AuthUsersModule } from './modules/authUsers/authUsers.module';
 import { AuthCustomersModule } from './modules/authCustomers/authCustomers.module';
@@ -10,6 +10,8 @@ import { OrderItemsModule } from './modules/order-items/order-items.module';
 import { RewardCodeModule } from './modules/reward-code/reward-code.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './db/database.module';
+import { authMiddleware } from 'src/middleware/auth.middleware';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -25,7 +27,11 @@ import { DatabaseModule } from './db/database.module';
     RewardCodeModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(authMiddleware).forRoutes('protected'); // 👈 define en qué rutas aplicar el middleware
+  }
+}

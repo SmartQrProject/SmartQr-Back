@@ -24,6 +24,9 @@ export class Category {
   @CreateDateColumn()
   created_at: Date;
 
+  @Column({ type: 'int', default: 0 })
+  sequenceNumber: number;
+
   @OneToMany(() => Product, (product) => product.category, { cascade: true })
   products: Product[];
 

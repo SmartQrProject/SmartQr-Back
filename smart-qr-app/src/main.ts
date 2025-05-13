@@ -3,8 +3,13 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { LoggerMiddleware } from './middleware/logger/logger.middleware';
+<<<<<<< HEAD
+import { auth } from 'express-openid-connect';
+import { config } from './config/auth0.config';
+=======
 import { ExpressAdapter } from '@nestjs/platform-express';
 import * as express from 'express';
+>>>>>>> 7530bd9f46e80943a2741aa0fbac7cfe5a9602eb
 
 async function bootstrap() {
   const server = express();
@@ -21,6 +26,20 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // console.log(
+  //   config.clientID,
+  //   config.baseURL,
+  //   config.secret,
+  //   config.clientSecret,
+  // );
+  // app.get('/authorized', (req: Request, res:Response	) => {
+  //   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+  // });
+  // // req.isAuthenticated is provided from the auth router
+  // app.get('/', (req, res) => {
+  //   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+  // });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Smart Qr API')

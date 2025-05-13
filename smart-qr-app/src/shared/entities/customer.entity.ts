@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
   ManyToOne,
+  UpdateDateColumn,
 } from 'typeorm';
 import {
   IsString,
@@ -24,18 +25,24 @@ export class Customer {
   @IsUUID()
   id: string;
 
-  @Column({ length: 100 })
-  @IsString()
-  @Length(2, 100)
-  name: string;
+  @Column({ unique: true })
+  auth0Id: string; // el campo `sub` del token
 
   @Column({ length: 150 })
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ length: 100 })
   @IsString()
-  password: string;
+  @Length(2, 100)
+  name: string;
+
+  @Column({ nullable: true })
+  picture: string;
+
+  // @Column()
+  // @IsString()
+  // password: string;
 
   @Column({ length: 20 })
   @IsString()
@@ -52,6 +59,9 @@ export class Customer {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @UpdateDateColumn()
+  modified_at: Date;
 
   @OneToMany(() => Order, (order) => order.customer, { cascade: true })
   orders: Order[];

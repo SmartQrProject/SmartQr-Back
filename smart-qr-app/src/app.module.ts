@@ -1,35 +1,42 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { AuthUsersModule } from './modules/authUsers/authUsers.module';
+import { AuthCustomersModule } from './modules/authCustomers/authCustomers.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { OrdersModule } from './modules/orders/orders.module';
-import { CustomersModule } from './modules/customers/customers.module';
 import { RestaurantTablesModule } from './modules/restaurant-tables/restaurant-tables.module';
 import { OrderItemsModule } from './modules/order-items/order-items.module';
 import { RewardCodeModule } from './modules/reward-code/reward-code.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './db/database.module';
+<<<<<<< HEAD
+import { authMiddleware } from 'src/middleware/auth.middleware';
+import { AppController } from './app.controller';
+=======
 import { StripeModule } from './modules/stripe/stripe.module';
+>>>>>>> 7530bd9f46e80943a2741aa0fbac7cfe5a9602eb
 
 @Module({
   imports: [
     DatabaseModule,
     RestaurantsModule,
-    AuthModule,
-    UsersModule,
+    AuthUsersModule,
+    AuthCustomersModule,
     ProductsModule,
     CategoriesModule,
     OrdersModule,
-    CustomersModule,
     RestaurantTablesModule,
     OrderItemsModule,
     RewardCodeModule,
     ConfigModule.forRoot({ isGlobal: true }),
     StripeModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(authMiddleware).forRoutes('protected'); // 👈 define en qué rutas aplicar el middleware
+  }
+}

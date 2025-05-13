@@ -1,26 +1,163 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Customer } from 'src/shared/entities/customer.entity';
+import { Order } from 'src/shared/entities/order.entity';
+import { DataSource, Repository } from 'typeorm';
+import { Product } from 'src/shared/entities/product.entity';
+import { OrderItem } from 'src/shared/entities/order-item.entity';
+import { In } from 'typeorm';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 
 @Injectable()
 export class OrdersService {
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
+  constructor(
+    @InjectRepository(Customer) private userRepository: Repository<Customer>,
+    @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    @InjectRepository(OrderItem)
+    private orderItemRepository: Repository<OrderItem>,
+    private dataSource: DataSource,
+  ) {}
+
+  async create(createOrderDto: CreateOrderDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Buscar entidades relacionadas
+      const customer = await queryRunner.manager.findOneBy(Customer, {
+        id: createOrderDto.customerId,
+      });
+      if (!customer) throw new NotFoundException('Cliente no encontrado');
+
+      const restaurant = await queryRunner.manager.findOneBy(Restaurant, {
+        id: createOrderDto.restaurantId,
+      });
+      if (!restaurant) throw new NotFoundException('Restaurante no encontrado');
+
+      const table = await queryRunner.manager.findOneBy(RestaurantTable, {
+        id: createOrderDto.tableId,
+      });
+      if (!table) throw new NotFoundException('Mesa no encontrada');
+
+      // 2. Obtener y validar productos
+      const requestedProductIds = createOrderDto.products.map(
+        (prod) => prod.id,
+      );
+      const availableProducts = await queryRunner.manager.findBy(Product, {
+        id: In(requestedProductIds),
+      });
+
+      for (const { id } of createOrderDto.products) {
+        const product = availableProducts.find((prod) => prod.id === id);
+        if (!product || !product.is_available) {
+          throw new BadRequestException(`Producto con ID ${id} no disponible`);
+        }
+      }
+
+      // 3. Crear items de orden
+      let totalPrice = 0;
+      const orderItems: OrderItem[] = [];
+
+      for (const { id, quantity } of createOrderDto.products) {
+        const product = availableProducts.find((prod) => prod.id === id)!;
+        const unit_price = Number(product.price);
+
+        totalPrice += unit_price * quantity;
+
+        const orderItem = queryRunner.manager.create(OrderItem, {
+          product,
+          quantity,
+          unit_price,
+        });
+
+        const savedItem = await queryRunner.manager.save(OrderItem, orderItem);
+        orderItems.push(savedItem);
+      }
+
+      // 4. Crear y guardar orden
+      const newOrder = queryRunner.manager.create(Order, {
+        customer,
+        restaurant,
+        table,
+        //order_type: createOrderDto.orderType,
+        //payStatus: createOrderDto.payStatus,
+        //status: 'pending',
+        total_price: totalPrice,
+        items: orderItems,
+      });
+
+      const savedOrder = await queryRunner.manager.save(Order, newOrder);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        orderId: savedOrder.id,
+        total: totalPrice,
+        items: orderItems.map((prod) => ({
+          productId: prod.product.id,
+          quantity: prod.quantity,
+          unit_price: prod.unit_price,
+        })),
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  async findAll() {
+    return this.orderRepository.find({ where: { exist: true } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: string) {
+    const order = await this.orderRepository.findOne({
+      where: { id, exist: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException(
+        `Orden con ID ${id} no encontrada o fue eliminada`,
+      );
+    }
+
+    return order;
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
+    const existingOrder = await this.orderRepository.findOne({
+      where: { id },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Orden con ID ${id} no encontrada`);
+    }
+
+    const updatedOrder = this.orderRepository.merge(
+      existingOrder,
+      updateOrderDto,
+    );
+    return this.orderRepository.save(updatedOrder);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async remove(id: string) {
+    const order = await this.orderRepository.findOne({ where: { id } });
+
+    if (!order) {
+      throw new NotFoundException(`Orden con ID ${id} no encontrada`);
+    }
+
+    order.exist = false;
+    return this.orderRepository.save(order);
   }
 }

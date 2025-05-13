@@ -35,4 +35,7 @@ export class RestaurantTable {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
+
+  @Column({ default: true })
+  exist: boolean;
 }

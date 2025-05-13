@@ -32,4 +32,7 @@ export class Subscription {
 
   @OneToOne(() => Restaurant, (restaurant) => restaurant.subscription)
   restaurant: Restaurant;
+
+  @Column({ default: true })
+  exist: boolean;
 }

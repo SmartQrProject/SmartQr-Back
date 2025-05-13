@@ -16,7 +16,7 @@ export class User {
 
   @Column({ length: 100 })
   @IsString()
-  @Length(2, 100)
+  @Length(5, 100)
   name: string;
 
   @Column({ unique: true, length: 150 })
@@ -30,7 +30,7 @@ export class User {
 
   @Column({ length: 20 })
   @IsString()
-  role: string; // 'owner', 'admin', 'kitchen'
+  role: string; // 'superadmin', 'restadmin', 'reststaff'
 
   @CreateDateColumn()
   created_at: Date;

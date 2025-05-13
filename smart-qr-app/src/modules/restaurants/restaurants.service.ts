@@ -6,7 +6,7 @@ import {
 
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
 import { User } from 'src/shared/entities/user.entity';
-import { BcryptService } from 'src/common/services/bcrypt.service';
+//import { BcryptService } from 'src/common/services/bcrypt.service';
 import { DataSource, Repository } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,7 +17,7 @@ export class RestaurantsService {
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly bcryptService: BcryptService,
+    //private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
   ) {}
 

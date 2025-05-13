@@ -51,11 +51,13 @@ export class RewardCodeService {
   }
 
   async findAll(): Promise<RewardCode[]> {
-    return this.rewardCodeRepo.find();
+    return this.rewardCodeRepo.find({ where: { exist: true } });
   }
 
   async findOne(id: string): Promise<RewardCode> {
-    const reward = await this.rewardCodeRepo.findOne({ where: { id } });
+    const reward = await this.rewardCodeRepo.findOne({
+      where: { id, exist: true },
+    });
     if (!reward) throw new NotFoundException('Código no encontrado');
     return reward;
   }
@@ -68,8 +70,9 @@ export class RewardCodeService {
 
   async remove(id: string): Promise<{ message: string }> {
     const reward = await this.findOne(id);
-    await this.rewardCodeRepo.remove(reward);
-    return { message: 'Código eliminado correctamente' };
+    reward.exist = false;
+    await this.rewardCodeRepo.save(reward);
+    return { message: 'Código eliminado lógicamente' };
   }
 
   // ✅ Método para marcar un código como usado

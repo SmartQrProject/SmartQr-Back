@@ -10,12 +10,9 @@ import { OrderItemsModule } from './modules/order-items/order-items.module';
 import { RewardCodeModule } from './modules/reward-code/reward-code.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './db/database.module';
-<<<<<<< HEAD
 import { authMiddleware } from 'src/middleware/auth.middleware';
 import { AppController } from './app.controller';
-=======
 import { StripeModule } from './modules/stripe/stripe.module';
->>>>>>> 7530bd9f46e80943a2741aa0fbac7cfe5a9602eb
 
 @Module({
   imports: [

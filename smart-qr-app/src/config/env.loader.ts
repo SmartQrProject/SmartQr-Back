@@ -19,17 +19,15 @@ export const SALT_ROUNDS = Number(process.env.SALT_ROUNDS || '10');
 export const JWT_SECRET = process.env.JWT_SECRET;
 export const JWT_EXPIRE_TIME = process.env.JWT_EXPIRE_TIME || '1h';
 
-<<<<<<< HEAD
 export const AUTH0_SECRET = process.env.AUTH0_SECRET;
 export const AUTH0_BASEURL = process.env.AUTH0_BASEURL;
 export const AUTH0_CLIENTID = process.env.AUTH0_CLIENTID;
 export const AUTH0_ISSUER_URL = process.env.AUTH0_ISSUER_URL;
 export const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
 export const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET;
-=======
+
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY!;
 export const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export const FRONTEND_URL = process.env.FRONTEND_URL;
->>>>>>> 7530bd9f46e80943a2741aa0fbac7cfe5a9602eb

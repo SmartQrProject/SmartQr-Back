@@ -47,6 +47,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
   const port = process.env.PORT ?? 3000;
+
+  app.enableCors({
+    origin: ['http://localhost:3000', 'https://smart-qr-front.vercel.app'],
+    credentials: true,
+  });
+
   await app.listen(port);
 
   console.log(`🚀 App listening on port ${port}`);

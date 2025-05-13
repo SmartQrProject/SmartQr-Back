@@ -75,7 +75,6 @@ export class RewardCodeService {
     return { message: 'Código eliminado lógicamente' };
   }
 
-  // ✅ Método para marcar un código como usado
   async deactivateCode(code: string): Promise<void> {
     const reward = await this.rewardCodeRepo.findOne({
       where: { code, isActive: true },

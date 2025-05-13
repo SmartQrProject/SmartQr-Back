@@ -28,7 +28,9 @@ export class RestaurantsService {
     await queryRunner.startTransaction();
 
     try {
-      const sanitizedSlug = dto.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      const sanitizedSlug = dto.slug
+        .replace(/[^a-zA-Z0-9-]/g, '')
+        .toLowerCase();
       if (
         await queryRunner.manager.findOneBy(Restaurant, { slug: sanitizedSlug })
       )
@@ -60,6 +62,7 @@ export class RestaurantsService {
       await queryRunner.release();
     }
   }
+
   async getRestaurants(slug: string) {
     const restaurantsBySlug: Restaurant | null =
       await this.restaurantRepository.findOne({

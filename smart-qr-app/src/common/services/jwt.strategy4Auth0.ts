@@ -24,7 +24,7 @@ export class JwtStrategy4Auth0 extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     // Este método es llamado si el token es válido
-    console.log('======');
-    return payload;
+    console.log('======>>>>>', payload);
+    return { userId: payload.sub, email: payload.email };
   }
 }

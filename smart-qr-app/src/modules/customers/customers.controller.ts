@@ -15,6 +15,8 @@ import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
 import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
 import { JwtAuth0Guard } from 'src/common/guards/jwt-auth0.guard';
+import { Auth0CustomerDto } from './dto/auth0-customer.dto';
+import { Customer } from 'src/shared/entities/customer.entity';
 
 @ApiTags('CRUD end points para Customers. SignUP, SignIn using Auth0 ')
 @Controller('customers')
@@ -44,6 +46,16 @@ export class CustomersController {
   @Post()
   create(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customersService.create(createCustomerDto);
+  }
+
+  @Post('sincronizar')
+  @ApiOperation({ summary: 'Create or Update data coming from Auth0' })
+  //@UseGuards(JwtAuthGuard)
+  async sincronizarAuth0(
+    @Body() customer: Auth0CustomerDto,
+    @Req() req,
+  ): Promise<Customer> {
+    return this.customersService.sincronizarAuth0(customer);
   }
 
   @Get()

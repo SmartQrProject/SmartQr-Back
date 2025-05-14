@@ -11,9 +11,11 @@ export class CloudinaryService {
 
   async updateImg(id: string, file: Express.Multer.File) /*: Promise<string>*/ {
     //buscar producto primero
+
     const imgUrl: string = await this.cloudinaryRepository.updateImg(file);
     /////////////////////////////////////////////////////////////////////////////////////////chequear
 
+    return imgUrl;
     // return await this.productRepository.updateProduct(id, { imgUrl });
   }
 }

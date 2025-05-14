@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ChatbotGateway } from './chatbot.gateway';
 import { ChatbotService } from './chatbot.service';
-import { UserSessionService } from './user-session/user-session.service';
+import { IntentService } from './intent.service';
+import { MenuFaqService } from './menu-faq.service';
 
 @Module({
-  providers: [ChatbotGateway, ChatbotService, UserSessionService]
+  providers: [ChatbotService, IntentService, MenuFaqService],
+  exports: [ChatbotService],
 })
 export class ChatbotModule {}

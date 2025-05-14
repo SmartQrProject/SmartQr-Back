@@ -12,8 +12,10 @@ import { DatabaseModule } from './db/database.module';
 import { authMiddleware } from 'src/middleware/auth.middleware';
 import { AppController } from './app.controller';
 import { StripeModule } from './modules/stripe/stripe.module';
-import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { WebSocketModule } from './modules/websocket/websocket.module';
 import { UsersModule } from './modules/users/users.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { UsersModule } from './modules/users/users.module';
     RewardCodeModule,
     ConfigModule.forRoot({ isGlobal: true }),
     StripeModule,
+    WebSocketModule,
     ChatbotModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [],

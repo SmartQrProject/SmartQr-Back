@@ -18,17 +18,17 @@ export class Order {
   @IsUUID()
   id: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'pending' })
   @IsString()
   @Length(2, 20)
   status: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'unpaid' })
   @IsString()
   @Length(2, 20)
   payStatus: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'dine-in' })
   @IsString()
   order_type: string;
 
@@ -52,4 +52,7 @@ export class Order {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
+
+  @Column({ default: true })
+  exist: boolean;
 }

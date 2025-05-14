@@ -25,7 +25,7 @@ export class Customer {
   @IsUUID()
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   auth0Id: string; // el campo `sub` del token
 
   @Column({ length: 150 })

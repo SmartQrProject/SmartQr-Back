@@ -6,6 +6,7 @@ import {
   OneToMany,
   ManyToOne,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import {
   IsString,
@@ -20,19 +21,27 @@ import { Order } from './order.entity';
 import { Restaurant } from './restaurant.entity';
 
 @Entity('customers')
+@Unique(['email'])
+@Unique(['auth0Id'])
 export class Customer {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
 
-  @Column({ unique: true, nullable: true })
-  auth0Id: string; // el campo `sub` del token
-
-  @Column({ length: 150 })
+  @Column({ length: 150, nullable: true })
   @IsEmail()
   email: string;
 
+  @Column({ nullable: true })
+  @IsString()
+  password: string;
+
+  @Column({ unique: true, nullable: true })
+  auth0Id: string; // el campo `sub` del token
   @Column({ length: 100 })
+  @Column({ default: 'local' }) // 'auth0' o 'local'
+  provider: 'auth0' | 'local';
+
   @IsString()
   @Length(2, 100)
   name: string;
@@ -40,15 +49,11 @@ export class Customer {
   @Column({ nullable: true })
   picture: string;
 
-  // @Column()
-  // @IsString()
-  // password: string;
-
   @Column({ length: 20 })
   @IsString()
   phone: string;
 
-  @Column({ default: true })
+  @Column({ default: false })
   @IsBoolean()
   is_guest: boolean;
 

@@ -1,12 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CustomersRepository } from './customers.repository';
-import { CreateCustomerDto } from './dto/create-customer.dto';
+
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { RegisterDto } from './dto/register.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BcryptService } from 'src/common/services/bcrypt.service';
 
 @Injectable()
 export class CustomersService {
-  constructor(private customersRepository: CustomersRepository) {}
+  constructor(
+    @InjectRepository(Customer)
+    private customerRepo: Repository<Customer>,
+    private customersRepository: CustomersRepository,
+    @Inject() private bcrypt: BcryptService,
+  ) {}
 
   async validateUserFromToken(payload: any) {
     // Podés verificar si existe en DB, sincronizar, etc.
@@ -23,10 +32,52 @@ export class CustomersService {
     //return newCustomer;
     return;
   }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  create(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer';
+  async register(email: string, password: string) {
+    const existing = await this.customerRepo.findOne({ where: { email } });
+    if (existing) throw new UnauthorizedException('Email ya registrado');
+
+    const hash = await this.bcrypt.hash(password);
+
+    const user = this.customerRepo.create({
+      email,
+      password: hash,
+      provider: 'local',
+    });
+
+    return this.customerRepo.save(user);
   }
+
+  async login(email: string, password: string) {
+    const user = await this.customerRepo.findOne({
+      where: { email, provider: 'local' },
+    });
+    if (!user || !user.password)
+      throw new UnauthorizedException('Credenciales inválidas');
+
+    const match = await this.bcrypt.compare(password, user.password);
+    if (!match) throw new UnauthorizedException('Credenciales inválidas');
+
+    return user;
+  }
+
+  async loginWithAuth0(auth0Id: string) {
+    const user = await this.customerRepo.findOne({
+      where: { auth0Id, provider: 'auth0' },
+    });
+
+    if (!user) {
+      const newUser = this.customerRepo.create({
+        auth0Id,
+        provider: 'auth0',
+      });
+      return this.customerRepo.save(newUser);
+    }
+
+    return user;
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   findAll() {
     return `This action returns all customers`;

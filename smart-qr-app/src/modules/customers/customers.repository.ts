@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Customer } from 'src/shared/entities/customer.entity';
-import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
 //import { updateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { PutUserDto } from '../users/dto/put-user.dto';

@@ -12,9 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
-import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
 import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
 import { JwtAuth0Guard } from 'src/common/guards/jwt-auth0.guard';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { Auth0Dto } from './dto/auth0.dto';
 
 @ApiTags('CRUD end points para Customers. SignUP, SignIn using Auth0 ')
 @Controller('customers')
@@ -40,12 +42,25 @@ export class CustomersController {
     // console.log(JSON.stringify(req.oidc.user));
     return JSON.stringify(req.oidc.user);
   }
-
-  @Post()
-  create(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.customersService.create(createCustomerDto);
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  @Post('register')
+  create(@Body() createCustomerDto: RegisterDto) {
+    return this.customersService.register(
+      createCustomerDto.email,
+      createCustomerDto.password,
+    );
   }
 
+  @Post('login1')
+  login(@Body() dto: LoginDto) {
+    return this.customersService.login(dto.email, dto.password);
+  }
+
+  @Post('auth0')
+  loginWithAuth0(@Body() dto: Auth0Dto) {
+    return this.customersService.loginWithAuth0(dto.auth0Id);
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @Get()
   findAll() {
     return this.customersService.findAll();

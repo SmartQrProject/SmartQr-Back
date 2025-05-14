@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
-import { AuthCustomersModule } from './modules/authCustomers/authCustomers.module';
+import { AuthCustomersModule } from './modules/customers/customers.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { OrdersModule } from './modules/orders/orders.module';

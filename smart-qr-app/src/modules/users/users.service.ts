@@ -20,20 +20,16 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
+  // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
   async userLogin(
     /*slug,*/ { email, password }: SignInUserDto,
   ): Promise<object> {
     /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
 
-    // if (!user) {
-    //   throw new NotFoundException(`❌ User ${email} not found!!!!`);
-    // }
-    //console.log('----> ', password, user.password, user.restaurant, rest);
-
     if (
       !user ||
+      !user.exist ||
       /*!rest ||
       user.restaurant.id !== rest.id ||*/
       !(await this.bcryptService.compare(password, user.password))
@@ -52,7 +48,7 @@ export class UsersService {
     return { success: 'Logged Succesfully with token', access_token };
   }
 
-  // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
+  // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
   async modifyUserById(id, slug, user, req): Promise<string> {
     const rest = await this.restService.getRestaurants(slug);
     if (user.password !== user.confirmPassword) {

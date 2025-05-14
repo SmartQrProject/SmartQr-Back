@@ -11,27 +11,28 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthCustomersService } from './authCustomers.service';
+import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
 import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
-import { JwtAuth0Guard } from 'src/common/guards/jwtAuth0Guard';
+import { JwtAuth0Guard } from 'src/common/guards/jwt-auth0.guard';
 
-@ApiTags('Customer creation (SignUP) and user login (SignIn) using Auth0')
-@Controller('auth/customers')
-export class AuthCustomersController {
-  constructor(private readonly customersService: AuthCustomersService) {}
+@ApiTags('CRUD end points para Customers. SignUP, SignIn using Auth0 ')
+@Controller('customers')
+export class CustomersController {
+  constructor(private readonly customersService: CustomersService) {}
 
   @Get('protected')
   @UseGuards(JwtAuth0Guard)
   async getProtected(@Request() req) {
-    console.log('Acceso Autorizado!!!');
+    console.log('Acceso Autorizado!!!', req.user, req.auth);
     return {
       message: 'Acceso Autorizado!!!',
       user: req.user,
     };
   }
 
-  @Get('alogin')
+  @Get('login')
+  @UseGuards(JwtAuth0Guard)
   async getAuth0Login(@Req() req) {
     console.log('Access Token: ---------- >');
     console.log(req.oidc.accessToken);

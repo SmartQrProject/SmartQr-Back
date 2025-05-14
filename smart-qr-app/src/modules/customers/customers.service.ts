@@ -8,6 +8,10 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 export class CustomersService {
   constructor(private customersRepository: CustomersRepository) {}
 
+  async sincronizarAuth0(customer): Promise<Customer> {
+    return await this.customersRepository.sincronizarAuth0(customer);
+  }
+
   async validateUserFromToken(payload: any) {
     // Podés verificar si existe en DB, sincronizar, etc.
     return payload;

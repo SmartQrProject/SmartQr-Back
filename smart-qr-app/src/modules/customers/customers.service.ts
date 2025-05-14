@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Customer } from 'src/shared/entities/customer.entity';
-import { AuthCustomersRepository } from './authCustomers.repository';
-import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
-import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
+import { CustomersRepository } from './customers.repository';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
-export class AuthCustomersService {
-  constructor(private customersRepository: AuthCustomersRepository) {}
+export class CustomersService {
+  constructor(private customersRepository: CustomersRepository) {}
 
   async validateUserFromToken(payload: any) {
     // Podés verificar si existe en DB, sincronizar, etc.

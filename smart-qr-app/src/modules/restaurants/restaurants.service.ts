@@ -6,10 +6,10 @@ import {
 
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
 import { User } from 'src/shared/entities/user.entity';
-//import { BcryptService } from 'src/common/services/bcrypt.service';
 import { DataSource, Repository } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BcryptService } from 'src/common/services/bcrypt.service';
 
 @Injectable()
 export class RestaurantsService {
@@ -17,7 +17,7 @@ export class RestaurantsService {
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    //private readonly bcryptService: BcryptService,
+    private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
   ) {}
 
@@ -45,7 +45,7 @@ export class RestaurantsService {
       const newUser: User = await queryRunner.manager.save(
         queryRunner.manager.create(User, {
           email: dto.owner_email,
-          password: dto.owner_pass,
+          password: await this.bcryptService.hash(dto.owner_pass),
           role: 'owner',
           name: 'owner ' + dto.name,
           restaurant: newRestaurants,

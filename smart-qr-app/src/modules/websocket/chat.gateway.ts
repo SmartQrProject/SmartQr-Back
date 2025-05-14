@@ -8,14 +8,12 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatbotService } from './chatbot.service';
-import { CHATBOT_EVENTS } from './types/chatbot-events';
+import { ChatbotService } from '../chatbot/chatbot.service';
+import { CHAT_EVENTS } from './types/chat-events';
 import { UserSessionService } from './user-session/user-session.service';
 
 @WebSocketGateway({ cors: true })
-export class ChatbotGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -26,7 +24,14 @@ export class ChatbotGateway
 
   handleConnection(client: Socket) {
     const userId = (client.handshake.query.userId as string) || client.id;
+    if (!userId) {
+      console.warn(`❌ Cliente ${client.id} intentó conectarse sin userId`);
+      client.emit('connection_error', 'Falta userId en la conexión');
+      client.disconnect();
+      return;
+    }
     const roomId = this.sessionService.assignUser(client.id, userId);
+
     client.join(roomId);
 
     console.log(
@@ -39,7 +44,7 @@ export class ChatbotGateway
     console.log(`Cliente ${client.id} desconectado`);
   }
 
-  @SubscribeMessage(CHATBOT_EVENTS.USER_MESSAGE)
+  @SubscribeMessage(CHAT_EVENTS.USER_MESSAGE)
   handleMessage(
     @MessageBody() message: string,
     @ConnectedSocket() client: Socket,
@@ -55,6 +60,6 @@ export class ChatbotGateway
     const roomId = this.sessionService.getRoomByUserId(userId);
     const reply = this.chatbotService.generateReply(message);
     //   // Emitir la respuesta solo a la sala del usuario.
-    this.server.to(roomId).emit(CHATBOT_EVENTS.BOT_REPLY, reply);
+    this.server.to(roomId).emit(CHAT_EVENTS.BOT_REPLY, reply);
   }
 }

@@ -13,6 +13,7 @@ import { DatabaseModule } from './db/database.module';
 import { authMiddleware } from 'src/middleware/auth.middleware';
 import { AppController } from './app.controller';
 import { StripeModule } from './modules/stripe/stripe.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StripeModule } from './modules/stripe/stripe.module';
     RewardCodeModule,
     ConfigModule.forRoot({ isGlobal: true }),
     StripeModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
   providers: [],

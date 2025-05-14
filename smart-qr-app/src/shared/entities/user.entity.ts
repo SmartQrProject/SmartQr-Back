@@ -39,4 +39,7 @@ export class User {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
+
+  @Column({ default: true })
+  exist: boolean;
 }

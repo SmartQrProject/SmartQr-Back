@@ -9,10 +9,10 @@ import { Repository } from 'typeorm';
 import { User } from 'src/shared/entities/user.entity';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
-import { PutUserDto } from '../users/dto/put-user.dto';
+import { PutUserDto } from './dto/put-user.dto';
 
 @Injectable()
-export class AuthUsersRepository {
+export class UsersRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

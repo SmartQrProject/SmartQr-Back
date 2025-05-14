@@ -1,34 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { RewardCodeService } from './reward-code.service';
 import { CreateRewardCodeDto } from './dto/create-reward-code.dto';
-import { UpdateRewardCodeDto } from './dto/update-reward-code.dto';
 
-@Controller('reward-code')
+@Controller('reward-codes')
 export class RewardCodeController {
   constructor(private readonly rewardCodeService: RewardCodeService) {}
 
   @Post()
-  create(@Body() createRewardCodeDto: CreateRewardCodeDto) {
-    return this.rewardCodeService.create(createRewardCodeDto);
+  async create(@Body() dto: CreateRewardCodeDto) {
+    return this.rewardCodeService.create(dto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.rewardCodeService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rewardCodeService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return this.rewardCodeService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRewardCodeDto: UpdateRewardCodeDto) {
-    return this.rewardCodeService.update(+id, updateRewardCodeDto);
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() data: Partial<CreateRewardCodeDto>,
+  ) {
+    return this.rewardCodeService.update(id, data);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rewardCodeService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return this.rewardCodeService.remove(id);
   }
 }

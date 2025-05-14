@@ -20,20 +20,20 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthUsersService } from './authUsers.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { User } from 'src/shared/entities/user.entity';
-import { PutUserDto } from '../users/dto/put-user.dto';
-import { SignInUserDto } from '../users/dto/signIn-user.dto';
+import { PutUserDto } from './dto/put-user.dto';
+import { SignInUserDto } from './dto/signIn-user.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @ApiTags(
   'App Users creation (SignUP) and user login (SignIn) using JWT and Bcrypt',
 )
-@Controller('auth/users')
-export class AuthUsersController {
+@Controller('users')
+export class UsersController {
   authUsersService;
-  constructor(private readonly authService: AuthUsersService) {}
+  constructor(private readonly authService: UsersService) {}
 
   // GEA Mayo-13-Finalizado ------ trabajando en este endpoint --------GEA Mayo-12
   @Put(':id')
@@ -98,9 +98,9 @@ export class AuthUsersController {
   @HttpCode(201)
   @ApiOperation({ summary: 'User Login (email and  password)' })
   async userLogin(
-    @Query('slug') slug: string,
+    /*@Query('slug') slug: string,*/
     @Body() auth: SignInUserDto,
   ): Promise<object> {
-    return this.authService.userLogin(slug, auth);
+    return this.authService.userLogin(/*slug,*/ auth);
   }
 }

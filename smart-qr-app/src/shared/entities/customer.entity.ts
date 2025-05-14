@@ -32,7 +32,7 @@ export class Customer {
   @IsEmail()
   email: string;
 
-  @Column({ length: 100 })
+  @Column({ nullable: true })
   @IsString()
   @Length(2, 100)
   name: string;
@@ -40,11 +40,11 @@ export class Customer {
   @Column({ nullable: true })
   picture: string;
 
-  // @Column()
-  // @IsString()
-  // password: string;
+  @Column({ nullable: true })
+  @IsString()
+  password: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, nullable: true })
   @IsString()
   phone: string;
 

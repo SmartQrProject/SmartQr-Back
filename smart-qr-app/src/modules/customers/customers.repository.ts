@@ -20,16 +20,39 @@ export class CustomersRepository {
     private readonly bcryptService: BcryptService,
   ) {}
 
+  // ------ trabajando en este endpoint ---GEA Mayo 14-
+  async sincronizarAuth0(customer): Promise<Customer> {
+    // ¿Ya existe un usuario con este sub (de Auth0)?
+    const { email, name, auth0Id, picture } = customer;
+    let wrkCust = await this.customerRepository.findOne({
+      where: { auth0Id: auth0Id },
+    });
+
+    if (wrkCust) {
+      this.customerRepository.merge(wrkCust, customer);
+      const wrk2Cust = await this.customerRepository.save(wrkCust);
+      return wrk2Cust;
+    }
+
+    // Si no existe, lo creamos
+    const newCustomer = this.customerRepository.create({
+      auth0Id: auth0Id,
+      email: email,
+      name: name,
+      picture: picture,
+      password: auth0Id,
+    });
+
+    const wrk3Cust = await this.customerRepository.save(newCustomer);
+    return wrk3Cust;
+  }
+
   // ------ trabajando en este endpoint ---GEA Mayo 13-
   async putById(id: string, rest, updateCustomer, req): Promise<string> {
     const customer = await this.customerRepository.findOneBy({
       id: id,
       restaurant: { id: rest.id },
     });
-
-    console.log('=======================');
-    console.log(customer);
-    console.log('=======================');
 
     if (!customer) {
       throw new NotFoundException(

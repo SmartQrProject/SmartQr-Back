@@ -1,6 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
-import { AuthUsersModule } from './modules/authUsers/authUsers.module';
 import { AuthCustomersModule } from './modules/authCustomers/authCustomers.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -14,12 +13,13 @@ import { authMiddleware } from 'src/middleware/auth.middleware';
 import { AppController } from './app.controller';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
     DatabaseModule,
     RestaurantsModule,
-    AuthUsersModule,
+    UsersModule,
     AuthCustomersModule,
     ProductsModule,
     CategoriesModule,

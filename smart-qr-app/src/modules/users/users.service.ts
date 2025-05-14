@@ -6,23 +6,25 @@ import {
 } from '@nestjs/common';
 import { User } from 'src/shared/entities/user.entity';
 import { RestaurantsService } from '../restaurants/restaurants.service';
-import { AuthUsersRepository } from './authUsers.repository';
-import { SignInUserDto } from '../users/dto/signIn-user.dto';
+import { UsersRepository } from './users.repository';
+import { SignInUserDto } from './dto/signIn-user.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { JwtService } from 'src/common/services/jwt.service';
 
 @Injectable()
-export class AuthUsersService {
+export class UsersService {
   constructor(
-    private readonly usersRepository: AuthUsersRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly restService: RestaurantsService,
     private readonly bcryptService: BcryptService,
     private readonly jwtService: JwtService,
   ) {}
 
   // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
-  async userLogin(slug, { email, password }: SignInUserDto): Promise<object> {
-    const rest = await this.restService.getRestaurants(slug);
+  async userLogin(
+    /*slug,*/ { email, password }: SignInUserDto,
+  ): Promise<object> {
+    /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
 
     if (!user) {
@@ -32,8 +34,8 @@ export class AuthUsersService {
 
     if (
       !user ||
-      !rest ||
-      user.restaurant.id !== rest.id ||
+      /*!rest ||
+      user.restaurant.id !== rest.id ||*/
       !(await this.bcryptService.compare(password, user.password))
     ) {
       throw new UnauthorizedException('Not valid Credentials');

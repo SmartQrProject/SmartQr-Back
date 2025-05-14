@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { OrderItem } from 'src/shared/entities/order-item.entity';
 import { In } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
+import { RewardCodeService } from '../reward-code/reward-code.service';
 
 @Injectable()
 export class OrdersService {
@@ -23,6 +25,7 @@ export class OrdersService {
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(OrderItem)
     private orderItemRepository: Repository<OrderItem>,
+    private readonly rewardCodeService: RewardCodeService,
     private dataSource: DataSource,
   ) {}
 
@@ -83,6 +86,27 @@ export class OrdersService {
         orderItems.push(savedItem);
       }
 
+      // 3,5. Aplicar código de recompensa
+      let discountPercentage = 0;
+      if (createOrderDto.rewardCode) {
+        const rewardCode = await this.rewardCodeService.findOneByCode(
+          createOrderDto.rewardCode,
+        );
+
+        if (!rewardCode || !rewardCode.isActive || !rewardCode.exist) {
+          throw new BadRequestException(
+            'Código de recompensa inválido o ya utilizado',
+          );
+        }
+
+        discountPercentage = rewardCode.percentage;
+
+        const discount = totalPrice * (discountPercentage / 100);
+        totalPrice -= discount;
+
+        await this.rewardCodeService.deactivateCode(rewardCode.code);
+      }
+
       // 4. Crear y guardar orden
       const newOrder = queryRunner.manager.create(Order, {
         customer,
@@ -102,6 +126,8 @@ export class OrdersService {
       return {
         orderId: savedOrder.id,
         total: totalPrice,
+        rewardCode: createOrderDto.rewardCode ?? null,
+        discountPercentage,
         items: orderItems.map((prod) => ({
           productId: prod.product.id,
           quantity: prod.quantity,

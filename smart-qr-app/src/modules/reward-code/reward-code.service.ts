@@ -84,4 +84,8 @@ export class RewardCodeService {
     reward.isActive = false;
     await this.rewardCodeRepo.save(reward);
   }
+
+  async findOneByCode(code: string): Promise<RewardCode | null> {
+    return this.rewardCodeRepo.findOne({ where: { code, exist: true } });
+  }
 }

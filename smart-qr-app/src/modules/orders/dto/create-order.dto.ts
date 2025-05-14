@@ -31,6 +31,10 @@ export class CreateOrderDto {
   @ValidateNested({ each: true })
   @Type(() => ProductOrderDto)
   products: ProductOrderDto[];
+
+  @IsOptional()
+  @IsString()
+  rewardCode?: string;
 }
 
 export class ProductOrderDto {

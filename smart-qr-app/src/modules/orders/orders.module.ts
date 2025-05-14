@@ -9,6 +9,7 @@ import { Customer } from 'src/shared/entities/customer.entity';
 import { Product } from 'src/shared/entities/product.entity';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
+import { RewardCodeModule } from '../reward-code/reward-code.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
       Restaurant,
       RestaurantTable,
     ]),
+    RewardCodeModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

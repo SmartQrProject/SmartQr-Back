@@ -59,6 +59,7 @@ export class CustomersController {
   }
 
   @Get()
+  //hcer esta funcion
   findAll() {
     return this.customersService.findAll();
   }

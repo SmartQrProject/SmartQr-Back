@@ -31,13 +31,9 @@ export class UsersRepository {
       restaurant: { id: rest.id },
     });
 
-    console.log('=======================');
-    console.log(user);
-    console.log('=======================');
-
-    if (!user) {
+    if (!user || !user.exist) {
       throw new NotFoundException(
-        `❌ No users found  with id ${id} for the restaurant ${rest.id} !!`,
+        `❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`,
       );
     }
 
@@ -66,7 +62,7 @@ export class UsersRepository {
     return id + ' was updated';
   }
 
-  // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
+  // GEA FINALIZADO Mayo 14------ trabajando en este endpoint ---GEA Mayo 12-
   async deleteById(id: string, rest, req): Promise<string> {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -79,13 +75,24 @@ export class UsersRepository {
       );
     }
 
+    if (!user.exist) {
+      throw new NotFoundException(
+        `❌ Usuer with id ${id} in this restaurant ${rest.name} is blocked!!!!`,
+      );
+    }
+
     if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
       throw new NotFoundException(
         `You can not delete a User account of a different user.`,
       );
     }
-    await this.userRepository.remove(user);
-    return id;
+
+    user.exist = false;
+    // const mergeUser = this.userRepository.merge(user, putUser);
+    // await this.userRepository.save(mergeUser);
+    // await this.userRepository.save(mergeUser);
+    await this.userRepository.save(user);
+    return 'Usuario bloquedao: ' + id;
   }
 
   // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
@@ -136,6 +143,10 @@ export class UsersRepository {
       where: { email },
       relations: ['restaurant'],
     });
+
+    if (!usuario || !usuario.exist) {
+      throw new NotFoundException(`❌ User ${email} not found`);
+    }
 
     return usuario;
   }

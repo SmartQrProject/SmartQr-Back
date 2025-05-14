@@ -1,7 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { LoggerMiddleware } from 'src/middleware/logger/logger.middleware';
-import { requiresAuth } from 'express-openid-connect';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/shared/entities/user.entity';
 import { RestaurantsModule } from '../restaurants/restaurants.module';
@@ -17,6 +16,6 @@ import { UsersController } from './users.controller';
 })
 export class UsersModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('auth/users');
+    consumer.apply(LoggerMiddleware).forRoutes('users');
   }
 }

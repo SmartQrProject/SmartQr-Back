@@ -27,13 +27,9 @@ export class UsersService {
     /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
 
-    // if (!user) {
-    //   throw new NotFoundException(`❌ User ${email} not found!!!!`);
-    // }
-    //console.log('----> ', password, user.password, user.restaurant, rest);
-
     if (
       !user ||
+      !user.exist ||
       /*!rest ||
       user.restaurant.id !== rest.id ||*/
       !(await this.bcryptService.compare(password, user.password))

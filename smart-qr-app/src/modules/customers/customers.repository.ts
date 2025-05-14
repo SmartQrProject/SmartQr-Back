@@ -13,7 +13,7 @@ import { PutUserDto } from '../users/dto/put-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class AuthCustomersRepository {
+export class CustomersRepository {
   constructor(
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,

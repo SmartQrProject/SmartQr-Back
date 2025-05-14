@@ -24,10 +24,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-@ApiTags('Cloudinary')
+@ApiTags()
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
-@Controller()
+@Controller('cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 

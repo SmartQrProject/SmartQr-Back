@@ -15,6 +15,7 @@ import { StripeModule } from './modules/stripe/stripe.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
 import { UsersModule } from './modules/users/users.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ChatbotModule } from './modules/chatbot/chatbot.module';
     StripeModule,
     WebSocketModule,
     ChatbotModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -10,17 +10,20 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { JwtService } from 'src/common/services/jwt.service';
 import { LogInCustomerDto } from './dto/login-customer.dto';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Injectable()
 export class CustomersService {
   constructor(
     private readonly customersRepository: CustomersRepository,
     private readonly bcryptService: BcryptService,
+    private readonly restaurantService: RestaurantsService,
     private readonly jwtService: JwtService,
   ) {}
 
-  async sincronizarAuth0(customer): Promise<Customer> {
-    return await this.customersRepository.sincronizarAuth0(customer);
+  async sincronizarAuth0(customer, slug): Promise<Customer> {
+    const rest = await this.restaurantService.getRestaurants(slug);
+    return await this.customersRepository.sincronizarAuth0(customer, rest);
   }
 
   // en principio no se usa - GEA
@@ -42,13 +45,15 @@ export class CustomersService {
   }
 
   // GEA listo mayo-14
-  create(
+  async create(
     createCustomer: CreateCustomerDto,
+    slug,
   ): Promise<Omit<Customer, 'password'>> {
+    const rest = await this.restaurantService.getRestaurants(slug);
     if (createCustomer.password !== createCustomer.confirmPassword) {
       throw new ConflictException('❌ Passwords are not equals!!!');
     }
-    return this.customersRepository.createCustomer(createCustomer);
+    return this.customersRepository.createCustomer(createCustomer, rest);
   }
 
   // FINALIZDO GEA MAYO-14
@@ -81,9 +86,13 @@ export class CustomersService {
   async customerLogin({ email, password }: LogInCustomerDto): Promise<object> {
     const customer = await this.customersRepository.getCustomerByEmail(email);
 
+    console.log(customer);
+    console.log(email, password);
     if (
       !customer ||
       !customer.exist ||
+      customer.auth0Id ||
+      !customer.password ||
       !(await this.bcryptService.compare(password, customer.password))
     ) {
       throw new UnauthorizedException('Not valid Credentials');

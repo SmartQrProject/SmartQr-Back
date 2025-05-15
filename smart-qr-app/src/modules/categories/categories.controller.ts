@@ -14,7 +14,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Post(":slug")
+  @Post("restaurant/:slug")
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({ 
     status: 201, 
@@ -57,10 +57,9 @@ export class CategoriesController {
     }
   })
   async create(
-    @Query('slug') slug: string,
+    @Param('slug') slug: string,
     @Body() createCategoryDto: CreateCategoryDto
   ): Promise<Category> {
-    console.log(slug, createCategoryDto);
     return await this.categoriesService.create(createCategoryDto, slug);
   }
 

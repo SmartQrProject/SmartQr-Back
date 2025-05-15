@@ -13,6 +13,7 @@ import {
   IsDecimal,
   Length,
   IsOptional,
+  IsNumber,
 } from 'class-validator';
 import { Category } from './category.entity';
 import { OrderItem } from './order-item.entity';
@@ -23,6 +24,10 @@ export class Product {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
+
+  @Column({ default: 0 })
+  @IsNumber()
+  sequenceNumber: number;
 
   @Column({ length: 100 })
   @IsString()
@@ -37,8 +42,9 @@ export class Product {
   @IsDecimal()
   price: number;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: true })
   @IsString()
+  @IsOptional()
   image_url: string;
 
   @Column({ default: true })

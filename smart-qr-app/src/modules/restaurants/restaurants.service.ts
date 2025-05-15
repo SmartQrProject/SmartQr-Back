@@ -66,7 +66,11 @@ export class RestaurantsService {
   async getRestaurants(slug: string) {
     const restaurantsBySlug: Restaurant | null =
       await this.restaurantRepository.findOne({
-        where: { slug },
+        where: { 
+          slug,
+          exist: true,
+          is_active: true
+        },
         relations: {
           categories: {
             products: true,

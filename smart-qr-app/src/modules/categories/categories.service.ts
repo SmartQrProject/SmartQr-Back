@@ -1,26 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoriesRepository } from './categories.repository';
+import { Category } from '../../shared/entities/category.entity';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    private readonly categoriesRepository: CategoriesRepository,
+    private readonly restService: RestaurantsService
+  ) {}
+
+  async create(createCategoryDto: CreateCategoryDto, slug: string): Promise<Category> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.categoriesRepository.createCategory(createCategoryDto, rest.id);
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findAll(
+    slug: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ categories: Category[]; total: number; page: number; limit: number }> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.categoriesRepository.findAllByRestaurant(rest.id, page, limit);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: string, slug: string): Promise<Category> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.categoriesRepository.findOneByIdAndRestaurant(id, rest.id);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: UpdateCategoryDto, slug: string): Promise<Category> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string, slug: string): Promise<void> {
+    const rest = await this.restService.getRestaurants(slug);
+    await this.categoriesRepository.softDeleteCategory(id, rest.id);
+  }
+
+  async updateSequences(categories: { id: string, sequenceNumber: number }[], slug: string): Promise<void> {
+    const rest = await this.restService.getRestaurants(slug);
+    await this.categoriesRepository.updateCategorySequences(categories, rest.id);
   }
 }

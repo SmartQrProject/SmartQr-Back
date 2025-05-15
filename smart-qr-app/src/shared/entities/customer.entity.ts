@@ -48,10 +48,6 @@ export class Customer {
   @IsString()
   phone: string;
 
-  @Column({ default: true })
-  @IsBoolean()
-  is_guest: boolean;
-
   @Column('int', { default: 0 })
   @IsInt()
   @Min(0)

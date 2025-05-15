@@ -7,9 +7,8 @@ import {
 import { Repository } from 'typeorm';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
-//import { updateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
+import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
-import { PutUserDto } from '../users/dto/put-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -47,119 +46,125 @@ export class CustomersRepository {
     return wrk3Cust;
   }
 
-  // ------ trabajando en este endpoint ---GEA Mayo 13-
-  async putById(id: string, rest, updateCustomer, req): Promise<string> {
-    const customer = await this.customerRepository.findOneBy({
-      id: id,
-      restaurant: { id: rest.id },
-    });
+  // GEA 14-mayo
+  async createCustomer(createCustomer): Promise<Omit<Customer, 'password'>> {
+    const hash = await this.bcryptService.hash(createCustomer.password);
+    if (!hash) {
+      throw new InternalServerErrorException('Problem with the bcrypt library');
+    }
+
+    const newCustomer = { ...createCustomer, password: hash };
+    this.customerRepository.create(newCustomer);
+    const customerCreado = await this.customerRepository.save(newCustomer);
+    const { password, ...customerSinPass } = customerCreado;
+    return customerSinPass;
+  }
+
+  // GEA 14-mayo
+  async updateById(
+    id,
+    updateCustomer,
+    req,
+  ): Promise<Omit<Customer, 'password'>> {
+    const customer = await this.customerRepository.findOneBy({ id: id });
 
     if (!customer) {
+      throw new NotFoundException(`❌ No customer found  with id ${id}  !!`);
+    }
+
+    if (!req.user.roles.includes('superAdmin') && req.customer.id !== id) {
       throw new NotFoundException(
-        `❌ No customer found  with id ${id} for the restaurant ${rest.id} !!`,
+        `You can not update Customer data for a different user.`,
       );
     }
 
-    if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
-      throw new NotFoundException(
-        `You can not update User data for a different user.`,
+    const wrkCustomer = await this.getCustomerByEmail(updateCustomer.email);
+    if (wrkCustomer && wrkCustomer.id !== id) {
+      throw new ConflictException(
+        `❌ Email already in use: ${customer.email} !!`,
       );
     }
 
-    // const usuario = await this.getUserByEmail(updateUser.email);
-    // if (usuario && usuario.id !== id) {
-    //   throw new ConflictException(
-    //     `❌ Email already in use: ${usuario.email} !!`,
-    //   );
-    // }
+    const hash = await this.bcryptService.hash(updateCustomer.password);
+    if (!hash) {
+      throw new InternalServerErrorException('Problem with the bcrypt library');
+    }
 
-    // const hash = await this.bcryptService.hash(updateUser.password);
-    // if (!hash) {
-    //   throw new InternalServerErrorException('Problem with the bcrypt library');
-    // }
-
-    // updateUser.password = hash;
-    // const { confirmPassword, ...putUser } = updateUser;
-    // const mergeUser = this.userRepository.merge(user, putUser);
-    // await this.userRepository.save(mergeUser);
-    return id + ' was updated';
+    updateCustomer.password = hash;
+    const { confirmPassword, ...putCustomer } = updateCustomer;
+    const mergeCustomer = this.customerRepository.merge(customer, putCustomer);
+    await this.customerRepository.save(mergeCustomer);
+    const { password, ...sinPassword } = mergeCustomer;
+    return sinPassword;
   }
 
   // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
-  async deleteById(id: string, rest, req): Promise<string> {
-    const user = await this.customerRepository.findOne({
+  async removeById(id: string, req): Promise<string> {
+    const customer = await this.customerRepository.findOne({
       where: { id },
     });
 
-    // if (!user || user.restaurant.id !== rest.id) {
-    //   throw new NotFoundException(
-    //     `❌ Usuer with id ${id} not found for this restaurant ${rest.name}!!!`,
-    //   );
-    // }
+    if (!customer) {
+      throw new NotFoundException(`❌ Customer with id ${id} not found !!!`);
+    }
 
-    // if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
-    //   throw new NotFoundException(
-    //     `You can not delete a User account of a different user.`,
-    //   );
-    // }
-    // await this.userRepository.remove(user);
-    return id;
+    if (!req.user.roles.includes('superAdmin') && req.customer.id !== id) {
+      throw new NotFoundException(
+        `You can not delete a Customer account of a different customer.`,
+      );
+    }
+    customer.exist = false;
+    // const mergeUser = this.userRepository.merge(user, putUser);
+    // await this.userRepository.save(mergeUser);
+    await this.customerRepository.save(customer);
+    return 'Customer bloquedao: ' + id;
   }
 
-  // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
-  async getCustomers(
-    rest,
+  // GEA FINALIZADO Mayo 14
+  async getAllCustomers(
     page: number,
     limit: number,
   ): Promise<{
     page: number;
     limit: number;
-    usuarios: Omit<Customer, 'password'>[];
+    customers: Omit<Customer, 'password'>[];
   }> {
     const skip = (page - 1) * limit;
-    const [usuarios, total] = await this.customerRepository.findAndCount({
+    const [customers, total] = await this.customerRepository.findAndCount({
       skip,
       take: limit,
-      where: { restaurant: { id: rest.id } },
       order: { name: 'ASC' },
     });
 
-    if (!usuarios) {
-      throw new NotFoundException('❌ No users found');
+    if (!customers) {
+      throw new NotFoundException('❌ No customers found');
     }
 
-    //const usuariosSinClave = usuarios.map(({ password, ...resto }) => resto);
-
-    return { page, limit, usuarios: usuarios };
+    const customersSinClave = customers.map(({ password, ...resto }) => resto);
+    return { page, limit, customers };
   }
 
-  async findAuthId(payload) {
-    return;
+  // GEA FINALIZADO Mayo 14
+  async findById(id): Promise<Omit<Customer, 'password'>> {
+    const customer = await this.customerRepository.findOne({
+      where: { id },
+    });
+
+    if (!customer) {
+      throw new NotFoundException('❌ No customer found');
+    }
+
+    const { password, ...customerSinPass } = customer;
+    return customer;
   }
-  //   // Finalizado GEA Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
-  //   async createUser(userToCreate, rest): Promise<Omit<User, 'password'>> {
-  //     const hash = await this.bcryptService.hash(userToCreate.password);
-  //     if (!hash) {
-  //       throw new InternalServerErrorException('Problem with the bcrypt library');
-  //     }
 
-  //     const newUser = { ...userToCreate, password: hash };
-  //     newUser.restaurant = rest;
-  //     this.userRepository.create(newUser);
-  //     const usuarioCreado = await this.userRepository.save(newUser);
-  //     const { password, ...userSinPass } = usuarioCreado;
-  //     return userSinPass;
-  //   }
-
-  //   // Finalizado GEA Mayo-13---- trabajando en este endpoint ---GEA Mayo 12-
-  //   async getUserByEmail(email: string): Promise<User | null> {
-  //     const usuario = await this.userRepository.findOne({
-  //       where: { email },
-  //       relations: ['restaurant'],
-  //     });
-
-  //     return usuario;
-  //   }
+  // Finalizado GEA Mayo-14
+  async getCustomerByEmail(email: string): Promise<Customer | null> {
+    const customer = await this.customerRepository.findOne({
+      where: { email },
+    });
+    return customer;
+  }
 
   //   async create({ auth0Id, email, name, picture }) {
   //     const newCustomer = this.customerRepository.create({
@@ -173,13 +178,5 @@ export class CustomersRepository {
   //     return this.customerRepository.save(newCustomer);
   //   }
 
-  //   async findAuthId(sub) {
-  //     const customer = await this.customerRepository.findOne({
-  //       where: { auth0Id: sub },
-  //     });
-
-  //     if (customer) return customer;
-  //     return false;
-  //   }
   // }
 }

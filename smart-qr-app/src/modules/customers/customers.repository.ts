@@ -20,14 +20,17 @@ export class CustomersRepository {
   ) {}
 
   // ------ trabajando en este endpoint ---GEA Mayo 14-
-  async sincronizarAuth0(customer): Promise<Customer> {
+  async sincronizarAuth0(customer, rest): Promise<Customer> {
     // ¿Ya existe un usuario con este sub (de Auth0)?
     const { email, name, auth0Id, picture } = customer;
+
     let wrkCust = await this.customerRepository.findOne({
       where: { auth0Id: auth0Id },
     });
 
     if (wrkCust) {
+      wrkCust.exist = true;
+      wrkCust.restaurant = rest;
       this.customerRepository.merge(wrkCust, customer);
       const wrk2Cust = await this.customerRepository.save(wrkCust);
       return wrk2Cust;
@@ -39,7 +42,7 @@ export class CustomersRepository {
       email: email,
       name: name,
       picture: picture,
-      password: auth0Id,
+      restaurant: rest,
     });
 
     const wrk3Cust = await this.customerRepository.save(newCustomer);
@@ -47,13 +50,17 @@ export class CustomersRepository {
   }
 
   // GEA 14-mayo
-  async createCustomer(createCustomer): Promise<Omit<Customer, 'password'>> {
+  async createCustomer(
+    createCustomer,
+    rest,
+  ): Promise<Omit<Customer, 'password'>> {
     const hash = await this.bcryptService.hash(createCustomer.password);
     if (!hash) {
       throw new InternalServerErrorException('Problem with the bcrypt library');
     }
 
     const newCustomer = { ...createCustomer, password: hash };
+    newCustomer.restaurant = rest;
     this.customerRepository.create(newCustomer);
     const customerCreado = await this.customerRepository.save(newCustomer);
     const { password, ...customerSinPass } = customerCreado;
@@ -72,11 +79,14 @@ export class CustomersRepository {
       throw new NotFoundException(`❌ No customer found  with id ${id}  !!`);
     }
 
-    if (!req.user.roles.includes('superAdmin') && req.customer.id !== id) {
-      throw new NotFoundException(
-        `You can not update Customer data for a different user.`,
-      );
-    }
+    // console.log('req.user', req.user);
+    // console.log('req.customer', req.customer);
+
+    // if (!req.user?.roles?.includes('superAdmin') && req.customer.id !== id) {
+    //   throw new NotFoundException(
+    //     `You can not update Customer data for a different user.`,
+    //   );
+    // }
 
     const wrkCustomer = await this.getCustomerByEmail(updateCustomer.email);
     if (wrkCustomer && wrkCustomer.id !== id) {
@@ -108,11 +118,12 @@ export class CustomersRepository {
       throw new NotFoundException(`❌ Customer with id ${id} not found !!!`);
     }
 
-    if (!req.user.roles.includes('superAdmin') && req.customer.id !== id) {
-      throw new NotFoundException(
-        `You can not delete a Customer account of a different customer.`,
-      );
-    }
+    // if (!req.user.roles.includes('superAdmin') && req.customer.id !== id) {
+    //   throw new NotFoundException(
+    //     `You can not delete a Customer account of a different customer.`,
+    //   );
+    // }
+
     customer.exist = false;
     // const mergeUser = this.userRepository.merge(user, putUser);
     // await this.userRepository.save(mergeUser);

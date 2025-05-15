@@ -8,9 +8,15 @@ import { CustomersController } from './customers.controller';
 import { CustomersRepository } from './customers.repository';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CommonModule } from 'src/common/common.module';
+import { RestaurantsModule } from '../restaurants/restaurants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer]), CommonModule, PassportModule],
+  imports: [
+    TypeOrmModule.forFeature([Customer]),
+    RestaurantsModule,
+    CommonModule,
+    PassportModule,
+  ],
   providers: [CustomersService, CustomersRepository, JwtStrategy4Auth0],
   controllers: [CustomersController],
   exports: [CustomersRepository],

@@ -3,7 +3,7 @@ import { BcryptService } from './services/bcrypt.service';
 import { JwtService } from './services/jwt.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_EXPIRE_TIME, JWT_SECRET } from 'src/config/env.loader';
-import { JwtStrategy4Auth0 } from './services/jwt.strategy4Auth0';
+import { MailService } from './services/mail.service';
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { JwtStrategy4Auth0 } from './services/jwt.strategy4Auth0';
       signOptions: { expiresIn: JWT_EXPIRE_TIME },
     }),
   ],
-  providers: [BcryptService, JwtService],
+  providers: [BcryptService, JwtService, MailService],
   exports: [BcryptService, JwtService, JwtModule],
 })
 export class CommonModule {}

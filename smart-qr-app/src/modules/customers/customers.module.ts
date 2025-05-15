@@ -9,6 +9,7 @@ import { CustomersRepository } from './customers.repository';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CommonModule } from 'src/common/common.module';
 import { RestaurantsModule } from '../restaurants/restaurants.module';
+import { MailService } from 'src/common/services/mail.service';
 
 @Module({
   imports: [
@@ -17,7 +18,12 @@ import { RestaurantsModule } from '../restaurants/restaurants.module';
     CommonModule,
     PassportModule,
   ],
-  providers: [CustomersService, CustomersRepository, JwtStrategy4Auth0],
+  providers: [
+    CustomersService,
+    CustomersRepository,
+    JwtStrategy4Auth0,
+    MailService,
+  ],
   controllers: [CustomersController],
   exports: [CustomersRepository],
 })

@@ -9,6 +9,7 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { JwtService } from 'src/common/services/jwt.service';
+import { MailService } from 'src/common/services/mail.service';
 import { LogInCustomerDto } from './dto/login-customer.dto';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 
@@ -19,6 +20,7 @@ export class CustomersService {
     private readonly bcryptService: BcryptService,
     private readonly restaurantService: RestaurantsService,
     private readonly jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async sincronizarAuth0(customer, slug): Promise<Customer> {
@@ -103,6 +105,11 @@ export class CustomersService {
       id: customer.id,
       email: customer.email,
     };
+
+    const subject = 'Satisfactory Login to SmartQR';
+    const textmsg = 'Your have been granted access to use the SmartQR App';
+    const htmlmsg = `<p>${textmsg}</p>`;
+    this.mailService.sendMail(customer.email, subject, textmsg, htmlmsg);
 
     const access_token = this.jwtService.generateToken(jwtPayLoad);
     return { success: 'Logged Succesfully with token', access_token };

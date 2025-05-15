@@ -1,26 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductsRepository } from './products.repository';
+import { Product } from '../../shared/entities/product.entity';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Injectable()
 export class ProductsService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    private readonly productsRepository: ProductsRepository,
+    private readonly restService: RestaurantsService
+  ) {}
+
+  async create(createProductDto: CreateProductDto, slug: string): Promise<Product> {
+    console.log('Creating product for slug:', slug);
+    const rest = await this.restService.getRestaurants(slug);
+    console.log('Found restaurant:', rest.id, rest.name);
+    return await this.productsRepository.createProduct(createProductDto, rest.id);
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll(
+    slug: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ products: Product[]; total: number; page: number; limit: number }> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.productsRepository.findAllByRestaurant(rest.id, page, limit);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string, slug: string): Promise<Product> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.productsRepository.findOneByIdAndRestaurant(id, rest.id);
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto, slug: string): Promise<Product> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.productsRepository.updateProduct(id, updateProductDto, rest.id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string, slug: string): Promise<void> {
+    const rest = await this.restService.getRestaurants(slug);
+    await this.productsRepository.softDeleteProduct(id, rest.id);
+  }
+
+  async updateSequences(products: { id: string, sequenceNumber: number }[], slug: string): Promise<void> {
+    const rest = await this.restService.getRestaurants(slug);
+    await this.productsRepository.updateProductSequences(products, rest.id);
   }
 }

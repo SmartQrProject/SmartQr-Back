@@ -108,8 +108,8 @@ export class CustomersService {
 
     const subject = 'Satisfactory Login to SmartQR';
     const textmsg = 'Your have been granted access to use the SmartQR App';
-    const htmlmsg = `<p>${textmsg}</p>`;
-    this.mailService.sendMail(customer.email, subject, textmsg, htmlmsg);
+    const tipoEmail = 'login';
+    this.mailService.sendMail(customer.email, subject, textmsg, tipoEmail);
 
     const access_token = this.jwtService.generateToken(jwtPayLoad);
     return { success: 'Logged Succesfully with token', access_token };

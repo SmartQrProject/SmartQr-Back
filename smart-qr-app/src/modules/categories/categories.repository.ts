@@ -1,27 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import { Category } from '../../shared/entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
-export class CategoriesRepository extends Repository<Category> {
-    constructor(private dataSource: DataSource) {
-        super(Category, dataSource.createEntityManager());
-    }
+export class CategoriesRepository {
+    constructor(
+        @InjectRepository(Category)
+        private readonly categoryRepository: Repository<Category>
+    ) {}
 
     async createCategory(createCategoryDto: CreateCategoryDto, restaurantId: string): Promise<Category> {
-        const category = this.create({
+        const category = this.categoryRepository.create({
             ...createCategoryDto,
             restaurant: { id: restaurantId }
         });
-        return await this.save(category);
+        return await this.categoryRepository.save(category);
     }
 
     async updateCategory(id: string, updateCategoryDto: UpdateCategoryDto, restaurantId: string): Promise<Category> {
         const category = await this.findOneByIdAndRestaurant(id, restaurantId);
-        await this.update(id, updateCategoryDto);
-        return await this.findOneByIdAndRestaurant(id, restaurantId);
+        
+        const updatedCategory = this.categoryRepository.merge(category, updateCategoryDto);
+        
+        return await this.categoryRepository.save(updatedCategory);
     }
 
     async findAllByRestaurant(
@@ -30,7 +34,7 @@ export class CategoriesRepository extends Repository<Category> {
         limit: number = 10
     ): Promise<{ categories: Category[]; total: number; page: number; limit: number }> {
         const skip = (page - 1) * limit;
-        const [categories, total] = await this.findAndCount({
+        const [categories, total] = await this.categoryRepository.findAndCount({
             where: { restaurant: { id: restaurantId }, exist: true },
             relations: ['products'],
             order: { sequenceNumber: 'ASC' },
@@ -46,7 +50,7 @@ export class CategoriesRepository extends Repository<Category> {
     }
 
     async findOneByIdAndRestaurant(id: string, restaurantId: string): Promise<Category> {
-        const category = await this.findOne({
+        const category = await this.categoryRepository.findOne({
             where: { 
                 id, 
                 exist: true,
@@ -60,6 +64,28 @@ export class CategoriesRepository extends Repository<Category> {
 
     async softDeleteCategory(id: string, restaurantId: string): Promise<void> {
         const category = await this.findOneByIdAndRestaurant(id, restaurantId);
-        await this.update(id, { exist: false });
+        category.exist = false;
+        await this.categoryRepository.save(category);
+    }
+
+    async updateCategorySequences(categories: { id: string, sequenceNumber: number }[], restaurantId: string): Promise<void> {
+        const existingCategories = await this.categoryRepository.find({
+            where: { 
+                id: In(categories.map(c => c.id)),
+                restaurant: { id: restaurantId },
+                exist: true
+            }
+        });
+
+        if (existingCategories.length !== categories.length) {
+            throw new NotFoundException('Some categories were not found or do not belong to this restaurant');
+        }
+
+        await Promise.all(categories.map(update => 
+            this.categoryRepository.update(
+                { id: update.id, restaurant: { id: restaurantId } },
+                { sequenceNumber: update.sequenceNumber }
+            )
+        ));
     }
 } 

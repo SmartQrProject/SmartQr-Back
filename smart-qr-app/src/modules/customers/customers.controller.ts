@@ -40,15 +40,19 @@ export class CustomersController {
   //@UseGuards(JwtAuthGuard)
   async sincronizarAuth0(
     @Body() customer: Auth0CustomerDto,
+    @Query('slug') slug: string,
     @Req() req,
   ): Promise<Customer> {
-    return this.customersService.sincronizarAuth0(customer);
+    return this.customersService.sincronizarAuth0(customer, slug);
   }
 
   // listo 14-Mayo GEA
-  @Post()
-  create(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.customersService.create(createCustomerDto);
+  @Post('signup')
+  create(
+    @Body() createCustomerDto: CreateCustomerDto,
+    @Query('slug') slug: string,
+  ) {
+    return this.customersService.create(createCustomerDto, slug);
   }
 
   // listo 14-Mayo GEA
@@ -87,7 +91,7 @@ export class CustomersController {
   // listo 14-Mayo GEA
   @Put(':id')
   @HttpCode(200)
-  @ApiBearerAuth()
+  //@ApiBearerAuth()
   @ApiOperation({ summary: 'Modify Customers data' })
   modifyCustomersById(
     @Param('id', ParseUUIDPipe) id: string,

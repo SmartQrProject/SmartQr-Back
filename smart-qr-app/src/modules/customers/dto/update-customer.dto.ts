@@ -1,5 +1,13 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCustomerDto } from './create-customer.dto';
+import { CompletoCustomerDto } from './completo-customer.dto';
 import { PickType } from '@nestjs/swagger';
 
-export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {}
+export class UpdateCustomerDto extends PickType(CompletoCustomerDto, [
+  'email',
+  'phone',
+  'name',
+  'picture',
+  'reward',
+  'password',
+  'confirmPassword',
+  'exist',
+]) {}

@@ -1,26 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoriesRepository } from './categories.repository';
+import { Category } from '../../shared/entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(private readonly categoriesRepository: CategoriesRepository) {}
+
+  async create(createCategoryDto: CreateCategoryDto, restaurantId: string): Promise<Category> {
+    return await this.categoriesRepository.createCategory(createCategoryDto, restaurantId);
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findAll(
+    restaurantId: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ categories: Category[]; total: number; page: number; limit: number }> {
+    return await this.categoriesRepository.findAllByRestaurant(restaurantId, page, limit);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: string, restaurantId: string): Promise<Category> {
+    return await this.categoriesRepository.findOneByIdAndRestaurant(id, restaurantId);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: UpdateCategoryDto, restaurantId: string): Promise<Category> {
+    return await this.categoriesRepository.updateCategory(id, updateCategoryDto, restaurantId);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string, restaurantId: string): Promise<void> {
+    await this.categoriesRepository.softDeleteCategory(id, restaurantId);
   }
 }

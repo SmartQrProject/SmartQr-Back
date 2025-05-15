@@ -10,6 +10,7 @@ import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto
 import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class CustomersRepository {
@@ -17,6 +18,7 @@ export class CustomersRepository {
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
     private readonly bcryptService: BcryptService,
+    private mailService: MailService,
   ) {}
 
   // ------ trabajando en este endpoint ---GEA Mayo 14-
@@ -64,6 +66,17 @@ export class CustomersRepository {
     this.customerRepository.create(newCustomer);
     const customerCreado = await this.customerRepository.save(newCustomer);
     const { password, ...customerSinPass } = customerCreado;
+
+    const subject = 'Satisfactory Account Creation in our SmartQR App';
+    const textmsg =
+      'Congratulations!!!! Your have been granted access to use the SmartQR App.';
+    const tipoEmail = 'signIn';
+    this.mailService.sendMail(
+      customerCreado.email,
+      subject,
+      textmsg,
+      tipoEmail,
+    );
     return customerSinPass;
   }
 

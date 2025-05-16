@@ -10,6 +10,7 @@ import { UsersRepository } from './users.repository';
 import { SignInUserDto } from './dto/signIn-user.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { JwtService } from 'src/common/services/jwt.service';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
 
 @Injectable()
 export class UsersService {
@@ -43,6 +44,7 @@ export class UsersService {
       email: user.email,
       roles: user.role,
       slug: user.restaurant.slug,
+      Restaurant: user.restaurant,
     };
 
     const access_token = this.jwtService.generateToken(jwtPayLoad);

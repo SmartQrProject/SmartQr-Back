@@ -27,7 +27,7 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto);
   }
 
-  @Get()
+  @Get(':slug')
   findAll(@Param('slug') slug: string) {
     return this.ordersService.findAll();
   }

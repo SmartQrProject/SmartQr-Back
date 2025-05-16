@@ -17,20 +17,30 @@ import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 
 //@ApiBearerAuth()
-@Controller('restaurant-tables')
+@Controller(':slug/restaurant-tables')
 export class RestaurantTablesController {
   constructor(
     private readonly restaurantTablesService: RestaurantTablesService,
   ) {}
 
   @Post('seeder')
-  create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true,
+  })
+  create(
+    @Param('slug') slug: string,
+    @Body() restaurantTableSeed: CreateRestaurantTableDto,
+  ) {
     return this.restaurantTablesService.seeder();
   }
 
@@ -43,7 +53,7 @@ export class RestaurantTablesController {
     description:
       'Retrieves a paginated list of tables for a specific restaurant. Requires authentication.',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'slug',
     description: 'Unique restaurant identifier',
     example: 'test-cafe',
@@ -110,7 +120,7 @@ export class RestaurantTablesController {
     },
   })
   findAll(
-    @Query('slug') slug: string,
+    @Param('slug') slug: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
   ) {
@@ -118,12 +128,35 @@ export class RestaurantTablesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique identifier of the restaurant',
+    example: 'test-cafe',
+    required: true,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Table ID',
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+  })
+  findOne(@Param('slug') slug: string, @Param('id') id: string) {
     return this.restaurantTablesService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique identifier of the restaurant',
+    example: 'test-cafe',
+    required: true,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Table ID',
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+  })
   update(
+    @Param('slug') slug: string,
     @Param('id') id: string,
     @Body() updateRestaurantTableDto: UpdateRestaurantTableDto,
   ) {
@@ -131,7 +164,18 @@ export class RestaurantTablesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique identifier of the restaurant',
+    example: 'test-cafe',
+    required: true,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Table ID',
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+  })
+  remove(@Param('slug') slug: string, @Param('id') id: string) {
     return this.restaurantTablesService.remove(+id);
   }
 }

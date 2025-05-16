@@ -21,6 +21,7 @@ import {
   ApiTags,
   ApiBody,
   ApiQuery,
+  ApiParam,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -32,7 +33,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 @ApiTags(
   'App Users creation (SignUP) and user login (SignIn) using JWT and Bcrypt',
 )
-@Controller('users')
+@Controller(':slug/users')
 export class UsersController {
   authUsersService;
   constructor(private readonly authService: UsersService) {}
@@ -65,86 +66,88 @@ export class UsersController {
   }
 
   //  FINALIZADO GEA MAyo-13------ trabajando en este endpoint --------GEA Mayo-13
-  @Get('')
+  @Get()
   @HttpCode(200)
-  @UseGuards(AuthGuard)
+  //@UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get paginated users list',
-    description: 'Retrieves a paginated list of users for a specific restaurant. Requires authentication.'
+    description:
+      'Retrieves a paginated list of users for a specific restaurant. Requires authentication.',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'slug',
     description: 'Unique restaurant identifier',
     example: 'test-cafe',
-    required: true
+    required: true,
   })
-  @ApiQuery({ 
-    name: 'page', 
+  @ApiQuery({
+    name: 'page',
     description: 'Page number',
     example: 1,
     required: false,
-    type: Number
+    type: Number,
   })
-  @ApiQuery({ 
-    name: 'limit', 
+  @ApiQuery({
+    name: 'limit',
     description: 'Items per page',
     example: 5,
     required: false,
-    type: Number
+    type: Number,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Users found successfully',
     schema: {
       example: {
         users: [
           {
-            id: "550e8400-e29b-41d4-a716-446655440000",
-            email: "smartqr2@gmail.com",
-            name: "owner Test Cafe",
-            role: "owner",
-            created_at: "2024-03-20T12:34:56.789Z",
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            email: 'smartqr2@gmail.com',
+            name: 'owner Test Cafe',
+            role: 'owner',
+            created_at: '2024-03-20T12:34:56.789Z',
             restaurant: {
-              id: "550e8400-e29b-41d4-a716-446655440000",
-              name: "Test Cafe",
-              slug: "test-cafe"
-            }
-          }
+              id: '550e8400-e29b-41d4-a716-446655440000',
+              name: 'Test Cafe',
+              slug: 'test-cafe',
+            },
+          },
         ],
         total: 1,
         page: 1,
-        limit: 5
-      }
-    }
+        limit: 5,
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Unauthorized',
     schema: {
       example: {
-        message: "Unauthorized user",
-        error: "Unauthorized",
-        statusCode: 401
-      }
-    }
+        message: 'Unauthorized user',
+        error: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 404, 
+  @ApiResponse({
+    status: 404,
     description: 'Restaurant not found',
     schema: {
       example: {
-        message: "Restaurant with slug test-cafe not found",
-        error: "Not Found",
-        statusCode: 404
-      }
-    }
+        message: 'Restaurant with slug test-cafe not found',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
   })
   getUsers(
-    @Query('slug') slug: string,
+    @Param('slug') slug: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
   ) {
+    console.log('slug', slug);
     return this.authService.getUsers(slug, page, limit);
   }
 
@@ -165,9 +168,10 @@ export class UsersController {
   //  FINALIZADO GEA MAyo-13------ trabajando en este endpoint --------GEA Mayo-13
   @Post('signin')
   @HttpCode(201)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'User login',
-    description: 'Allows a user to sign in using their email and password. Returns a JWT token for authentication.'
+    description:
+      'Allows a user to sign in using their email and password. Returns a JWT token for authentication.',
   })
   @ApiBody({
     type: SignInUserDto,
@@ -175,44 +179,44 @@ export class UsersController {
     examples: {
       testCafeOwner: {
         value: {
-          email: "smartqr2@gmail.com",
-          password: "!Example123"
+          email: 'smartqr2@gmail.com',
+          password: '!Example123',
         },
-        summary: "Test Cafe owner credentials"
-      }
-    }
+        summary: 'Test Cafe owner credentials',
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Login successful',
     schema: {
       example: {
         user: {
-          id: "550e8400-e29b-41d4-a716-446655440000",
-          email: "smartqr2@gmail.com",
-          name: "owner Test Cafe",
-          role: "owner",
-          created_at: "2024-03-20T12:34:56.789Z",
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          email: 'smartqr2@gmail.com',
+          name: 'owner Test Cafe',
+          role: 'owner',
+          created_at: '2024-03-20T12:34:56.789Z',
           restaurant: {
-            id: "550e8400-e29b-41d4-a716-446655440000",
-            name: "Test Cafe",
-            slug: "test-cafe"
-          }
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            name: 'Test Cafe',
+            slug: 'test-cafe',
+          },
         },
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-      }
-    }
+        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Invalid credentials',
     schema: {
       example: {
-        message: "Invalid email or password",
-        error: "Unauthorized",
-        statusCode: 401
-      }
-    }
+        message: 'Invalid email or password',
+        error: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
   })
   async userLogin(@Body() auth: SignInUserDto): Promise<object> {
     return this.authService.userLogin(auth);

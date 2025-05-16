@@ -69,7 +69,7 @@ export class CloudinaryController {
       'El archivo no es una imagen válida o su formato no está permitido (jpg, png, webp)',
   })
   @HttpCode(200)
-  @Put('uploadImage/:id')
+  @Put('uploadImage')
   @UseInterceptors(FileInterceptor('file'))
   async updateImg(
     @Param('slug') slug: string,

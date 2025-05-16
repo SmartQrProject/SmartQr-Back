@@ -27,18 +27,13 @@ import {
 @ApiTags()
 @ApiBearerAuth()
 //@UseGuards(AuthGuard)
-@Controller(':slug/cloudinary')
+@Controller('cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
   @ApiOperation({
     summary:
       'Subir o actualizar una imagen de usuario (JPEG, PNG o WebP)(requiere autenticación)',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID del producto',
-    example: 'uuid-válido',
   })
   @ApiParam({
     name: 'slug',
@@ -74,11 +69,11 @@ export class CloudinaryController {
       'El archivo no es una imagen válida o su formato no está permitido (jpg, png, webp)',
   })
   @HttpCode(200)
-  @Put('uploadImage/:id')
+  @Put('uploadImage')
   @UseInterceptors(FileInterceptor('file'))
   async updateImg(
     @Param('slug') slug: string,
-    @Param('id', ParseUUIDPipe) id: string,
+
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -90,6 +85,6 @@ export class CloudinaryController {
     file: Express.Multer.File,
   ) /*: Promise<string>*/ {
     /////////////////////////////////////////////////////////////////////////////////////////chequear
-    return await this.cloudinaryService.updateImg(id, file);
+    return await this.cloudinaryService.updateImg(file);
   }
 }

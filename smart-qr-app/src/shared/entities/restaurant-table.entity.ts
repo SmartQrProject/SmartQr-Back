@@ -25,6 +25,9 @@ export class RestaurantTable {
   @IsBoolean()
   is_active: boolean;
 
+  @Column({ default: true })
+  exist: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
@@ -35,7 +38,4 @@ export class RestaurantTable {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
-
-  @Column({ default: true })
-  exist: boolean;
 }

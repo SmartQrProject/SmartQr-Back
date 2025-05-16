@@ -12,7 +12,7 @@ import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
-@ApiBearerAuth()
+//@ApiBearerAuth()
 @Controller('restaurant-tables')
 export class RestaurantTablesController {
   constructor(

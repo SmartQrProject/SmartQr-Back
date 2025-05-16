@@ -11,7 +11,8 @@ import { CommonModule } from 'src/common/common.module';
   imports: [
     TypeOrmModule.forFeature([Category]),
     RestaurantsModule,
-    CommonModule  ],
+    CommonModule
+  ],
   controllers: [CategoriesController],
   providers: [CategoriesService, CategoriesRepository],
   exports: [CategoriesService]

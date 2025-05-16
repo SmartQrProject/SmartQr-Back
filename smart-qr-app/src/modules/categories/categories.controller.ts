@@ -79,6 +79,17 @@ export class CategoriesController {
       }
     }
   })
+  @ApiResponse({ 
+    status: 409, 
+    description: 'Category name already exists',
+    schema: {
+      example: {
+        message: 'Ya existe una categoría con el nombre "Beverages" en este restaurante',
+        error: "Conflict",
+        statusCode: 409
+      }
+    }
+  })
   async create(
     @Param('slug') slug: string,
     @Body() createCategoryDto: CreateCategoryDto

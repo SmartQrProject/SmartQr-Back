@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, EntityManager } from 'typeorm';
 import { Category } from '../../shared/entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -9,23 +9,52 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesRepository {
     constructor(
         @InjectRepository(Category)
-        private readonly categoryRepository: Repository<Category>
+        private readonly categoryRepository: Repository<Category>,
+        private readonly entityManager: EntityManager
     ) {}
 
-    async createCategory(createCategoryDto: CreateCategoryDto, restaurantId: string): Promise<Category> {
-        const category = this.categoryRepository.create({
-            ...createCategoryDto,
-            restaurant: { id: restaurantId }
+    private async validateCategoryName(name: string, restaurantId: string): Promise<void> {
+        const existingCategory = await this.categoryRepository.findOne({
+            where: {
+                name: name,
+                restaurant: { id: restaurantId },
+                exist: true
+            }
         });
-        return await this.categoryRepository.save(category);
+
+        if (existingCategory) {
+            throw new ConflictException(`Ya existe una categoría con el nombre "${name}" en este restaurante`);
+        }
+    }
+
+    async createCategory(createCategoryDto: CreateCategoryDto, restaurantId: string): Promise<Category> {
+        // Usamos una transacción con el EntityManager
+        return await this.entityManager.transaction(async transactionalEntityManager => {
+            // Validamos el nombre antes de cualquier operación
+            await this.validateCategoryName(createCategoryDto.name, restaurantId);
+
+            // Creamos la categoría dentro de la transacción
+            const category = this.categoryRepository.create({
+                ...createCategoryDto,
+                restaurant: { id: restaurantId }
+            });
+
+            return await transactionalEntityManager.save(Category, category);
+        });
     }
 
     async updateCategory(id: string, updateCategoryDto: UpdateCategoryDto, restaurantId: string): Promise<Category> {
-        const category = await this.findOneByIdAndRestaurant(id, restaurantId);
-        
-        const updatedCategory = this.categoryRepository.merge(category, updateCategoryDto);
-        
-        return await this.categoryRepository.save(updatedCategory);
+        return await this.entityManager.transaction(async transactionalEntityManager => {
+            const category = await this.findOneByIdAndRestaurant(id, restaurantId);
+            
+            // Si se está actualizando el nombre, validamos que no exista
+            if (updateCategoryDto.name) {
+                await this.validateCategoryName(updateCategoryDto.name, restaurantId);
+            }
+            
+            const updatedCategory = this.categoryRepository.merge(category, updateCategoryDto);
+            return await transactionalEntityManager.save(Category, updatedCategory);
+        });
     }
 
     async findAllByRestaurant(

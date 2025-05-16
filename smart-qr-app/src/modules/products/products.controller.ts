@@ -99,6 +99,17 @@ export class ProductsController {
       }
     }
   })
+  @ApiResponse({ 
+    status: 409, 
+    description: 'Product name already exists in restaurant',
+    schema: {
+      example: {
+        message: 'Ya existe un producto con el nombre "Coca Cola" en este restaurante',
+        error: "Conflict",
+        statusCode: 409
+      }
+    }
+  })
   async create(
     @Param('slug') slug: string,
     @Body() createProductDto: CreateProductDto

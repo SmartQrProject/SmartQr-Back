@@ -29,6 +29,10 @@ export class RestaurantTablesService {
     return this.restTableRepository.findAll(rest, page, limit);
   }
 
+  seeder() {
+    return this.restTableRepository.seeder();
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} restaurantTable`;
   }

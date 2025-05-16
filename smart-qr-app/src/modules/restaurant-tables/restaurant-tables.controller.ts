@@ -29,9 +29,9 @@ export class RestaurantTablesController {
     private readonly restaurantTablesService: RestaurantTablesService,
   ) {}
 
-  @Post()
-  create(@Body() createRestaurantTableDto: CreateRestaurantTableDto) {
-    return this.restaurantTablesService.create(createRestaurantTableDto);
+  @Post('seeder')
+  create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
+    return this.restaurantTablesService.seeder();
   }
 
   @Get()

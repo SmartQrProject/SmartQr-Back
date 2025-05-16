@@ -24,7 +24,7 @@ export class RestaurantTablesController {
     return this.restaurantTablesService.create(createRestaurantTableDto);
   }
 
-  @Get()
+  @Get(':slug')
   findAll(@Param('slug') slug: string) {
     return this.restaurantTablesService.findAll();
   }

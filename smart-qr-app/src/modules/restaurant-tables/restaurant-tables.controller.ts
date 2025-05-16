@@ -31,7 +31,16 @@ export class RestaurantTablesController {
   ) {}
 
   @Post('seeder')
-  create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true,
+  })
+  create(
+    @Param('slug') slug: string,
+    @Body() restaurantTableSeed: CreateRestaurantTableDto,
+  ) {
     return this.restaurantTablesService.seeder();
   }
 
@@ -44,7 +53,7 @@ export class RestaurantTablesController {
     description:
       'Retrieves a paginated list of tables for a specific restaurant. Requires authentication.',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'slug',
     description: 'Unique restaurant identifier',
     example: 'test-cafe',
@@ -111,7 +120,7 @@ export class RestaurantTablesController {
     },
   })
   findAll(
-    @Query('slug') slug: string,
+    @Param('slug') slug: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
   ) {

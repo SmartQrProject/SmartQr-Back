@@ -44,7 +44,6 @@ export class ProductsRepository {
                 throw new BadRequestException('La categoría no existe o no pertenece a este restaurante');
             }
 
-            // Validamos que no exista un producto con el mismo nombre en el restaurante
             await this.validateProductName(createProductDto.name, restaurantId);
 
             const product = this.productRepository.create({
@@ -62,7 +61,6 @@ export class ProductsRepository {
         return await this.entityManager.transaction(async transactionalEntityManager => {
             const product = await this.findOneByIdAndRestaurant(id, restaurantId);
             
-            // Si se está actualizando el nombre, validamos que no exista
             if (updateProductDto.name) {
                 await this.validateProductName(updateProductDto.name, restaurantId);
             }

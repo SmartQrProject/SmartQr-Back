@@ -28,12 +28,8 @@ export class CategoriesRepository {
     }
 
     async createCategory(createCategoryDto: CreateCategoryDto, restaurantId: string): Promise<Category> {
-        // Usamos una transacción con el EntityManager
         return await this.entityManager.transaction(async transactionalEntityManager => {
-            // Validamos el nombre antes de cualquier operación
             await this.validateCategoryName(createCategoryDto.name, restaurantId);
-
-            // Creamos la categoría dentro de la transacción
             const category = this.categoryRepository.create({
                 ...createCategoryDto,
                 restaurant: { id: restaurantId }
@@ -47,7 +43,6 @@ export class CategoriesRepository {
         return await this.entityManager.transaction(async transactionalEntityManager => {
             const category = await this.findOneByIdAndRestaurant(id, restaurantId);
             
-            // Si se está actualizando el nombre, validamos que no exista
             if (updateCategoryDto.name) {
                 await this.validateCategoryName(updateCategoryDto.name, restaurantId);
             }

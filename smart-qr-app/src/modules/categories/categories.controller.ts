@@ -7,7 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam, 
 import { AuthGuard } from 'src/common/guards/auth.guard';
 
 
-@ApiTags('categories')
+@ApiTags('Categories')
 @ApiBearerAuth()
 @Controller('categories')
 @UseGuards(AuthGuard)
@@ -15,44 +15,67 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post("restaurant/:slug")
-  @ApiOperation({ summary: 'Create a new category' })
+  @ApiOperation({ 
+    summary: 'Create a new category',
+    description: 'Creates a new category for the restaurant menu. Requires owner authentication.'
+  })
+  @ApiParam({ 
+    name: 'slug', 
+    description: 'Unique identifier of the restaurant',
+    example: 'test-cafe',
+    required: true
+  })
+  @ApiBody({
+    type: CreateCategoryDto,
+    description: 'New category data',
+    examples: {
+      beverages: {
+        value: {
+          name: "Beverages"
+        },
+        summary: "Beverages category for Test Cafe"
+      }
+    }
+  })
   @ApiResponse({ 
     status: 201, 
-    description: 'The category has been successfully created.',
-    type: Category,
-    content: {
-      'application/json': {
-        example: {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Bebidas',
-          created_at: '2024-03-20T15:30:00.000Z',
-          sequenceNumber: 1,
-          exist: true,
-          products: [],
-          restaurant: {
-            id: '987fcdeb-a123-12d3-a456-426614174000',
-            name: 'Mi Restaurante Italiano'
-          }
+    description: 'Category successfully created',
+    schema: {
+      example: {
+        id: "123e4567-e89b-12d3-a456-426614174000",
+        name: "Beverages",
+        created_at: "2024-03-20T15:30:00.000Z",
+        updated_at: "2024-03-20T15:30:00.000Z",
+        sequenceNumber: 1,
+        exist: true,
+        products: [],
+        restaurant: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          name: "Test Cafe",
+          slug: "test-cafe"
         }
       }
     }
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiParam({ 
-    name: 'slug', 
-    description: 'Restaurant slug (Example: mi-restaurante-italiano)',
-    example: 'mi-restaurante-italiano',
-    required: true,
-    type: 'string'
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: "Unauthorized user",
+        error: "Unauthorized",
+        statusCode: 401
+      }
+    }
   })
-  @ApiBody({
-    type: CreateCategoryDto,
-    examples: {
-      category: {
-        value: {
-          name: "Bebidas",
-        },
-        description: "Example of creating a new category"
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Restaurant not found',
+    schema: {
+      example: {
+        message: "Restaurant with slug test-cafe not found",
+        error: "Not Found",
+        statusCode: 404
       }
     }
   })
@@ -66,45 +89,66 @@ export class CategoriesController {
   @Get('restaurant/:slug')
   @ApiOperation({ 
     summary: 'Get all categories for the restaurant',
-    description: 'Retrieves all categories for a specific restaurant using its slug'
+    description: 'Retrieves a paginated list of categories with their products for a specific restaurant.'
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'List of all categories for the restaurant.',
-    content: {
-      'application/json': {
-        example: {
-          categories: [
-            {
-              id: '123e4567-e89b-12d3-a456-426614174000',
-              name: 'Bebidas',
-              created_at: '2024-03-20T15:30:00.000Z',
-              sequenceNumber: 1,
-              exist: true,
-              products: [
-                {
-                  id: 'abc12345-e89b-12d3-a456-426614174000',
-                  name: 'Coca Cola',
-                  price: 2.5
-                }
-              ]
-            }
-          ],
-          total: 1,
-          page: 1,
-          limit: 10
-        }
+    description: 'Categories found successfully',
+    schema: {
+      example: {
+        categories: [
+          {
+            id: "123e4567-e89b-12d3-a456-426614174000",
+            name: "Beverages",
+            created_at: "2024-03-20T15:30:00.000Z",
+            updated_at: "2024-03-20T15:30:00.000Z",
+            sequenceNumber: 1,
+            exist: true,
+            products: [
+              {
+                id: "abc12345-e89b-12d3-a456-426614174000",
+                name: "Coca Cola",
+                price: 2.5,
+                description: "Regular Coca Cola",
+                image_url: "https://example.com/coca-cola.jpg",
+                exist: true
+              }
+            ]
+          }
+        ],
+        total: 1,
+        page: 1,
+        limit: 10
       }
     }
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'Restaurant not found.' })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: "Unauthorized user",
+        error: "Unauthorized",
+        statusCode: 401
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Restaurant not found',
+    schema: {
+      example: {
+        message: "Restaurant with slug test-cafe not found",
+        error: "Not Found",
+        statusCode: 404
+      }
+    }
+  })
   @ApiParam({ 
     name: 'slug', 
-    description: 'Restaurant slug (Example: mi-restaurante-italiano)',
-    example: 'mi-restaurante-italiano',
-    required: true,
-    type: 'string'
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true
   })
   @ApiQuery({ 
     name: 'page', 
@@ -129,46 +173,71 @@ export class CategoriesController {
   }
 
   @Get('restaurant/:slug/:id')
-  @ApiOperation({ summary: 'Get a category by id' })
+  @ApiOperation({ 
+    summary: 'Get category by ID',
+    description: 'Retrieves a specific category and its products for a restaurant using the category ID and restaurant slug.'
+  })
   @ApiResponse({ 
     status: 200, 
-    description: 'The found category.',
-    content: {
-      'application/json': {
-        example: {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Bebidas',
-          created_at: '2024-03-20T15:30:00.000Z',
-          sequenceNumber: 1,
-          exist: true,
-          products: [
-            {
-              id: 'abc12345-e89b-12d3-a456-426614174000',
-              name: 'Coca Cola',
-              price: 2.5
-            }
-          ],
-          restaurant: {
-            id: '987fcdeb-a123-12d3-a456-426614174000',
-            name: 'Mi Restaurante Italiano'
+    description: 'Category found successfully',
+    schema: {
+      example: {
+        id: "c2917676-d3d2-472a-8b7c-785f455a80ab",
+        name: "Beverages",
+        created_at: "2024-03-20T15:30:00.000Z",
+        updated_at: "2024-03-20T15:30:00.000Z",
+        sequenceNumber: 1,
+        exist: true,
+        products: [
+          {
+            id: "abc12345-e89b-12d3-a456-426614174000",
+            name: "Coca Cola",
+            price: 2.5,
+            description: "Regular Coca Cola",
+            image_url: "https://example.com/coca-cola.jpg",
+            exist: true
           }
+        ],
+        restaurant: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          name: "Test Cafe",
+          slug: "test-cafe"
         }
       }
     }
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'Category not found.' })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: "Unauthorized user",
+        error: "Unauthorized",
+        statusCode: 401
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Category or restaurant not found',
+    schema: {
+      example: {
+        message: "Category with ID c2917676-d3d2-472a-8b7c-785f455a80ab not found in restaurant test-cafe",
+        error: "Not Found",
+        statusCode: 404
+      }
+    }
+  })
   @ApiParam({ 
     name: 'slug', 
-    description: 'Restaurant slug (Example: mi-restaurante-italiano)',
-    example: 'mi-restaurante-italiano',
-    required: true,
-    type: 'string'
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true
   })
   @ApiParam({ 
     name: 'id', 
     description: 'Category ID',
-    example: '123e4567-e89b-12d3-a456-426614174000'
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab'
   })
   async findOne(
     @Param('id') id: string,
@@ -178,50 +247,94 @@ export class CategoriesController {
   }
 
   @Patch('restaurant/:slug/:id')
-  @ApiOperation({ summary: 'Update a category' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'The category has been successfully updated.',
-    content: {
-      'application/json': {
-        example: {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Bebidas Calientes',
-          created_at: '2024-03-20T15:30:00.000Z',
-          sequenceNumber: 2,
-          exist: true,
-          products: [],
-          restaurant: {
-            id: '987fcdeb-a123-12d3-a456-426614174000',
-            name: 'Mi Restaurante Italiano'
-          }
-        }
-      }
-    }
+  @ApiOperation({ 
+    summary: 'Update category',
+    description: 'Updates a specific category information. You can update the name and/or sequence number.'
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'Category not found.' })
   @ApiParam({ 
     name: 'slug', 
-    description: 'Restaurant slug (Example: mi-restaurante-italiano)',
-    example: 'mi-restaurante-italiano',
-    required: true,
-    type: 'string'
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true
   })
   @ApiParam({ 
     name: 'id', 
     description: 'Category ID',
-    example: '123e4567-e89b-12d3-a456-426614174000'
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab'
   })
   @ApiBody({
     type: UpdateCategoryDto,
+    description: 'Category data to update',
     examples: {
-      category: {
+      fullUpdate: {
         value: {
-          name: "Bebidas Calientes",
+          name: "Hot Beverages",
           sequenceNumber: 2
         },
-        description: "Example of updating a category"
+        summary: "Update both name and sequence"
+      },
+      nameOnly: {
+        value: {
+          name: "Hot Beverages"
+        },
+        summary: "Update only the name"
+      },
+      sequenceOnly: {
+        value: {
+          sequenceNumber: 2
+        },
+        summary: "Update only the sequence number"
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Category updated successfully',
+    schema: {
+      example: {
+        id: "c2917676-d3d2-472a-8b7c-785f455a80ab",
+        name: "Hot Beverages",
+        created_at: "2024-03-20T15:30:00.000Z",
+        updated_at: "2024-03-20T15:35:00.000Z",
+        sequenceNumber: 2,
+        exist: true,
+        products: [
+          {
+            id: "abc12345-e89b-12d3-a456-426614174000",
+            name: "Coca Cola",
+            price: 2.5,
+            description: "Regular Coca Cola",
+            image_url: "https://example.com/coca-cola.jpg",
+            exist: true
+          }
+        ],
+        restaurant: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          name: "Test Cafe",
+          slug: "test-cafe"
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: "Unauthorized user",
+        error: "Unauthorized",
+        statusCode: 401
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Category or restaurant not found',
+    schema: {
+      example: {
+        message: "Category with ID c2917676-d3d2-472a-8b7c-785f455a80ab not found in restaurant test-cafe",
+        error: "Not Found",
+        statusCode: 404
       }
     }
   })
@@ -234,29 +347,51 @@ export class CategoriesController {
   }
 
   @Delete('restaurant/:slug/:id')
-  @ApiOperation({ summary: 'Delete a category' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'The category has been successfully deleted.',
-    content: {
-      'application/json': {
-        example: {}
-      }
-    }
+  @ApiOperation({ 
+    summary: 'Delete category',
+    description: 'Deletes a specific category and its associated products from the restaurant menu.'
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'Category not found.' })
   @ApiParam({ 
     name: 'slug', 
-    description: 'Restaurant slug (Example: mi-restaurante-italiano)',
-    example: 'mi-restaurante-italiano',
-    required: true,
-    type: 'string'
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true
   })
   @ApiParam({ 
     name: 'id', 
     description: 'Category ID',
-    example: '123e4567-e89b-12d3-a456-426614174000'
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Category deleted successfully',
+    schema: {
+      example: {
+        message: "Category Hot Beverages has been deleted successfully"
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: "Unauthorized user",
+        error: "Unauthorized",
+        statusCode: 401
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Category or restaurant not found',
+    schema: {
+      example: {
+        message: "Category with ID c2917676-d3d2-472a-8b7c-785f455a80ab not found in restaurant test-cafe",
+        error: "Not Found",
+        statusCode: 404
+      }
+    }
   })
   async remove(
     @Param('id') id: string,
@@ -266,24 +401,15 @@ export class CategoriesController {
   }
 
   @Patch('restaurant/:slug/sequence')
-  @ApiOperation({ summary: 'Update sequence numbers for multiple categories' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'The categories have been successfully reordered.',
-    content: {
-      'application/json': {
-        example: {}
-      }
-    }
+  @ApiOperation({ 
+    summary: 'Update categories sequence',
+    description: 'Updates the display order of multiple categories at once. Useful for drag and drop reordering.'
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'One or more categories not found.' })
   @ApiParam({ 
     name: 'slug', 
-    description: 'Restaurant slug (Example: mi-restaurante-italiano)',
-    example: 'mi-restaurante-italiano',
-    required: true,
-    type: 'string'
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true
   })
   @ApiBody({
     schema: {
@@ -293,7 +419,7 @@ export class CategoriesController {
         properties: {
           id: {
             type: 'string',
-            example: '123e4567-e89b-12d3-a456-426614174000'
+            example: 'c2917676-d3d2-472a-8b7c-785f455a80ab'
           },
           sequenceNumber: {
             type: 'number',
@@ -303,12 +429,49 @@ export class CategoriesController {
       }
     },
     examples: {
-      categories: {
+      reorderCategories: {
         value: [
-          { id: '123e4567-e89b-12d3-a456-426614174000', sequenceNumber: 1 },
-          { id: '987fcdeb-a123-12d3-a456-426614174000', sequenceNumber: 2 }
+          { 
+            id: 'c2917676-d3d2-472a-8b7c-785f455a80ab', 
+            sequenceNumber: 1 
+          },
+          { 
+            id: '7d1e3cd8-2a0d-4a40-8b2e-4e1c9578c8f3', 
+            sequenceNumber: 2 
+          }
         ],
-        description: "Example of reordering categories"
+        summary: "Reorder Hot Beverages and Cold Beverages categories"
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Categories reordered successfully',
+    schema: {
+      example: {
+        message: "Categories sequence updated successfully"
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: "Unauthorized user",
+        error: "Unauthorized",
+        statusCode: 401
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Restaurant or categories not found',
+    schema: {
+      example: {
+        message: "One or more categories not found in restaurant test-cafe",
+        error: "Not Found",
+        statusCode: 404
       }
     }
   })

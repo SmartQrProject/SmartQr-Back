@@ -5,6 +5,7 @@ import {
   Param,
   ParseFilePipe,
   ParseUUIDPipe,
+  Post,
   Put,
   UploadedFile,
   UseGuards,
@@ -35,12 +36,6 @@ export class CloudinaryController {
     summary:
       'Subir o actualizar una imagen de usuario (JPEG, PNG o WebP)(requiere autenticación)',
   })
-  @ApiParam({
-    name: 'slug',
-    description: 'Unique restaurant identifier',
-    example: 'test-cafe',
-    required: true,
-  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -69,11 +64,9 @@ export class CloudinaryController {
       'El archivo no es una imagen válida o su formato no está permitido (jpg, png, webp)',
   })
   @HttpCode(200)
-  @Put('uploadImage')
+  @Post('uploadImage')
   @UseInterceptors(FileInterceptor('file'))
   async updateImg(
-    @Param('slug') slug: string,
-
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -84,6 +77,8 @@ export class CloudinaryController {
     )
     file: Express.Multer.File,
   ) /*: Promise<string>*/ {
+    console.log('file', file);
+    console.log('file buffer', file.buffer);
     /////////////////////////////////////////////////////////////////////////////////////////chequear
     return await this.cloudinaryService.updateImg(file);
   }

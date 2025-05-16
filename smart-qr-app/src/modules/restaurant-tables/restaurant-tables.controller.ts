@@ -6,11 +6,22 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { RestaurantTablesService } from './restaurant-tables.service';
 import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 
 //@ApiBearerAuth()
 @Controller(':slug/restaurant-tables')
@@ -19,29 +30,92 @@ export class RestaurantTablesController {
     private readonly restaurantTablesService: RestaurantTablesService,
   ) {}
 
-  @Post()
-  @ApiParam({
-    name: 'slug',
-    description: 'Unique identifier of the restaurant',
-    example: 'test-cafe',
-    required: true,
-  })
-  create(
-    @Param('slug') slug: string,
-    @Body() createRestaurantTableDto: CreateRestaurantTableDto,
-  ) {
-    return this.restaurantTablesService.create(createRestaurantTableDto);
+  @Post('seeder')
+  create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
+    return this.restaurantTablesService.seeder();
   }
 
   @Get()
-  @ApiParam({
+  @HttpCode(200)
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get paginated restaurants table list report',
+    description:
+      'Retrieves a paginated list of tables for a specific restaurant. Requires authentication.',
+  })
+  @ApiQuery({
     name: 'slug',
-    description: 'Unique identifier of the restaurant',
+    description: 'Unique restaurant identifier',
     example: 'test-cafe',
     required: true,
   })
-  findAll(@Param('slug') slug: string) {
-    return this.restaurantTablesService.findAll();
+  @ApiQuery({
+    name: 'page',
+    description: 'Page number',
+    example: 1,
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    description: 'Items per page',
+    example: 5,
+    required: false,
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tables listed successfully',
+    schema: {
+      example: {
+        tables: [
+          {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            code: 'T33',
+            exists: true,
+            is_active: true,
+            restaurant: {
+              id: '550e8400-e29b-41d4-a716-446655440000',
+              name: 'Test Cafe',
+              slug: 'test-cafe',
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 5,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        message: 'Unauthorized user',
+        error: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Restaurant not found',
+    schema: {
+      example: {
+        message: 'Restaurant with slug test-cafe not found',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  findAll(
+    @Query('slug') slug: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+  ) {
+    return this.restaurantTablesService.findAll(slug, page, limit);
   }
 
   @Get(':id')

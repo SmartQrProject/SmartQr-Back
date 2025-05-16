@@ -33,7 +33,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 @ApiTags(
   'App Users creation (SignUP) and user login (SignIn) using JWT and Bcrypt',
 )
-@Controller(':slug/users')
+@Controller('users')
 export class UsersController {
   authUsersService;
   constructor(private readonly authService: UsersService) {}
@@ -58,7 +58,7 @@ export class UsersController {
   @HttpCode(201)
   @ApiOperation({ summary: 'Users App creation' })
   async userSignUp(
-    @Query('slug') slug: string,
+    @Param('slug') slug: string,
     @Body() user: CreateUserDto,
   ): Promise<Omit<User, 'password'>> {
     console.log(slug, user);

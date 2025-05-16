@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
@@ -29,12 +29,21 @@ export class RestaurantTablesService {
     return this.restTableRepository.findAll(rest, page, limit);
   }
 
-  seeder() {
-    return this.restTableRepository.seeder();
+  //====================================================================
+  seeder(slug, qty, prefix) {
+    console.log(slug, qty, prefix);
+    const cant = Number(qty);
+    if (cant >= 99) {
+      throw new BadRequestException(
+        `❌ The number of tables shoud be less than 100 for this restaurant `,
+      );
+    }
+    return this.restTableRepository.seeder(slug, qty, prefix);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} restaurantTable`;
+  async findOne(slug, id: string) {
+    const rest = await this.restService.getRestaurants(slug);
+    return this.restTableRepository.findOneById(rest, id);
   }
 
   update(id: number, updateRestaurantTableDto: UpdateRestaurantTableDto) {

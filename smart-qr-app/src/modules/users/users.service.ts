@@ -42,6 +42,7 @@ export class UsersService {
       id: user.id,
       email: user.email,
       roles: user.role,
+      slug: user.restaurant.slug,
     };
 
     const access_token = this.jwtService.generateToken(jwtPayLoad);

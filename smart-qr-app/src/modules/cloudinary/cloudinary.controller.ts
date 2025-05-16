@@ -27,7 +27,7 @@ import {
 @ApiTags()
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
-@Controller('cloudinary')
+@Controller(':slug/cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
@@ -39,6 +39,12 @@ export class CloudinaryController {
     name: 'id',
     description: 'ID del producto',
     example: 'uuid-válido',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true,
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -71,6 +77,7 @@ export class CloudinaryController {
   @Put('uploadImage/:id')
   @UseInterceptors(FileInterceptor('file'))
   async updateImg(
+    @Param('slug') slug: string,
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile(
       new ParseFilePipe({

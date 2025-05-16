@@ -26,7 +26,7 @@ import {
 
 @ApiTags()
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+//@UseGuards(AuthGuard)
 @Controller(':slug/cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}

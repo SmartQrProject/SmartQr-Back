@@ -6,7 +6,7 @@ import {
   PipeTransform,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
-const fileTypeFromBuffer = require('file-type');
+import { fileTypeFromBuffer } from 'file-type'; // ✅ cambio necesario
 
 @Injectable()
 export class ValidateImagePipe implements PipeTransform {
@@ -17,8 +17,8 @@ export class ValidateImagePipe implements PipeTransform {
       throw new PayloadTooLargeException('El archivo debe ser menor de 200 KB');
 
     const type = await fileTypeFromBuffer(file.buffer);
-    Logger.debug(type);
-    Logger.debug('MIME:', file.mimetype);
+    Logger.debug(`Tipo detectado: ${JSON.stringify(type)}`);
+    Logger.debug(`MIME desde Multer: ${file.mimetype}`);
 
     if (!type || !type.mime.startsWith('image/'))
       throw new UnsupportedMediaTypeException(

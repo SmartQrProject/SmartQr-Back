@@ -2,39 +2,39 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class CreateRestaurantsDto {
-  @IsNotEmpty({ message: 'El el nombre de la Tienda es obligatorio.' })
+  @IsNotEmpty({ message: 'Restaurant name is required' })
   @IsString()
   @ApiProperty({
-    description: 'Nombre de la Tienda',
-    example: 'Rocio Café',
+    description: 'Restaurant name',
+    example: 'Test Cafe'
   })
   name: string;
 
-  @IsNotEmpty({ message: 'El el Slug de la Tienda es obligatorio.' })
+  @IsNotEmpty({ message: 'Restaurant slug is required' })
   @IsString()
   @ApiProperty({
-    description: 'Slug/endpoint de la Tienda',
-    example: 'Rocio-cafe',
+    description: 'Unique restaurant slug/endpoint (lowercase, hyphens, no spaces)',
+    example: 'test-cafe'
   })
   slug: string;
 
   @IsNotEmpty({
-    message: 'El el E-mail del dueño de la Tienda es obligatorio.',
+    message: 'Owner email is required',
   })
   @IsEmail()
   @ApiProperty({
-    description: 'E-mail del dueño de la Tienda',
-    example: 'rocio@cafe.com',
+    description: 'Restaurant owner email',
+    example: 'smartqr2@gmail.com'
   })
   owner_email: string;
 
   @IsNotEmpty({
-    message: 'El el E-mail del dueño de la Tienda es obligatorio.',
+    message: 'Owner password is required',
   })
   @IsString()
   @ApiProperty({
-    description: 'Password del dueño de la Tienda',
-    example: 'Example123',
+    description: 'Restaurant owner password (min 8 chars, must include uppercase, lowercase and numbers)',
+    example: '!Example123'
   })
   owner_pass: string;
 }

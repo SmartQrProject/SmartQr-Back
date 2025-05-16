@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, EntityManager } from 'typeorm';
 import { Product } from '../../shared/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -12,37 +12,62 @@ export class ProductsRepository {
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
         @InjectRepository(Category)
-        private readonly categoryRepository: Repository<Category>
+        private readonly categoryRepository: Repository<Category>,
+        private readonly entityManager: EntityManager
     ) {}
 
-    async createProduct(createProductDto: CreateProductDto, restaurantId: string): Promise<Product> {
-        const category = await this.categoryRepository.findOne({
+    private async validateProductName(name: string, restaurantId: string): Promise<void> {
+        const existingProduct = await this.productRepository.findOne({
             where: {
-                id: createProductDto.categoryId,
+                name: name,
                 restaurant: { id: restaurantId },
                 exist: true
             }
         });
 
-        if (!category) {
-            throw new BadRequestException('La categoría no existe o no pertenece a este restaurante');
+        if (existingProduct) {
+            throw new ConflictException(`Ya existe un producto con el nombre "${name}" en este restaurante`);
         }
+    }
 
-        const product = this.productRepository.create({
-            ...createProductDto,
-            image_url: createProductDto.image_url || 'https://via.placeholder.com/150',
-            restaurant: { id: restaurantId },
-            category: { id: createProductDto.categoryId }
+    async createProduct(createProductDto: CreateProductDto, restaurantId: string): Promise<Product> {
+        return await this.entityManager.transaction(async transactionalEntityManager => {
+            const category = await this.categoryRepository.findOne({
+                where: {
+                    id: createProductDto.categoryId,
+                    restaurant: { id: restaurantId },
+                    exist: true
+                }
+            });
+
+            if (!category) {
+                throw new BadRequestException('La categoría no existe o no pertenece a este restaurante');
+            }
+
+            await this.validateProductName(createProductDto.name, restaurantId);
+
+            const product = this.productRepository.create({
+                ...createProductDto,
+                image_url: createProductDto.image_url || 'https://via.placeholder.com/150',
+                restaurant: { id: restaurantId },
+                category: { id: createProductDto.categoryId }
+            });
+
+            return await transactionalEntityManager.save(Product, product);
         });
-        return await this.productRepository.save(product);
     }
 
     async updateProduct(id: string, updateProductDto: UpdateProductDto, restaurantId: string): Promise<Product> {
-        const product = await this.findOneByIdAndRestaurant(id, restaurantId);
-        
-        const updatedProduct = this.productRepository.merge(product, updateProductDto);
-        
-        return await this.productRepository.save(updatedProduct);
+        return await this.entityManager.transaction(async transactionalEntityManager => {
+            const product = await this.findOneByIdAndRestaurant(id, restaurantId);
+            
+            if (updateProductDto.name) {
+                await this.validateProductName(updateProductDto.name, restaurantId);
+            }
+            
+            const updatedProduct = this.productRepository.merge(product, updateProductDto);
+            return await transactionalEntityManager.save(Product, updatedProduct);
+        });
     }
 
     async findAllByRestaurant(

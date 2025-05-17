@@ -49,7 +49,11 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://smart-qr-front.vercel.app'],
+    origin: [
+      'http://localhost:3000',
+      'https://smart-qr-front.vercel.app',
+      'https://www.smart-qr.tech',
+    ],
     credentials: true,
   });
 

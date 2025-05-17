@@ -32,10 +32,10 @@ export class RestaurantTablesController {
     private readonly restaurantTablesService: RestaurantTablesService,
   ) {}
 
-  @Post('seeder')
-  create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
-    return this.restaurantTablesService.seeder();
-  }
+  // @Post(':id')
+  // create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
+  //   return this.restaurantTablesService.seeder(slug, qty, prefix);
+  // }
 
   // --------------------- Reporte de todos las mesas de un restaurant
   @Get()
@@ -53,7 +53,7 @@ export class RestaurantTablesController {
     description:
       'Retrieves a paginated list of tables for a specific restaurant. Requires authentication.',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'slug',
     description: 'Unique restaurant identifier',
     example: 'test-cafe',
@@ -128,10 +128,10 @@ export class RestaurantTablesController {
   }
 
   //------------------------------ Trabajando en este EP mayo 16
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.restaurantTablesService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.restaurantTablesService.findOne(+id);
+  // }
 
   @Patch(':id')
   @ApiParam({

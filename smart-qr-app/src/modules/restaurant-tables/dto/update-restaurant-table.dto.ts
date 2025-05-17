@@ -1,4 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PickType } from '@nestjs/swagger';
 import { CreateRestaurantTableDto } from './create-restaurant-table.dto';
 
-export class UpdateRestaurantTableDto extends PartialType(CreateRestaurantTableDto) {}
+export class UpdateRestaurantTableDto extends PickType(
+  CreateRestaurantTableDto,
+  ['code', 'is_active', 'exist'],
+) {}

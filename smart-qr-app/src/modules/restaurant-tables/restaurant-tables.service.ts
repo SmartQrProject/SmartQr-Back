@@ -31,6 +31,7 @@ export class RestaurantTablesService {
 
   //====================================================================
   seeder(slug, qty, prefix) {
+    console.log('=============================================');
     console.log(slug, qty, prefix);
     const cant = Number(qty);
     if (cant >= 99) {
@@ -41,16 +42,21 @@ export class RestaurantTablesService {
     return this.restTableRepository.seeder(slug, qty, prefix);
   }
 
-  async findOne(slug, id: string) {
+  //====================================================================
+  async findOneById(slug, id): Promise<RestaurantTable> {
     const rest = await this.restService.getRestaurants(slug);
     return this.restTableRepository.findOneById(rest, id);
   }
 
-  update(id: number, updateRestaurantTableDto: UpdateRestaurantTableDto) {
-    return `This action updates a #${id} restaurantTable`;
+  //====================================================================
+  async deleteById(slug, id) {
+    const rest = await this.restService.getRestaurants(slug);
+    return this.restTableRepository.deleteById(rest, id);
   }
+  //====================================================================
 
-  remove(id: number) {
-    return `This action removes a #${id} restaurantTable`;
+  async update(slug, id, updateRestaurantTable) {
+    const rest = await this.restService.getRestaurants(slug);
+    return this.restTableRepository.updateById(rest, id, updateRestaurantTable);
   }
 }

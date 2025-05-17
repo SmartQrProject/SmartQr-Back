@@ -30,10 +30,19 @@ export class CreateRestaurantTableDto {
   @IsNotEmpty()
   @ApiProperty({
     description:
-      'Indicates if the Table is available to be used. True or False.',
+      'Indicates if the Table is temporarilly available to be used. True or False.',
     type: Boolean,
     default: true,
   })
   @IsBoolean()
-  activo: boolean;
+  is_active: boolean;
+
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Indicates if the Table should be blocked. True or False.',
+    type: Boolean,
+    default: true,
+  })
+  @IsBoolean()
+  exist: boolean;
 }

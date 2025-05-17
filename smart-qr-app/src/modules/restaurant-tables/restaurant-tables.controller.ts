@@ -17,6 +17,7 @@ import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -32,19 +33,8 @@ export class RestaurantTablesController {
     private readonly restaurantTablesService: RestaurantTablesService,
   ) {}
 
-  // @Post(':id')
-  // create(@Body() restaurantTableSeed: CreateRestaurantTableDto) {
-  //   return this.restaurantTablesService.seeder(slug, qty, prefix);
-  // }
-
   // --------------------- Reporte de todos las mesas de un restaurant
   @Get()
-  @ApiParam({
-    name: 'slug',
-    description: 'Unique restaurant identifier',
-    example: 'test-cafe',
-    required: true,
-  })
   @HttpCode(200)
   // @UseGuards(AuthGuard)
   // @ApiBearerAuth()
@@ -128,11 +118,192 @@ export class RestaurantTablesController {
   }
 
   //------------------------------ Trabajando en este EP mayo 16
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.restaurantTablesService.findOne(+id);
-  // }
+  @Post('seeder/:qty/:prefix')
+  @ApiOperation({
+    summary:
+      'Generate a number of table based on the qty of tables needed and a prefix to call them.',
+    description:
+      'Example Qty = 5, Prefix = MesaSalon then it will create automatically MesaSalon01, MesaSalon02....',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique restaurant identifier',
+    example: 'test-cafe',
+    required: true,
+  })
+  @ApiParam({
+    name: 'qty',
+    description: 'Numbers of tables to be created',
+    example: 10,
+    required: true,
+  })
+  @ApiParam({
+    name: 'prefix',
+    description: 'Identifier of the tables',
+    example: 'T',
+    required: true,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Restaurant not found',
+    schema: {
+      example: {
+        message: 'Restaurant with slug test-cafe not found',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of tables',
+    content: {
+      'application/json': {
+        schema: {
+          example: {
+            code: 'TestTable-03',
+            restaurant: {
+              id: 'e8876bd5-ae4f-4079-834d-7a93f29a648f',
+              name: 'mati',
+              slug: 'mati',
+              owner_email: 'mati@gmail.com',
+              is_active: true,
+              created_at: '2025-05-16T17:29:53.453Z',
+              categories: [],
+              subscription: null,
+              exist: true,
+            },
+            exist: true,
+            is_active: true,
+          },
+        },
+      },
+    },
+  })
+  seeder(
+    @Param('slug') slug: string,
+    @Param('qty') qty: string,
+    @Param('prefix') prefix: string,
+  ) {
+    return this.restaurantTablesService.seeder(slug, qty, prefix);
+  }
 
+  //-------------GET BY ID ----------------- Trabajando en este EP mayo 16
+  @ApiOperation({
+    summary: 'Retrieve a table definition by its ID.',
+    description:
+      'Retrieve a table definition by its ID for a defined Restaurant.',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique restaurant identifier',
+    example: 'mati',
+    required: true,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'An UUID string ',
+    example: '79eeeba5-0066-456c-aefe-64407a5bccd5',
+    required: true,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Restaurant not found',
+    schema: {
+      example: {
+        message: 'Restaurant with slug test-cafe not found',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tabled found and returned',
+    content: {
+      'application/json': {
+        schema: {
+          example: {
+            code: 'TestTable-03',
+            restaurant: {
+              id: 'e8876bd5-ae4f-4079-834d-7a93f29a648f',
+              name: 'mati',
+              slug: 'mati',
+              owner_email: 'mati@gmail.com',
+              is_active: true,
+              created_at: '2025-05-16T17:29:53.453Z',
+              categories: [],
+              subscription: null,
+              exist: true,
+            },
+            exist: true,
+            is_active: true,
+          },
+        },
+      },
+    },
+  })
+  @Get(':id')
+  findOneById(
+    @Param('slug') slug: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.restaurantTablesService.findOneById(slug, id);
+  }
+
+  //===========DELETE BY ID======================================================
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Retrieve a table definition by its ID.',
+    description:
+      'Retrieve a table definition by its ID for a defined Restaurant.',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique restaurant identifier',
+    example: 'mati',
+    required: true,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'An UUID string ',
+    example: '79eeeba5-0066-456c-aefe-64407a5bccd5',
+    required: true,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Restaurant not found',
+    schema: {
+      example: {
+        message: 'Restaurant with slug test-cafe not found',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiOkResponse({
+    type: RestaurantTable,
+    description: 'Table de-activated. Successfully Blocked',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'Unique identifier of the restaurant',
+    example: 'test-cafe',
+    required: true,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Table ID',
+    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+  })
+  deleteById(
+    @Param('slug') slug: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<RestaurantTable> {
+    return this.restaurantTablesService.deleteById(slug, id);
+  }
+
+  //---------------Patch by ID----------------------------------
   @Patch(':id')
   @ApiParam({
     name: 'slug',
@@ -147,25 +318,11 @@ export class RestaurantTablesController {
   })
   update(
     @Param('slug') slug: string,
-    @Param('id') id: string,
-    @Body() updateRestaurantTableDto: UpdateRestaurantTableDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateRestaurantTable: UpdateRestaurantTableDto,
   ) {
-    return this.restaurantTablesService.update(+id, updateRestaurantTableDto);
+    return this.restaurantTablesService.update(slug, id, updateRestaurantTable);
   }
 
-  @Delete(':id')
-  @ApiParam({
-    name: 'slug',
-    description: 'Unique identifier of the restaurant',
-    example: 'test-cafe',
-    required: true,
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Table ID',
-    example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
-  })
-  remove(@Param('slug') slug: string, @Param('id') id: string) {
-    return this.restaurantTablesService.remove(+id);
-  }
+  //---------------------------------
 }

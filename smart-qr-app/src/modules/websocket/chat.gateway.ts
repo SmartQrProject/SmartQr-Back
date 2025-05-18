@@ -1,12 +1,4 @@
-import {
-  WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
-  WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  ConnectedSocket,
-} from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatbotService } from '../chatbot/chatbot.service';
 import { CHAT_EVENTS } from './types/chat-events';
@@ -34,9 +26,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     client.join(roomId);
 
-    console.log(
-      `Cliente ${client.id} conectado como ${userId}, sala: ${roomId}`,
-    );
+    console.log(`Cliente ${client.id} conectado como ${userId}, sala: ${roomId}`);
   }
 
   handleDisconnect(client: Socket) {
@@ -45,20 +35,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(CHAT_EVENTS.USER_MESSAGE)
-  handleMessage(
-    @MessageBody() message: string,
-    @ConnectedSocket() client: Socket,
-  ) {
+  handleMessage(@MessageBody() message: string, @ConnectedSocket() client: Socket) {
     const userId = this.sessionService.getUserId(client.id);
     if (!userId) {
-      console.warn(
-        `Socket ${client?.id ?? 'unknown'} no tiene userId asignado`,
-      );
+      console.warn(`Socket ${client?.id ?? 'unknown'} no tiene userId asignado`);
       return;
     }
 
     const roomId = this.sessionService.getRoomByUserId(userId);
     const reply = this.chatbotService.generateReply(message);
+    console.log(reply);
     //   // Emitir la respuesta solo a la sala del usuario.
     this.server.to(roomId).emit(CHAT_EVENTS.BOT_REPLY, reply);
   }

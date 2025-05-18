@@ -21,7 +21,7 @@ export class RestaurantTableRepository {
     private readonly restService: RestaurantsService,
   ) {}
 
-  // GEA FINALIZADO Mayo 16
+  // GEA FINALIZADO Mayo 16 -------------------------------------------------
   async findAll(
     rest,
     page: number,
@@ -48,24 +48,82 @@ export class RestaurantTableRepository {
     return { page, limit, restaurantTables: tables };
   }
 
-  async seeder() {
-    const rest = await this.restService.getRestaurants('test-cafe');
-    const registros = tablesCargaInicial.map((table) => ({
-      code: table.code,
+  // GEA FINALIZADO Mayo 16 -------------------------------------------------
+  async seeder(slug, qty, prefix) {
+    const rest = await this.restService.getRestaurants(slug);
+    const cant = Number(qty);
+
+    const items = Array.from({ length: cant }, (_, i) => ({
+      code: prefix + `-${(i + 1).toString().padStart(2, '0')}`,
       restaurant: rest,
     }));
 
-    console.log(`Cantidad de registros:`, registros.length);
-    console.log(registros);
+    console.log(`Cantidad de registros:`, items.length);
+    console.log(items);
 
-    await this.restaurantTableRepository
+    const tablesArray = await this.restaurantTableRepository
       .createQueryBuilder()
       .insert()
       .into(RestaurantTable)
-      .values(registros)
+      .values(items)
       .orIgnore()
       .execute();
 
-    return;
+    return items;
+  }
+
+  // GEA FINALIZADO Mayo 16 -------------------------------------------------
+  async findOneById(rest, id): Promise<RestaurantTable> {
+    const restTable = await this.restaurantTableRepository.findOne({
+      where: { restaurant: { id: rest.id }, id: id },
+      relations: ['restaurant'],
+    });
+
+    if (!restTable) {
+      throw new NotFoundException(
+        `❌ No Table found for this restaurant ${rest} and with this Id: ${id}`,
+      );
+    }
+
+    return restTable;
+  }
+
+  // GEA FINALIZADO Mayo 16 -------------------------------------------------
+  async deleteById(rest, id): Promise<RestaurantTable> {
+    const restTable = await this.restaurantTableRepository.findOne({
+      where: { restaurant: { id: rest.id }, id: id, exist: true },
+      relations: ['restaurant'],
+    });
+
+    if (!restTable) {
+      throw new NotFoundException(
+        `❌ No Table found for this restaurant ${rest} and with this Id: ${id}`,
+      );
+    }
+    const updatedTable = this.restaurantTableRepository.merge(restTable, {
+      exist: false,
+      is_active: false,
+    });
+    await this.restaurantTableRepository.save(updatedTable);
+    return updatedTable;
+  }
+  // GEA FINALIZADO Mayo 17 -------------------------------------------------
+  async updateById(rest, id, updateRestaurantTable): Promise<RestaurantTable> {
+    const restTable = await this.restaurantTableRepository.findOne({
+      where: { restaurant: { id: rest.id }, id: id },
+      relations: ['restaurant'],
+    });
+
+    if (!restTable) {
+      throw new NotFoundException(
+        `❌ No Table found for this restaurant ${rest} and with this Id: ${id}`,
+      );
+    }
+    const updatedTable = this.restaurantTableRepository.merge(
+      restTable,
+      updateRestaurantTable,
+    );
+    await this.restaurantTableRepository.save(updatedTable);
+    return updatedTable;
   }
 }

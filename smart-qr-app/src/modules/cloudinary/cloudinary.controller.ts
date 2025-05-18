@@ -2,11 +2,8 @@ import {
   Controller,
   FileTypeValidator,
   HttpCode,
-  Param,
   ParseFilePipe,
-  ParseUUIDPipe,
   Post,
-  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -27,7 +24,7 @@ import {
 
 @ApiTags()
 @ApiBearerAuth()
-//@UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}

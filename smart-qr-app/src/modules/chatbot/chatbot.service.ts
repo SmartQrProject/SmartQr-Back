@@ -22,12 +22,12 @@ export class ChatbotService {
     const allProducts = await this.productService.findAll('eli-cafe', 1, 999); // cada uno con product.details: string[]
     const allDetails: SearchEntry[] = allProducts.products.flatMap((p) => p.details.map((d) => ({ product: p.name, detail: d })));
 
-    const matches = matchSorter(allDetails, intents.join(' '), {
-      keys: ['detail'],
-    });
+    const matches = intents.flatMap((intent) => matchSorter(allDetails, intent, { keys: ['detail'] }));
+    const uniqueMatches = Array.from(new Map(matches.map((m) => [m.product + m.detail, m])).values());
+
     console.log('segundo');
 
-    if (matches.length === 0) {
+    if (uniqueMatches.length === 0) {
       console.log('allProducts', allProducts);
       console.log('allDetails', allDetails);
       console.log('intents', intents);
@@ -35,7 +35,7 @@ export class ChatbotService {
       return 'No encontré opciones relacionadas con tu consulta. ¿Querés reformularla?';
     }
     console.log('tercero');
-    const foundProducts = [...new Set(matches.map((m) => m.product))];
+    const foundProducts = [...new Set(uniqueMatches.map((m) => m.product))];
     console.log('allProducts', allProducts);
     console.log('allDetails', allDetails);
     console.log('intents', intents);

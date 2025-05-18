@@ -35,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(CHAT_EVENTS.USER_MESSAGE)
-  handleMessage(@MessageBody() message: string, @ConnectedSocket() client: Socket) {
+  async handleMessage(@MessageBody() message: string, @ConnectedSocket() client: Socket) {
     const userId = this.sessionService.getUserId(client.id);
     if (!userId) {
       console.warn(`Socket ${client?.id ?? 'unknown'} no tiene userId asignado`);
@@ -43,9 +43,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const roomId = this.sessionService.getRoomByUserId(userId);
-    const reply = this.chatbotService.generateReply(message);
-    console.log(reply);
-    //   // Emitir la respuesta solo a la sala del usuario.
+    const reply = await this.chatbotService.generateReply(message); // ✅ AWAIT agregado
+    console.log('📤 Respuesta emitida al socket:', reply);
+
     this.server.to(roomId).emit(CHAT_EVENTS.BOT_REPLY, reply);
   }
 }

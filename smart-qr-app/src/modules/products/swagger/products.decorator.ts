@@ -26,6 +26,7 @@ export function CreateProductDoc() {
     }),
     ApiBody({
       type: CreateProductDto,
+      description: 'Crea un nuevo producto enviando los datos en JSON, incluyendo la URL de la imagen ya subida',
       examples: {
         beverage: {
           summary: 'Create a beverage product',
@@ -33,8 +34,10 @@ export function CreateProductDoc() {
             name: 'Coca Cola',
             price: 2.5,
             description: 'Regular Coca Cola 355ml',
-            image_url: 'https://example.com/images/coca-cola.jpg',
-            categoryId: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+            image_url: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/coca-cola.jpg',
+            categoryId: 'd8737e33-4d0d-49eb-ad10-b2a1d3489666',
+            is_available: true,
+            sequenceNumber: 10,
           },
         },
       },

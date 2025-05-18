@@ -10,11 +10,11 @@ import { CreateProductDoc, GetAllProductsDoc, GetProductByIdDoc, UpdateProductDo
 @ApiTags('products')
 @ApiBearerAuth()
 @Controller(':slug/products')
-@UseGuards(AuthGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   @CreateProductDoc()
   async create(@Param('slug') slug: string, @Body() createProductDto: CreateProductDto): Promise<Product> {
     return await this.productsService.create(createProductDto, slug);
@@ -42,18 +42,21 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   @UpdateProductDoc()
   async update(@Param('id') id: string, @Param('slug') slug: string, @Body() updateProductDto: UpdateProductDto): Promise<Product> {
     return await this.productsService.update(id, updateProductDto, slug);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   @DeleteProductDoc()
   async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<void> {
     return await this.productsService.remove(id, slug);
   }
 
   @Patch('sequence')
+  @UseGuards(AuthGuard)
   @UpdateProductSequencesDoc()
   async updateSequences(@Param('slug') slug: string, @Body() products: { id: string; sequenceNumber: number }[]): Promise<void> {
     return await this.productsService.updateSequences(products, slug);

@@ -38,6 +38,7 @@ export function CreateProductDoc() {
             categoryId: 'd8737e33-4d0d-49eb-ad10-b2a1d3489666',
             is_available: true,
             sequenceNumber: 10,
+            details: ['sin gluten', 'vegano', 'descafeinado'],
           },
         },
       },

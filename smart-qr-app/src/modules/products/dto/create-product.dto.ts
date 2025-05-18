@@ -40,6 +40,17 @@ export class CreateProductDto {
   })
   image_url?: string;
 
+  @IsOptional()
+  @IsString({ each: true })
+  @ApiProperty({
+    description: 'Optional product details like dietary tags or labels',
+    example: ['vegano', 'sin gluten', 'sin lactosa'],
+    required: false,
+    isArray: true,
+    type: String,
+  })
+  details?: string[];
+
   @IsNotEmpty({ message: 'Category ID is required' })
   @IsUUID()
   @ApiProperty({

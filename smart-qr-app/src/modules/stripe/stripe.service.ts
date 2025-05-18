@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  FRONTEND_URL,
-  STRIPE_PRICE_ID,
-  STRIPE_SECRET_KEY,
-} from 'src/config/env.loader';
+import { FRONTEND_URL, STRIPE_PRICE_ID, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from 'src/config/env.loader';
+import { Request, Response } from 'express';
+import { HttpStatus } from '@nestjs/common';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -41,8 +39,57 @@ export class StripeService {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.FRONTEND_URL}/success`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      success_url: `${FRONTEND_URL}/success`,
+      cancel_url: `${FRONTEND_URL}/cancel`,
     });
+  }
+
+  async handleWebhook(req: Request, res: Response, signature: string) {
+    let event: Stripe.Event;
+
+    try {
+      event = this.stripe.webhooks.constructEvent(req.body, signature, STRIPE_WEBHOOK_SECRET!);
+    } catch (err) {
+      console.error('❌ Webhook signature verification failed.', err.message);
+      return res.status(HttpStatus.BAD_REQUEST).send(`Webhook error: ${err.message}`);
+    }
+
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.log('✅ Pago confirmado:', session.id);
+        break;
+      }
+
+      case 'customer.subscription.created':
+        console.log('📦 Suscripción creada');
+        break;
+
+      case 'customer.subscription.updated':
+        console.log('🔁 Suscripción actualizada');
+        break;
+
+      case 'customer.subscription.deleted':
+        console.log('❌ Suscripción cancelada');
+        break;
+
+      case 'invoice.paid':
+        console.log('💵 Factura pagada');
+        break;
+
+      case 'invoice.payment_failed':
+        console.log('❌ Fallo de pago de suscripción');
+        break;
+
+      case 'checkout.session.expired':
+        console.log('⏰ Sesión expirada sin pagar');
+        break;
+
+      default:
+        console.log(`📌 Evento recibido (no manejado): ${event.type}`);
+        break;
+    }
+
+    return res.status(200).json({ received: true });
   }
 }

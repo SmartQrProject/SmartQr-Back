@@ -28,7 +28,6 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 @ApiTags('Categories')
 @ApiBearerAuth()
 @Controller(':slug/categories')
-@UseGuards(AuthGuard)
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 

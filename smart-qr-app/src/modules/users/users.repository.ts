@@ -37,18 +37,18 @@ export class UsersRepository {
       );
     }
 
-    if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
-      throw new NotFoundException(
-        `You can not update User data for a different user.`,
-      );
-    }
+    // if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
+    //   throw new NotFoundException(
+    //     `You can not update User data for a different user.`,
+    //   );
+    // }
 
-    const usuario = await this.getUserByEmail(updateUser.email);
-    if (usuario && usuario.id !== id) {
-      throw new ConflictException(
-        `❌ Email already in use: ${usuario.email} !!`,
-      );
-    }
+    // const usuario = await this.getUserByEmail(updateUser.email);
+    // if (usuario && usuario.id !== id) {
+    //   throw new ConflictException(
+    //     `❌ Email already in use: ${usuario.email} !!`,
+    //   );
+    // }
 
     const hash = await this.bcryptService.hash(updateUser.password);
     if (!hash) {

@@ -28,7 +28,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from 'src/shared/entities/user.entity';
 import { PutUserDto } from './dto/put-user.dto';
 import { SignInUserDto } from './dto/signIn-user.dto';
-import { AuthGuard } from 'src/common/guards/auth.guard';
+//import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @ApiTags(
   'App Users creation (SignUP) and user login (SignIn) using JWT and Bcrypt',
@@ -41,8 +41,8 @@ export class UsersController {
   // GEA Mayo-13-Finalizado ------ trabajando en este endpoint --------GEA Mayo-12
   @Put(':id')
   @HttpCode(200)
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  //@UseGuards(AuthGuard)
+  //@ApiBearerAuth()
   @ApiOperation({ summary: 'Modify users data' })
   modifyUserById(
     @Param('id', ParseUUIDPipe) id: string,
@@ -69,7 +69,7 @@ export class UsersController {
   @Get()
   @HttpCode(200)
   //@UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  //@ApiBearerAuth()
   @ApiOperation({
     summary: 'Get paginated users list',
     description:
@@ -154,8 +154,8 @@ export class UsersController {
   //  FINALIZADO GEA MAyo-13------ trabajando en este endpoint --------GEA Mayo-13
   @Delete(':id')
   @HttpCode(200)
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  //@UseGuards(AuthGuard)
+  //@ApiBearerAuth()
   @ApiOperation({ summary: 'Deletion of User' })
   deleteUserById(
     @Param('id', ParseUUIDPipe) id: string,

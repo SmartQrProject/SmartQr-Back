@@ -34,8 +34,42 @@ Devolvé solo el array en formato JSON.
       if (error.code === 'insufficient_quota') {
         return ['🧠 El sistema está temporalmente fuera de servicio por límite de uso. Intentá más tarde.'];
       }
+      return ['❌ Hubo un error al interpretar tu consulta. Por favor, intentá de nuevo.'];
+    }
+  }
 
-      throw error;
+  async matchWithAI(userMessage: string, allDetails: { product: string; detail: string }[]): Promise<{ product: string; detail: string }[]> {
+    const prompt = `
+Tengo los siguientes detalles de productos:
+
+${JSON.stringify(
+  allDetails.map((d, i) => ({ id: i, ...d })),
+  null,
+  2,
+)}
+
+Y este mensaje del usuario:
+
+"${userMessage}"
+
+Decime los IDs de los detalles que están relacionados con la intención del usuario. Respondé solo con un array de IDs.
+
+Ejemplo de respuesta: [0, 3, 5]
+`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const content = completion.choices[0].message.content || '[]';
+      const matchedIds: number[] = JSON.parse(content);
+
+      return matchedIds.map((id) => allDetails[id]).filter(Boolean); // Evita errores si un id no existe
+    } catch (error) {
+      console.error('🔴 Error en matchWithAI:', error);
+      return [];
     }
   }
 }

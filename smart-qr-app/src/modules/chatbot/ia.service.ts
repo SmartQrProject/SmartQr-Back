@@ -27,14 +27,25 @@ Devolvé solo el array en formato JSON.
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
       });
-
+      console.log('🤖 Respuesta de OpenAI:', completion);
       const raw = completion.choices[0].message.content || '[]';
-      return JSON.parse(raw);
+      console.log('🧠 Respuesta cruda de OpenAI:', raw);
+      const parsed = JSON.parse(raw);
+      console.log('🧠 Intents generados:', parsed);
+
+      return parsed;
     } catch (error: any) {
+      console.error('❌ Error en extractIntents:', error);
+
       if (error.code === 'insufficient_quota') {
-        return ['🧠 El sistema está temporalmente fuera de servicio por límite de uso. Intentá más tarde.'];
+        const fallback = ['🧠 El sistema está temporalmente fuera de servicio por límite de uso. Intentá más tarde.'];
+        console.log('⚠️ Intents fallback por límite:', fallback);
+        return fallback;
       }
-      return ['❌ Hubo un error al interpretar tu consulta. Por favor, intentá de nuevo.'];
+
+      const fallback = ['❌ Error al generar intents.'];
+      console.log('⚠️ Intents fallback general:', fallback);
+      return fallback;
     }
   }
 
@@ -56,20 +67,27 @@ Decime los IDs de los detalles que están relacionados con la intención del usu
 
 Ejemplo de respuesta: [0, 3, 5]
 `;
-
+    console.log('🧠 Prompt para OpenAI:', prompt);
     try {
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
       });
-
+      console.log('🤖 Respuesta de OpenAI:', completion);
       const content = completion.choices[0].message.content || '[]';
+      console.log('🧠 Respuesta cruda de OpenAI:', content);
       const matchedIds: number[] = JSON.parse(content);
+      console.log('🎯 IDs detectados por OpenAI:', matchedIds);
 
-      return matchedIds.map((id) => allDetails[id]).filter(Boolean); // Evita errores si un id no existe
+      const result = matchedIds.map((id) => allDetails[id]).filter(Boolean);
+      console.log('✅ Detalles encontrados:', result);
+
+      return result;
     } catch (error) {
-      console.error('🔴 Error en matchWithAI:', error);
-      return [];
+      console.error('❌ Error en matchWithAI:', error);
+      const fallback: { product: string; detail: string }[] = [];
+      console.log('⚠️ Resultado fallback matchWithAI:', fallback);
+      return fallback;
     }
   }
 }

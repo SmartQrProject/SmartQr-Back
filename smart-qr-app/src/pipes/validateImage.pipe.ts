@@ -6,7 +6,8 @@ import {
   PipeTransform,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
-import { fileTypeFromBuffer } from 'file-type'; // ✅ cambio necesario
+
+const FileType = require('file-type');
 
 @Injectable()
 export class ValidateImagePipe implements PipeTransform {
@@ -16,7 +17,25 @@ export class ValidateImagePipe implements PipeTransform {
     if (file.size > 204800)
       throw new PayloadTooLargeException('El archivo debe ser menor de 200 KB');
 
-    const type = await fileTypeFromBuffer(file.buffer);
+    let type;
+    try {
+      if (typeof FileType === 'function') {
+        type = await FileType(file.buffer);
+      } else if (typeof FileType.fileTypeFromBuffer === 'function') {
+        type = await FileType.fileTypeFromBuffer(file.buffer);
+      } else if (typeof FileType.fromBuffer === 'function') {
+        type = await FileType.fromBuffer(file.buffer);
+      } else {
+        Logger.error('FileType methods available:', Object.keys(FileType));
+        throw new Error('No compatible file-type method found');
+      }
+    } catch (error) {
+      Logger.error('Error detecting file type:', error);
+      throw new UnsupportedMediaTypeException(
+        'No se pudo determinar el tipo de archivo',
+      );
+    }
+
     Logger.debug(`Tipo detectado: ${JSON.stringify(type)}`);
     Logger.debug(`MIME desde Multer: ${file.mimetype}`);
 

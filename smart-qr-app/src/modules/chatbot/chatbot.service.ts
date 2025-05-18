@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IaService } from './ia.service';
-import Fuse from 'fuse.js';
+import { matchSorter } from 'match-sorter';
 import { ProductsService } from '../products/products.service'; // O donde estén tus productos
 
 @Injectable()
@@ -21,19 +21,15 @@ export class ChatbotService {
     const allProducts = await this.productService.findAll('eli-cafe', 1, 999); // cada uno con product.details: string[]
     const allDetails: SearchEntry[] = allProducts.products.flatMap((p) => p.details.map((d) => ({ product: p.name, detail: d })));
 
-    const fuse = new Fuse<SearchEntry>(allDetails, {
+    const matches = matchSorter(allDetails, intents.join(' '), {
       keys: ['detail'],
-      includeScore: true,
-      threshold: 0.4,
     });
-
-    const matches = fuse.search(intents.join(' '));
 
     if (matches.length === 0) {
       return 'No encontré opciones relacionadas con tu consulta. ¿Querés reformularla?';
     }
 
-    const foundProducts = [...new Set(matches.map((m) => m.item.product))];
+    const foundProducts = [...new Set(matches.map((m) => m.product))];
 
     return `Te puedo recomendar: ${foundProducts.join(', ')}`;
   }

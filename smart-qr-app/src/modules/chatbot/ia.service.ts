@@ -22,18 +22,20 @@ Ejemplo de salida para "plato vegano":
 Devolvé solo el array en formato JSON.
     `;
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const content = response.choices[0]?.message?.content || '[]';
-
     try {
-      return JSON.parse(content);
-    } catch (err) {
-      console.error('Error al parsear la respuesta de la IA:', content);
-      return [];
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const raw = completion.choices[0].message.content || '[]';
+      return JSON.parse(raw);
+    } catch (error: any) {
+      if (error.code === 'insufficient_quota') {
+        return ['🧠 El sistema está temporalmente fuera de servicio por límite de uso. Intentá más tarde.'];
+      }
+
+      throw error;
     }
   }
 }

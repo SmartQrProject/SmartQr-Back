@@ -1,20 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
-import {
-  IsString,
-  IsBoolean,
-  IsUUID,
-  IsDecimal,
-  Length,
-  IsOptional,
-  IsNumber,
-} from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { IsString, IsBoolean, IsUUID, IsDecimal, Length, IsOptional, IsNumber } from 'class-validator';
 import { Category } from './category.entity';
 import { OrderItem } from './order-item.entity';
 import { Restaurant } from './restaurant.entity';
@@ -50,6 +35,11 @@ export class Product {
   @Column({ default: true })
   @IsBoolean()
   is_available: boolean;
+
+  @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
+  @IsOptional()
+  @IsString({ each: true })
+  details: string[];
 
   @ManyToOne(() => Category, (category) => category.products, {
     eager: true,

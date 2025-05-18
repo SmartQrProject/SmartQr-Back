@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,7 +15,7 @@ import { RewardCodeService } from '../reward-code/reward-code.service';
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectRepository(Customer) private userRepository: Repository<Customer>,
+    @InjectRepository(Customer) private customerRepository: Repository<Customer>,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(OrderItem)
@@ -52,9 +47,7 @@ export class OrdersService {
       if (!table) throw new NotFoundException('Mesa no encontrada');
 
       // 2. Obtener y validar productos
-      const requestedProductIds = createOrderDto.products.map(
-        (prod) => prod.id,
-      );
+      const requestedProductIds = createOrderDto.products.map((prod) => prod.id);
       const availableProducts = await queryRunner.manager.findBy(Product, {
         id: In(requestedProductIds),
       });
@@ -74,7 +67,7 @@ export class OrdersService {
         const product = availableProducts.find((prod) => prod.id === id)!;
         const unit_price = Number(product.price);
 
-        totalPrice += unit_price * quantity;
+        totalPrice += parseFloat((totalPrice + unit_price * quantity).toFixed(2));
 
         const orderItem = queryRunner.manager.create(OrderItem, {
           product,
@@ -89,14 +82,10 @@ export class OrdersService {
       // 3,5. Aplicar código de recompensa
       let discountPercentage = 0;
       if (createOrderDto.rewardCode) {
-        const rewardCode = await this.rewardCodeService.findOneByCode(
-          createOrderDto.rewardCode,
-        );
+        const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode);
 
         if (!rewardCode || !rewardCode.isActive || !rewardCode.exist) {
-          throw new BadRequestException(
-            'Código de recompensa inválido o ya utilizado',
-          );
+          throw new BadRequestException('Código de recompensa inválido o ya utilizado');
         }
 
         discountPercentage = rewardCode.percentage;
@@ -516,9 +505,7 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new NotFoundException(
-        `Orden con ID ${id} no encontrada o fue eliminada`,
-      );
+      throw new NotFoundException(`Orden con ID ${id} no encontrada o fue eliminada`);
     }
 
     return order;
@@ -533,10 +520,7 @@ export class OrdersService {
       throw new NotFoundException(`Orden con ID ${id} no encontrada`);
     }
 
-    const updatedOrder = this.orderRepository.merge(
-      existingOrder,
-      updateOrderDto,
-    );
+    const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
     return this.orderRepository.save(updatedOrder);
   }
 

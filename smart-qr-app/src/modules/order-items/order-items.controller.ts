@@ -3,43 +3,82 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
+  ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderItemsService } from './order-items.service';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
+import {
+  CreateOrderItemDoc,
+  GetAllOrderItemsDoc,
+  GetOrderItemByIdDoc,
+  UpdateOrderItemDoc,
+  DeleteOrderItemDoc,
+} from './swagger/order-item.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
+@ApiBearerAuth()
 @Controller(':slug/order-items')
+@UseGuards(AuthGuard)
 export class OrderItemsController {
   constructor(private readonly orderItemsService: OrderItemsService) {}
 
   @Post()
-  create(@Body() createOrderItemDto: CreateOrderItemDto) {
-    return this.orderItemsService.create(createOrderItemDto);
+  @CreateOrderItemDoc()
+  async create(
+    @Param('slug') slug: string,
+    @Body() createOrderItemDto: CreateOrderItemDto,
+  ) {
+    const orderItem = await this.orderItemsService.create(slug, createOrderItemDto);
+    return {
+      message: 'Item de orden creado exitosamente',
+      orderItem,
+    };
   }
 
   @Get()
-  findAll() {
-    return this.orderItemsService.findAll();
+  @GetAllOrderItemsDoc()
+  async findAll(@Param('slug') slug: string) {
+    return this.orderItemsService.findAll(slug);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderItemsService.findOne(+id);
+  @GetOrderItemByIdDoc()
+  async findOne(
+    @Param('slug') slug: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.orderItemsService.findOne(slug, id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Put(':id')
+  @UpdateOrderItemDoc()
+  async update(
+    @Param('slug') slug: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateOrderItemDto: UpdateOrderItemDto,
   ) {
-    return this.orderItemsService.update(+id, updateOrderItemDto);
+    const orderItem = await this.orderItemsService.update(slug, id, updateOrderItemDto);
+    return {
+      message: 'Item de orden actualizado exitosamente',
+      orderItem,
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderItemsService.remove(+id);
+  @DeleteOrderItemDoc()
+  async remove(
+    @Param('slug') slug: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    await this.orderItemsService.remove(slug, id);
+    return {
+      message: 'Item de orden eliminado exitosamente',
+    };
   }
 }

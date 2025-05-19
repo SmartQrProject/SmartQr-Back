@@ -10,11 +10,11 @@ import { CreateProductDoc, GetAllProductsDoc, GetProductByIdDoc, UpdateProductDo
 @ApiTags('products')
 @ApiBearerAuth()
 @Controller(':slug/products')
-@UseGuards(AuthGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   @CreateProductDoc()
   async create(@Param('slug') slug: string, @Body() createProductDto: CreateProductDto): Promise<Product> {
     return await this.productsService.create(createProductDto, slug);
@@ -35,6 +35,13 @@ export class ProductsController {
     return await this.productsService.findAll(slug, page, limit);
   }
 
+  @Patch('sequence')
+  @UseGuards(AuthGuard)
+  @UpdateProductSequencesDoc()
+  async updateSequences(@Param('slug') slug: string, @Body() products: { id: string; sequenceNumber: number }[]): Promise<{ message: string }> {
+    return await this.productsService.updateSequences(products, slug);
+  }
+
   @Get(':id')
   @GetProductByIdDoc()
   async findOne(@Param('id') id: string, @Param('slug') slug: string): Promise<Product> {
@@ -42,20 +49,16 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   @UpdateProductDoc()
   async update(@Param('id') id: string, @Param('slug') slug: string, @Body() updateProductDto: UpdateProductDto): Promise<Product> {
     return await this.productsService.update(id, updateProductDto, slug);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   @DeleteProductDoc()
-  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<void> {
+  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<{ message: string }> {
     return await this.productsService.remove(id, slug);
-  }
-
-  @Patch('sequence')
-  @UpdateProductSequencesDoc()
-  async updateSequences(@Param('slug') slug: string, @Body() products: { id: string; sequenceNumber: number }[]): Promise<void> {
-    return await this.productsService.updateSequences(products, slug);
   }
 }

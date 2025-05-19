@@ -1,24 +1,32 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody, ApiParam } from '@nestjs/swagger';
 import { SignInUserDto } from '../dto/signIn-user.dto';
+import { PutUserDto } from '../dto/put-user.dto';
 
 export function ModifyUserByIdDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({ summary: 'Modify users data' }),
-    ApiQuery({
+    ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
       example: 'test-cafe',
       required: true,
     }),
+    ApiParam({
+      name: 'id',
+      description: 'User ID',
+      example: '20966491-1959-40ce-96f9-5c391d79fb1f',
+      required: true,
+    }),
+    ApiBody({ type: PutUserDto }),
   );
 }
 
-export function UserSignUpDoc() {
+export function CreateUserDoc() {
   return applyDecorators(
     ApiOperation({ summary: 'Users App creation' }),
-    ApiQuery({
+    ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
       example: 'test-cafe',
@@ -26,8 +34,8 @@ export function UserSignUpDoc() {
     }),
   );
 }
-
-export function GetUsersDoc() {
+//
+export function GetAllUsersDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
@@ -105,7 +113,22 @@ export function GetUsersDoc() {
 }
 
 export function DeleteUserByIdDoc() {
-  return applyDecorators(ApiBearerAuth(), ApiOperation({ summary: 'Deletion of User' }));
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: 'De-activation of a user record' }),
+    ApiParam({
+      name: 'slug',
+      description: 'Unique restaurant identifier',
+      example: 'test-cafe',
+      required: true,
+    }),
+    ApiParam({
+      name: 'id',
+      description: 'User ID',
+      example: '20966491-1959-40ce-96f9-5c391d79fb1f',
+      required: true,
+    }),
+  );
 }
 
 export function UserLoginDoc() {
@@ -124,6 +147,29 @@ export function UserLoginDoc() {
             password: '!Example123',
           },
           summary: 'Test Cafe owner credentials',
+        },
+
+        testCafeStaff: {
+          value: {
+            email: 'amigop@gmail.com',
+            password: 'Clave123$$',
+          },
+          summary: 'Test Cafe staff credentials',
+        },
+
+        testSuperAdmin: {
+          value: {
+            email: 'info@smart-qr.tech',
+            password: 'HardPass123%%',
+          },
+          summary: 'SUPERADMIN',
+        },
+        testAmigoRestoOwner: {
+          value: {
+            email: 'amigogabrielernesto@yahoo.com',
+            password: 'Clave123%%',
+          },
+          summary: 'AmigoResto Owner credentials',
         },
       },
     }),

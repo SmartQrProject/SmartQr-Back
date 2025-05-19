@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { IsEmail, IsString, IsUUID, Length } from 'class-validator';
 import { Restaurant } from './restaurant.entity';
 
@@ -35,11 +29,11 @@ export class User {
   @CreateDateColumn()
   created_at: Date;
 
+  @Column({ default: true })
+  exist: boolean;
+
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.users, {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
-
-  @Column({ default: true })
-  exist: boolean;
 }

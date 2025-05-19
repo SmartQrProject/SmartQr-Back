@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoriesRepository } from './categories.repository';
 import { Category } from '../../shared/entities/category.entity';
 import { RestaurantsService } from '../restaurants/restaurants.service';
+import { SequenceUpdateException } from '../../common/exceptions/sequence-update.exception';
 
 @Injectable()
 export class CategoriesService {
@@ -36,13 +37,25 @@ export class CategoriesService {
     return await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
   }
 
-  async remove(id: string, slug: string): Promise<void> {
+  async remove(id: string, slug: string): Promise<{ message: string }> {
     const rest = await this.restService.getRestaurants(slug);
+    const category = await this.categoriesRepository.findOneByIdAndRestaurant(id, rest.id);
     await this.categoriesRepository.softDeleteCategory(id, rest.id);
+    return { message: `Category ${category.name} has been deleted successfully` };
   }
 
-  async updateSequences(categories: { id: string, sequenceNumber: number }[], slug: string): Promise<void> {
-    const rest = await this.restService.getRestaurants(slug);
-    await this.categoriesRepository.updateCategorySequences(categories, rest.id);
+  async updateSequences(categories: { id: string, sequenceNumber: number }[], slug: string): Promise<{ message: string }> {
+    try {
+      const rest = await this.restService.getRestaurants(slug);
+      await this.categoriesRepository.updateCategorySequences(categories, rest.id);
+      return { message: 'Category sequences have been updated successfully' };
+    } catch (error) {
+      if (error instanceof SequenceUpdateException) {
+        throw error;
+      }
+      throw new SequenceUpdateException(
+        'Failed to update category sequences. Please ensure all category IDs are valid and try again.'
+      );
+    }
   }
 }

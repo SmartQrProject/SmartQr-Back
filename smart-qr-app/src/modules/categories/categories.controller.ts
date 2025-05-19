@@ -34,6 +34,13 @@ export class CategoriesController {
     return await this.categoriesService.findAll(slug, page, limit);
   }
 
+  @Patch('sequence')
+  @UseGuards(AuthGuard)
+  @UpdateCategorySequenceDoc()
+  async updateSequences(@Param('slug') slug: string, @Body() categories: { id: string; sequenceNumber: number }[]): Promise<{ message: string }> {
+    return await this.categoriesService.updateSequences(categories, slug);
+  }
+
   @Get(':id')
   @GetCategoryByIdDoc()
   async findOne(@Param('id') id: string, @Param('slug') slug: string): Promise<Category> {
@@ -50,14 +57,7 @@ export class CategoriesController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @DeleteCategoryDoc()
-  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<void> {
+  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<{ message: string }> {
     return await this.categoriesService.remove(id, slug);
-  }
-
-  @Patch('sequence')
-  @UseGuards(AuthGuard)
-  @UpdateCategorySequenceDoc()
-  async updateSequences(@Param('slug') slug: string, @Body() categories: { id: string; sequenceNumber: number }[]): Promise<void> {
-    return await this.categoriesService.updateSequences(categories, slug);
   }
 }

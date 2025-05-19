@@ -26,6 +26,7 @@ export function CreateProductDoc() {
     }),
     ApiBody({
       type: CreateProductDto,
+      description: 'Crea un nuevo producto enviando los datos en JSON, incluyendo la URL de la imagen ya subida',
       examples: {
         beverage: {
           summary: 'Create a beverage product',
@@ -33,8 +34,11 @@ export function CreateProductDoc() {
             name: 'Coca Cola',
             price: 2.5,
             description: 'Regular Coca Cola 355ml',
-            image_url: 'https://example.com/images/coca-cola.jpg',
-            categoryId: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+            image_url: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/coca-cola.jpg',
+            categoryId: 'd8737e33-4d0d-49eb-ad10-b2a1d3489666',
+            is_available: true,
+            sequenceNumber: 10,
+            details: ['sin gluten', 'vegano', 'descafeinado'],
           },
         },
       },
@@ -127,7 +131,15 @@ export function DeleteProductDoc() {
       summary: 'Delete a product',
       description: 'Removes a product from the restaurant menu. This action cannot be undone.',
     }),
-    ApiResponse({ status: 200, description: 'Product deleted successfully' }),
+    ApiResponse({ 
+      status: 200, 
+      description: 'Product deleted successfully',
+      schema: {
+        example: {
+          message: 'Product Coca Cola has been deleted successfully'
+        }
+      }
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
     ApiResponse({ status: 404, description: 'Product or restaurant not found' }),
   );
@@ -136,7 +148,10 @@ export function DeleteProductDoc() {
 export function UpdateProductSequencesDoc() {
   return applyDecorators(
     SlugParam,
-    ApiOperation({ summary: 'Update sequence numbers for multiple products' }),
+    ApiOperation({ 
+      summary: 'Update sequence numbers for multiple products',
+      description: 'Updates the display order of multiple products at once. Useful for drag and drop reordering.'
+    }),
     ApiBody({
       schema: {
         type: 'array',
@@ -158,8 +173,47 @@ export function UpdateProductSequencesDoc() {
         },
       },
     }),
-    ApiResponse({ status: 200, description: 'The sequence numbers have been updated' }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'One or more products not found' }),
+    ApiResponse({ 
+      status: 200, 
+      description: 'The sequence numbers have been updated successfully',
+      schema: {
+        example: {
+          message: 'Product sequences have been updated successfully'
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 400, 
+      description: 'Sequence update failed',
+      schema: {
+        example: {
+          message: 'Failed to update product sequences. Please ensure all product IDs are valid and try again.',
+          error: 'Sequence Update Failed',
+          statusCode: 400
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 401, 
+      description: 'Unauthorized',
+      schema: {
+        example: {
+          message: 'Unauthorized user',
+          error: 'Unauthorized',
+          statusCode: 401
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 404, 
+      description: 'One or more products not found',
+      schema: {
+        example: {
+          message: 'Some products were not found or do not belong to this restaurant',
+          error: 'Not Found',
+          statusCode: 404
+        }
+      }
+    }),
   );
 }

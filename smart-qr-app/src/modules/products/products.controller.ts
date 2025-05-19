@@ -51,7 +51,7 @@ export class ProductsController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @DeleteProductDoc()
-  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<void> {
+  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<{ message: string }> {
     return await this.productsService.remove(id, slug);
   }
 

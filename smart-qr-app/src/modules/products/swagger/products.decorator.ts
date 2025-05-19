@@ -131,7 +131,15 @@ export function DeleteProductDoc() {
       summary: 'Delete a product',
       description: 'Removes a product from the restaurant menu. This action cannot be undone.',
     }),
-    ApiResponse({ status: 200, description: 'Product deleted successfully' }),
+    ApiResponse({ 
+      status: 200, 
+      description: 'Product deleted successfully',
+      schema: {
+        example: {
+          message: 'Product Coca Cola has been deleted successfully'
+        }
+      }
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
     ApiResponse({ status: 404, description: 'Product or restaurant not found' }),
   );

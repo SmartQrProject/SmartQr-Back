@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
@@ -52,10 +47,7 @@ export class CustomersRepository {
   }
 
   // GEA 14-mayo
-  async createCustomer(
-    createCustomer,
-    rest,
-  ): Promise<Omit<Customer, 'password'>> {
+  async createCustomer(createCustomer, rest): Promise<Omit<Customer, 'password'>> {
     const hash = await this.bcryptService.hash(createCustomer.password);
     if (!hash) {
       throw new InternalServerErrorException('Problem with the bcrypt library');
@@ -67,25 +59,21 @@ export class CustomersRepository {
     const customerCreado = await this.customerRepository.save(newCustomer);
     const { password, ...customerSinPass } = customerCreado;
 
-    const subject = 'Satisfactory Account Creation in our SmartQR App';
-    const textmsg =
-      'Congratulations!!!! Your have been granted access to use the SmartQR App.';
-    const tipoEmail = 'signIn';
-    this.mailService.sendMail(
-      customerCreado.email,
-      subject,
-      textmsg,
-      tipoEmail,
-    );
+    // const subject = 'Satisfactory Account Creation in our SmartQR App';
+    // const textmsg =
+    //   'Congratulations!!!! Your have been granted access to use the SmartQR App.';
+    // const tipoEmail = 'signIn';
+    // this.mailService.sendMail(
+    //   customerCreado.email,
+    //   subject,
+    //   textmsg,
+    //   tipoEmail,
+    // );
     return customerSinPass;
   }
 
   // GEA 14-mayo
-  async updateById(
-    id,
-    updateCustomer,
-    req,
-  ): Promise<Omit<Customer, 'password'>> {
+  async updateById(id, updateCustomer, req): Promise<Omit<Customer, 'password'>> {
     const customer = await this.customerRepository.findOneBy({ id: id });
 
     if (!customer) {
@@ -103,9 +91,7 @@ export class CustomersRepository {
 
     const wrkCustomer = await this.getCustomerByEmail(updateCustomer.email);
     if (wrkCustomer && wrkCustomer.id !== id) {
-      throw new ConflictException(
-        `❌ Email already in use: ${customer.email} !!`,
-      );
+      throw new ConflictException(`❌ Email already in use: ${customer.email} !!`);
     }
 
     const hash = await this.bcryptService.hash(updateCustomer.password);

@@ -7,6 +7,7 @@ import { RestaurantTablesService } from './restaurant-tables.service';
 import { RestaurantTablesController } from './restaurant-tables.controller';
 import { RestaurantTableRepository } from './restaurant-tables.repository';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
+import { MailService } from 'src/common/services/mail.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
     RestaurantsModule,
     CommonModule,
   ],
-  providers: [RestaurantTablesService, RestaurantTableRepository],
+  providers: [RestaurantTablesService, RestaurantTableRepository, MailService],
   controllers: [RestaurantTablesController],
 })
 export class RestaurantTablesModule implements NestModule {

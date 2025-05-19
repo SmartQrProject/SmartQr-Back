@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { User } from 'src/shared/entities/user.entity';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 import { UsersRepository } from './users.repository';
@@ -22,9 +17,7 @@ export class UsersService {
   ) {}
 
   // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
-  async userLogin(
-    /*slug,*/ { email, password }: SignInUserDto,
-  ): Promise<object> {
+  async userLogin(/*slug,*/ { email, password }: SignInUserDto): Promise<object> {
     /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
 
@@ -44,26 +37,83 @@ export class UsersService {
       email: user.email,
       roles: user.role,
       slug: user.restaurant.slug,
-      Restaurant: user.restaurant,
+      restaurant: user.restaurant,
     };
 
+    console.log('payload en signin:', jwtPayLoad);
+
     const access_token = this.jwtService.generateToken(jwtPayLoad);
+    console.log('token:', access_token);
+
     return { success: 'Logged Succesfully with token', access_token };
   }
 
   // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
   async modifyUserById(id, slug, user, req): Promise<string> {
+    const usuario = await this.usersRepository.getUserById(id);
+
+    if (!usuario || !usuario.exist) {
+      throw new NotFoundException(`❌ No users found  with id ${id} or is blocked !!`);
+    }
+
     const rest = await this.restService.getRestaurants(slug);
-    if (user.password !== user.confirmPassword) {
+    if (!rest) {
+      throw new NotFoundException(`❌ restaurant ${slug} found !!`);
+    }
+
+    if (usuario && usuario.restaurant.id !== rest.id) {
+      throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
+    }
+
+    if (user.email) {
+      const usuario = await this.usersRepository.getUserByEmail(user.email);
+      if (usuario && usuario.id !== user.id) {
+        throw new ConflictException(`❌ Email already in use: ${user.email} !!`);
+      }
+    }
+
+    if (user.password && user.password !== user.confirmPassword) {
       throw new ConflictException('Passwords are not equals!!!');
     }
-    return this.usersRepository.putById(id, rest, user, req);
+
+    if (!req.user.roles.includes('superAdmin')) {
+      if (!req.user.roles.includes('owner')) {
+        if (req.user.id !== id) {
+          throw new NotFoundException(`You can not update this User data .`);
+        }
+      }
+    }
+
+    return this.usersRepository.patchById(id, rest, user, req);
   }
 
   // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
   async deleteUserById(id, slug, req): Promise<string> {
+    const usuario = await this.usersRepository.getUserById(id);
+
+    if (!usuario || !usuario.exist) {
+      throw new NotFoundException(`❌ No users found  with id ${id} or is blocked !!`);
+    }
+
     const rest = await this.restService.getRestaurants(slug);
-    return this.usersRepository.deleteById(id, rest, req);
+    if (!rest) {
+      throw new NotFoundException(`❌ restaurant ${slug} found !!`);
+    }
+
+    if (usuario && usuario.restaurant.id !== rest.id) {
+      throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
+    }
+
+    if (!req.user.roles.includes('superAdmin')) {
+      if (req.user.roles.includes('owner')) {
+        if (req.user.restaurant.id !== rest.id) {
+          throw new NotFoundException(`You can not in-activate this User .`);
+        }
+      } else {
+        throw new NotFoundException(`You can not in-activate this User .`);
+      }
+    }
+    return this.usersRepository.deleteById(id);
   }
 
   // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
@@ -85,6 +135,7 @@ export class UsersService {
   async userSignUp(slug, newUser): Promise<Omit<User, 'password'>> {
     const rest = await this.restService.getRestaurants(slug);
     const user = await this.usersRepository.getUserByEmail(newUser.email);
+
     if (user) {
       throw new ConflictException(`❌ User ${newUser.email} already exists!!`);
     }
@@ -93,7 +144,7 @@ export class UsersService {
       throw new ConflictException('❌ Passwords are not equals!!!');
     }
 
-    console.log('nuevo usuario: ', newUser, ' restaurant: ', rest);
-    return await this.usersRepository.createUser(newUser, rest);
+    console.log('YYYYYYYYYYYYYYYYYY ---------------nuevo usuario: ', newUser, ' restaurant: ', rest);
+    return await this.usersRepository.createUser(rest, newUser);
   }
 }

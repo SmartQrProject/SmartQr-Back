@@ -4,6 +4,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
 import { Product } from '../../shared/entities/product.entity';
 import { RestaurantsService } from '../restaurants/restaurants.service';
+import { SequenceUpdateException } from '../../common/exceptions/sequence-update.exception';
 
 @Injectable()
 export class ProductsService {
@@ -45,8 +46,18 @@ export class ProductsService {
     return { message: `Product ${product.name} has been deleted successfully` };
   }
 
-  async updateSequences(products: { id: string, sequenceNumber: number }[], slug: string): Promise<void> {
-    const rest = await this.restService.getRestaurants(slug);
-    await this.productsRepository.updateProductSequences(products, rest.id);
+  async updateSequences(products: { id: string, sequenceNumber: number }[], slug: string): Promise<{ message: string }> {
+    try {
+      const rest = await this.restService.getRestaurants(slug);
+      await this.productsRepository.updateProductSequences(products, rest.id);
+      return { message: 'Product sequences have been updated successfully' };
+    } catch (error) {
+      if (error instanceof SequenceUpdateException) {
+        throw error;
+      }
+      throw new SequenceUpdateException(
+        'Failed to update product sequences. Please ensure all product IDs are valid and try again.'
+      );
+    }
   }
 }

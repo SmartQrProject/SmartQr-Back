@@ -148,7 +148,10 @@ export function DeleteProductDoc() {
 export function UpdateProductSequencesDoc() {
   return applyDecorators(
     SlugParam,
-    ApiOperation({ summary: 'Update sequence numbers for multiple products' }),
+    ApiOperation({ 
+      summary: 'Update sequence numbers for multiple products',
+      description: 'Updates the display order of multiple products at once. Useful for drag and drop reordering.'
+    }),
     ApiBody({
       schema: {
         type: 'array',
@@ -170,8 +173,47 @@ export function UpdateProductSequencesDoc() {
         },
       },
     }),
-    ApiResponse({ status: 200, description: 'The sequence numbers have been updated' }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'One or more products not found' }),
+    ApiResponse({ 
+      status: 200, 
+      description: 'The sequence numbers have been updated successfully',
+      schema: {
+        example: {
+          message: 'Product sequences have been updated successfully'
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 400, 
+      description: 'Sequence update failed',
+      schema: {
+        example: {
+          message: 'Failed to update product sequences. Please ensure all product IDs are valid and try again.',
+          error: 'Sequence Update Failed',
+          statusCode: 400
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 401, 
+      description: 'Unauthorized',
+      schema: {
+        example: {
+          message: 'Unauthorized user',
+          error: 'Unauthorized',
+          statusCode: 401
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 404, 
+      description: 'One or more products not found',
+      schema: {
+        example: {
+          message: 'Some products were not found or do not belong to this restaurant',
+          error: 'Not Found',
+          statusCode: 404
+        }
+      }
+    }),
   );
 }

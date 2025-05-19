@@ -10,14 +10,19 @@ export class ChatbotService {
   ) {}
 
   async generateReply(message: string): Promise<string> {
-    console.log('📥 Mensaje del usuario:', message);
+    const cleaned = message
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .trim();
+
+    console.log('📥 Mensaje del usuario:', cleaned);
 
     type SearchEntry = {
       product: string;
       detail: string;
     };
 
-    const intents = await this.iaService.extractIntents(message);
+    const intents = await this.iaService.extractIntents(cleaned);
     console.log('🔎 Intenciones detectadas:', intents);
 
     if (!intents || intents.length === 0) {

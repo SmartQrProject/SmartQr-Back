@@ -13,15 +13,17 @@ export class IaService {
   }
 
   async extractIntents(userMessage: string): Promise<string[]> {
-    const prompt = `
-Dado este mensaje de un usuario: "${userMessage}", generá una lista con las posibles palabras clave o intenciones relacionadas con alimentos, salud, preferencias dietéticas, ingredientes, etc.
+    const prompt = `Dado este mensaje de un usuario: "${userMessage}", generá una lista con las posibles palabras clave o intenciones relacionadas con alimentos, salud, preferencias dietéticas, ingredientes, etc.
+
+Incluso si hay errores de escritura, tratá de deducir lo que quiso decir.
 
 Ejemplo de salida para "plato vegano":
-["vegano", "vegetal", "sin productos animales", "dieta vegana"]
+["vegano", "vegetariano", "sin carne", "dieta vegetal"]
 
-Si el mensaje no tiene ninguna intención útil (por ejemplo, si solo dice "hola", "cómo estás", etc), devolvé un array vacío: [].
+Si no hay intención clara o no se puede deducir, devolvé [].
 
 Devolvé solo el array en formato JSON.
+
     `;
 
     try {

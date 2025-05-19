@@ -391,7 +391,7 @@ export function UpdateCategorySequenceDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Update categories sequence',
-      description: 'Updates the display order of multiple categories at once. Useful for drag and drop reordering.',
+      description: 'Updates the display order of multiple categories at once. Useful for drag and drop reordering.'
     }),
     ApiParam({
       name: 'slug',
@@ -405,14 +405,8 @@ export function UpdateCategorySequenceDoc() {
         items: {
           type: 'object',
           properties: {
-            id: {
-              type: 'string',
-              example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
-            },
-            sequenceNumber: {
-              type: 'number',
-              example: 1,
-            },
+            id: { type: 'string', example: 'c2917676-d3d2-472a-8b7c-785f455a80ab' },
+            sequenceNumber: { type: 'number', example: 1 },
           },
         },
       },
@@ -420,48 +414,53 @@ export function UpdateCategorySequenceDoc() {
         reorderCategories: {
           summary: 'Reorder Hot Beverages and Cold Beverages categories',
           value: [
-            {
-              id: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
-              sequenceNumber: 1,
-            },
-            {
-              id: '7d1e3cd8-2a0d-4a40-8b2e-4e1c9578c8f3',
-              sequenceNumber: 2,
-            },
+            { id: 'c2917676-d3d2-472a-8b7c-785f455a80ab', sequenceNumber: 1 },
+            { id: '7d1e3cd8-2a0d-4a40-8b2e-4e1c9578c8f3', sequenceNumber: 2 },
           ],
         },
       },
     }),
-    ApiResponse({
-      status: 200,
+    ApiResponse({ 
+      status: 200, 
       description: 'Categories reordered successfully',
       schema: {
         example: {
-          message: 'Categories sequence updated successfully',
-        },
-      },
+          message: 'Category sequences have been updated successfully'
+        }
+      }
     }),
-    ApiResponse({
-      status: 401,
+    ApiResponse({ 
+      status: 400, 
+      description: 'Sequence update failed',
+      schema: {
+        example: {
+          message: 'Failed to update category sequences. Please ensure all category IDs are valid and try again.',
+          error: 'Sequence Update Failed',
+          statusCode: 400
+        }
+      }
+    }),
+    ApiResponse({ 
+      status: 401, 
       description: 'Unauthorized',
       schema: {
         example: {
           message: 'Unauthorized user',
           error: 'Unauthorized',
-          statusCode: 401,
-        },
-      },
+          statusCode: 401
+        }
+      }
     }),
-    ApiResponse({
-      status: 404,
+    ApiResponse({ 
+      status: 404, 
       description: 'Restaurant or categories not found',
       schema: {
         example: {
           message: 'One or more categories not found in restaurant test-cafe',
           error: 'Not Found',
-          statusCode: 404,
-        },
-      },
+          statusCode: 404
+        }
+      }
     }),
   );
 }

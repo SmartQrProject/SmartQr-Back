@@ -35,6 +35,13 @@ export class ProductsController {
     return await this.productsService.findAll(slug, page, limit);
   }
 
+  @Patch('sequence')
+  @UseGuards(AuthGuard)
+  @UpdateProductSequencesDoc()
+  async updateSequences(@Param('slug') slug: string, @Body() products: { id: string; sequenceNumber: number }[]): Promise<{ message: string }> {
+    return await this.productsService.updateSequences(products, slug);
+  }
+
   @Get(':id')
   @GetProductByIdDoc()
   async findOne(@Param('id') id: string, @Param('slug') slug: string): Promise<Product> {
@@ -53,12 +60,5 @@ export class ProductsController {
   @DeleteProductDoc()
   async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<{ message: string }> {
     return await this.productsService.remove(id, slug);
-  }
-
-  @Patch('sequence')
-  @UseGuards(AuthGuard)
-  @UpdateProductSequencesDoc()
-  async updateSequences(@Param('slug') slug: string, @Body() products: { id: string; sequenceNumber: number }[]): Promise<void> {
-    return await this.productsService.updateSequences(products, slug);
   }
 }

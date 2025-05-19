@@ -50,7 +50,7 @@ export class CategoriesController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @DeleteCategoryDoc()
-  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<void> {
+  async remove(@Param('id') id: string, @Param('slug') slug: string): Promise<{ message: string }> {
     return await this.categoriesService.remove(id, slug);
   }
 

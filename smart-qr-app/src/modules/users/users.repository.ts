@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/shared/entities/user.entity';
@@ -20,21 +15,14 @@ export class UsersRepository {
   ) {}
 
   // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
-  async putById(
-    id: string,
-    rest,
-    updateUser: PutUserDto,
-    req,
-  ): Promise<string> {
+  async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<string> {
     const user = await this.userRepository.findOneBy({
       id: id,
       restaurant: { id: rest.id },
     });
 
     if (!user || !user.exist) {
-      throw new NotFoundException(
-        `❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`,
-      );
+      throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
     }
 
     // if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
@@ -42,20 +30,14 @@ export class UsersRepository {
     //     `You can not update User data for a different user.`,
     //   );
     // }
-
-    // const usuario = await this.getUserByEmail(updateUser.email);
-    // if (usuario && usuario.id !== id) {
-    //   throw new ConflictException(
-    //     `❌ Email already in use: ${usuario.email} !!`,
-    //   );
-    // }
-
-    const hash = await this.bcryptService.hash(updateUser.password);
-    if (!hash) {
-      throw new InternalServerErrorException('Problem with the bcrypt library');
+    if (updateUser.password) {
+      const hash = await this.bcryptService.hash(updateUser.password);
+      if (!hash) {
+        throw new InternalServerErrorException('Problem with the bcrypt library');
+      }
+      updateUser.password = hash;
     }
 
-    updateUser.password = hash;
     const { confirmPassword, ...putUser } = updateUser;
     const mergeUser = this.userRepository.merge(user, putUser);
     await this.userRepository.save(mergeUser);
@@ -63,34 +45,17 @@ export class UsersRepository {
   }
 
   // GEA FINALIZADO Mayo 14------ trabajando en este endpoint ---GEA Mayo 12-
-  async deleteById(id: string, rest, req): Promise<string> {
+  async deleteById(id: string): Promise<string> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['restaurant'],
     });
 
-    if (!user || user.restaurant.id !== rest.id) {
-      throw new NotFoundException(
-        `❌ Usuer with id ${id} not found for this restaurant ${rest.name}!!!`,
-      );
-    }
-
-    if (!user.exist) {
-      throw new NotFoundException(
-        `❌ Usuer with id ${id} in this restaurant ${rest.name} is blocked!!!!`,
-      );
-    }
-
-    if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
-      throw new NotFoundException(
-        `You can not delete a User account of a different user.`,
-      );
+    if (!user || !user.exist) {
+      throw new NotFoundException(`❌ Usuer with id ${id}  is blocked!!!!`);
     }
 
     user.exist = false;
-    // const mergeUser = this.userRepository.merge(user, putUser);
-    // await this.userRepository.save(mergeUser);
-    // await this.userRepository.save(mergeUser);
     await this.userRepository.save(user);
     return 'Usuario bloquedao: ' + id;
   }
@@ -123,17 +88,18 @@ export class UsersRepository {
   }
 
   // Finalizado GEA Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
-  async createUser(userToCreate, rest): Promise<Omit<User, 'password'>> {
+  async createUser(rest, userToCreate): Promise<Omit<User, 'password'>> {
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', userToCreate, rest);
     const hash = await this.bcryptService.hash(userToCreate.password);
     if (!hash) {
       throw new InternalServerErrorException('Problem with the bcrypt library');
     }
 
-    const newUser = { ...userToCreate, password: hash };
-    newUser.restaurant = rest;
-    this.userRepository.create(newUser);
-    const usuarioCreado = await this.userRepository.save(newUser);
-    const { password, ...userSinPass } = usuarioCreado;
+    userToCreate.password = hash;
+    userToCreate.restaurant = rest;
+    const user2BeCreated = this.userRepository.create(userToCreate);
+    await this.userRepository.save(user2BeCreated);
+    const { password, ...userSinPass } = userToCreate;
     return userSinPass;
   }
 
@@ -144,9 +110,15 @@ export class UsersRepository {
       relations: ['restaurant'],
     });
 
-    if (!usuario || !usuario.exist) {
-      throw new NotFoundException(`❌ User ${email} not found`);
-    }
+    return usuario;
+  }
+
+  // Finalizado GEA Mayo-13---- trabajando en este endpoint ---GEA Mayo 12-
+  async getUserById(id: string): Promise<User | null> {
+    const usuario = await this.userRepository.findOne({
+      where: { id },
+      relations: ['restaurant'],
+    });
 
     return usuario;
   }

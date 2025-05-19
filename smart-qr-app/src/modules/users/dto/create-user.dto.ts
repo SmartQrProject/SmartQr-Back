@@ -1,26 +1,14 @@
 import { pwMatch } from 'src/common/decorators/passwordMatch';
 import { Role } from 'src/common/decorators/role.enum';
-import {
-  IsEmail,
-  IsEmpty,
-  IsIn,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  IsUUID,
-  Length,
-  Matches,
-} from 'class-validator';
+import { IsEmail, IsEmpty, IsIn, IsNotEmpty, IsNumber, IsString, IsUUID, Length, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
   @IsString({
-    message:
-      'The name is mandatory and  must have between 5 and 100 characteres',
+    message: 'The name is mandatory and  must have between 5 and 100 characteres',
   })
   @Length(5, 100, {
-    message:
-      'LThe name is mandatory and  must have between 5 and 100 characteres',
+    message: 'LThe name is mandatory and  must have between 5 and 100 characteres',
   })
   @Matches(/^[A-Za-z0-9 ]+$/, {
     message: 'THis field only permits letters and numbers and spaces.',
@@ -41,16 +29,11 @@ export class CreateUserDto {
 
   @IsString({ message: 'The password must be a characters field .' })
   @IsNotEmpty({ message: 'The password could not blank.' })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/,
-    {
-      message:
-        'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
-    },
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/, {
+    message: 'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
+  })
   @ApiProperty({
-    description:
-      'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
+    description: 'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
     example: 'Clave123%%',
   })
   password: string;
@@ -58,22 +41,20 @@ export class CreateUserDto {
   @IsString({ message: 'The password must be a characters field .' })
   @pwMatch('password', { message: 'Passwords do not match' })
   @ApiProperty({
-    description:
-      'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
+    description: 'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
     example: 'Clave123%%',
   })
   confirmPassword: string;
 
   @IsNotEmpty({
-    message:
-      'The role should have these options only: superAdmin, restOwner, restStaff.',
+    message: 'The role should have these options only: superAdmin, owner, staff.',
   })
   @ApiProperty({
-    description: 'It should be superadmin or restadmin or reststaff',
-    example: 'restStaff',
+    description: 'It should be superAdmin or owner or staff',
+    example: 'staff',
   })
-  @IsIn(['restStaff', 'restOwner', 'superAdmin'], {
-    message: 'The role should be: restStaff, restOwner o superAdmin only!',
+  @IsIn(['staff', 'owner', 'superAdmin'], {
+    message: 'The role should be: staff, owner o superAdmin only!',
   })
   role: string;
 }

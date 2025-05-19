@@ -17,6 +17,15 @@ export class ChatbotService {
       detail: string;
     };
 
+    const intents = await this.iaService.extractIntents(message);
+    console.log('🔎 Intenciones detectadas:', intents);
+
+    if (!intents || intents.length === 0) {
+      const fallback = '👋 ¡Hola! ¿Qué estás buscando? Podés decir cosas como "sin azúcar", "vegano", "sin gluten", etc.';
+      console.log('📭 Respuesta final (sin intención):', fallback);
+      return fallback;
+    }
+
     const allProducts = await this.productService.findAll('eli-cafe', 1, 999);
     console.log('📦 Productos obtenidos:', allProducts.products.length);
 
@@ -33,7 +42,7 @@ export class ChatbotService {
 
     if (matches.length === 0) {
       const response = 'No encontré opciones relacionadas con tu consulta. ¿Querés reformularla?';
-      console.log('📭 Respuesta final:', response);
+      console.log('📭 Respuesta final (sin matches):', response);
       return response;
     }
 

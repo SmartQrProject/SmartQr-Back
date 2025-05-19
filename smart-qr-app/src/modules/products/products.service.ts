@@ -38,9 +38,11 @@ export class ProductsService {
     return await this.productsRepository.updateProduct(id, updateProductDto, rest.id);
   }
 
-  async remove(id: string, slug: string): Promise<void> {
+  async remove(id: string, slug: string): Promise<{ message: string }> {
     const rest = await this.restService.getRestaurants(slug);
+    const product = await this.productsRepository.findOneByIdAndRestaurant(id, rest.id);
     await this.productsRepository.softDeleteProduct(id, rest.id);
+    return { message: `Product ${product.name} has been deleted successfully` };
   }
 
   async updateSequences(products: { id: string, sequenceNumber: number }[], slug: string): Promise<void> {

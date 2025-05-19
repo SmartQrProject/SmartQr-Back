@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CustomersRepository } from './customers.repository';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -47,10 +43,7 @@ export class CustomersService {
   }
 
   // GEA listo mayo-14
-  async create(
-    createCustomer: CreateCustomerDto,
-    slug,
-  ): Promise<Omit<Customer, 'password'>> {
+  async create(createCustomer: CreateCustomerDto, slug): Promise<Omit<Customer, 'password'>> {
     const rest = await this.restaurantService.getRestaurants(slug);
     if (createCustomer.password !== createCustomer.confirmPassword) {
       throw new ConflictException('❌ Passwords are not equals!!!');
@@ -90,13 +83,7 @@ export class CustomersService {
 
     console.log(customer);
     console.log(email, password);
-    if (
-      !customer ||
-      !customer.exist ||
-      customer.auth0Id ||
-      !customer.password ||
-      !(await this.bcryptService.compare(password, customer.password))
-    ) {
+    if (!customer || !customer.exist || customer.auth0Id || !customer.password || !(await this.bcryptService.compare(password, customer.password))) {
       throw new UnauthorizedException('Not valid Credentials');
     }
 
@@ -106,10 +93,10 @@ export class CustomersService {
       email: customer.email,
     };
 
-    const subject = 'Satisfactory Login to SmartQR';
-    const textmsg = 'Your have been granted access to use the SmartQR App';
-    const tipoEmail = 'login';
-    this.mailService.sendMail(customer.email, subject, textmsg, tipoEmail);
+    // const subject = 'Satisfactory Login to SmartQR';
+    // const textmsg = 'Your have been granted access to use the SmartQR App';
+    // const tipoEmail = 'login';
+    // this.mailService.sendMail(customer.email, subject, textmsg, tipoEmail);
 
     const access_token = this.jwtService.generateToken(jwtPayLoad);
     return { success: 'Logged Succesfully with token', access_token };

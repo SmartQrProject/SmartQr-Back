@@ -36,9 +36,11 @@ export class CategoriesService {
     return await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
   }
 
-  async remove(id: string, slug: string): Promise<void> {
+  async remove(id: string, slug: string): Promise<{ message: string }> {
     const rest = await this.restService.getRestaurants(slug);
+    const category = await this.categoriesRepository.findOneByIdAndRestaurant(id, rest.id);
     await this.categoriesRepository.softDeleteCategory(id, rest.id);
+    return { message: `Category ${category.name} has been deleted successfully` };
   }
 
   async updateSequences(categories: { id: string, sequenceNumber: number }[], slug: string): Promise<void> {

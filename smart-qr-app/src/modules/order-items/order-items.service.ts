@@ -44,7 +44,7 @@ export class OrderItemsService {
         throw new NotFoundException('Orden no encontrada');
       }
 
-      // Verificar que el producto existe y está disponible
+     
       const product = await queryRunner.manager.findOneBy(Product, {
         id: createOrderItemDto.productId,
         restaurant: { id: restaurant.id },
@@ -56,7 +56,7 @@ export class OrderItemsService {
         throw new BadRequestException('El producto no está disponible');
       }
 
-      // Crear el item de orden
+     
       const orderItem = queryRunner.manager.create(OrderItem, {
         order,
         product,
@@ -67,7 +67,7 @@ export class OrderItemsService {
 
       const savedOrderItem = await queryRunner.manager.save(OrderItem, orderItem);
 
-      // Actualizar el precio total de la orden
+    
       const orderItems = await queryRunner.manager.find(OrderItem, {
         where: { order: { id: order.id }, exist: true },
       });
@@ -142,7 +142,7 @@ export class OrderItemsService {
         throw new NotFoundException(`Item de orden con ID ${id} no encontrado`);
       }
 
-      // Si se actualiza el producto, verificar que existe y está disponible
+      
       if (updateOrderItemDto.productId) {
         const product = await queryRunner.manager.findOneBy(Product, {
           id: updateOrderItemDto.productId,
@@ -157,11 +157,11 @@ export class OrderItemsService {
         orderItem.product = product;
       }
 
-      // Actualizar los campos del item
+      
       Object.assign(orderItem, updateOrderItemDto);
       const updatedOrderItem = await queryRunner.manager.save(OrderItem, orderItem);
 
-      // Actualizar el precio total de la orden
+      
       const orderItems = await queryRunner.manager.find(OrderItem, {
         where: { order: { id: orderItem.order.id }, exist: true },
       });
@@ -206,11 +206,11 @@ export class OrderItemsService {
         throw new NotFoundException(`Item de orden con ID ${id} no encontrado`);
       }
 
-      // Soft delete del item
+      
       orderItem.exist = false;
       await queryRunner.manager.save(OrderItem, orderItem);
 
-      // Actualizar el precio total de la orden
+      
       const orderItems = await queryRunner.manager.find(OrderItem, {
         where: { order: { id: orderItem.order.id }, exist: true },
       });

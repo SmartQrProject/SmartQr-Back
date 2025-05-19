@@ -13,20 +13,32 @@ export class IaService {
   }
 
   async extractIntents(userMessage: string): Promise<string[]> {
-    const prompt = `Dado este mensaje de un usuario: "${userMessage}", devolvé una lista de palabras clave o intenciones relacionadas con comida, salud, ingredientes o preferencias dietéticas.
+    const prompt = `Estás actuando como un analizador de intenciones para un chatbot gastronómico. Tu tarea es extraer palabras clave o intenciones relacionadas con comida, salud, dieta, ingredientes o preferencias del usuario a partir de su mensaje.
 
-Detectá la intención incluso si se usa lenguaje informal, expresiones equivalentes o sinónimos. Por ejemplo:
+Tenés que devolver una lista en formato JSON con conceptos clave detectados. Detectá la intención incluso si el usuario usa:
 
-- "bajo en azúcar" → "sin azúcar"
-- "sin lactosa" → "lactose free"
-- "no contiene gluten" → "gluten free"
-- "comida vegetariana" → "vegetariano"
-- "opción vegana" → "vegano"
+- Lenguaje informal o coloquial
+- Errores de escritura menores
+- Idiomas mixtos (ej: 'sugar free', 'sin azúcar')
+- Expresiones equivalentes o sinónimos
 
-Si no hay ninguna intención útil o relacionada con productos alimenticios, devolvé [].
+📌 Ejemplos de equivalencias esperadas:
 
-Respondé solo con el array en formato JSON.
+- "sin azúcar", "sugar free", "bajo en azúcar", "no azúcar" → "sin azúcar"
+- "sin gluten", "gluten free", "celíaco", "libre de gluten" → "sin gluten"
+- "vegano", "vegan", "sin productos animales" → "vegano"
+- "vegetariano", "vegetarian", "no carne" → "vegetariano"
+- "sin lactosa", "lactose free", "intolerancia a la lactosa" → "sin lactosa"
+- "saludable", "light", "fitness", "comida sana" → "saludable"
+- "keto", "cetogénico", "pocos carbohidratos" → "keto"
+- "proteico", "con proteínas", "alto en proteínas" → "proteico"
 
+📤 Si no detectás ninguna intención relacionada con preferencias alimenticias, ingredientes o dieta, devolvé un array vacío: []
+
+🧾 Mensaje del usuario:
+"${userMessage}"
+
+Respondé solo con el array en formato JSON, sin explicaciones ni texto adicional.
     `;
 
     try {

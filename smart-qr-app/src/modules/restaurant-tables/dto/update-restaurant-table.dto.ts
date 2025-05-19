@@ -7,8 +7,8 @@ export class UpdateRestaurantTableDto extends PickType(CreateRestaurantTableDto,
   @IsOptional()
   @IsString()
   @Length(1, 50)
-  @Matches(/^[A-Za-z0-9 ]+$/, {
-    message: 'This field only permits letters, numbers and spaces.',
+  @Matches(/^[A-Za-z0-9 \-]+$/, {
+    message: 'This field only permits letters, numbers, spaces, and hyphens.',
   })
   @ApiPropertyOptional({
     description: 'The Table-Code must have between 5 and 100 characters',

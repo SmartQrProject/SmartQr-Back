@@ -10,8 +10,8 @@ export class CreateRestaurantTableDto {
   @Length(1, 50, {
     message: 'The Table-Code is mandatory and  must have between 5 and 100 characteres',
   })
-  @Matches(/^[A-Za-z0-9 ]+$/, {
-    message: 'This field only permits letters and numbers and spaces.',
+  @Matches(/^[A-Za-z0-9 \-]+$/, {
+    message: 'This field only permits letters, numbers, spaces, and hyphens.',
   })
   @ApiProperty({
     description: 'The Table-Code must have between 5 and 100 characteres',

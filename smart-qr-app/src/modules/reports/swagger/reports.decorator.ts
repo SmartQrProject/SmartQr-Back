@@ -249,3 +249,44 @@ export function GetCustomersReportDoc() {
     ApiResponse({ status: 401, description: 'No autorizado' }),
   );
 }
+
+export function GetCustomerTypesDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Obtener cantidad y porcentaje de clientes nuevos vs recurrentes',
+      description: 'Devuelve métricas comparando clientes nuevos y recurrentes en un rango de fechas.',
+    }),
+    ApiParam({
+      name: 'slug',
+      required: true,
+      description: 'Slug del restaurante',
+      example: 'test-cafe',
+    }),
+    ApiQuery({
+      name: 'from',
+      required: true,
+      type: String,
+      example: '2025-05-01',
+    }),
+    ApiQuery({
+      name: 'to',
+      required: true,
+      type: String,
+      example: '2025-05-20',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Reporte de clientes',
+      schema: {
+        example: {
+          newCustomers: 8,
+          returningCustomers: 15,
+          newPercentage: 34.78,
+          returningPercentage: 65.22,
+        },
+      },
+    }),
+  );
+}

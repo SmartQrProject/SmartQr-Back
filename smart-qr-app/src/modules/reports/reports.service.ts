@@ -6,6 +6,7 @@ import { GetCustomersReportDto } from './dto/get-customers.dto';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import * as dayjs from 'dayjs';
+import { GetCustomerTypesDto } from './dto/get-customer-types.dto';
 
 @Injectable()
 export class ReportsService {
@@ -210,6 +211,67 @@ export class ReportsService {
     return {
       data: enhanced,
       total,
+    };
+  }
+
+  async getCustomerTypes(slug: string, query: GetCustomerTypesDto) {
+    const { from, to } = query;
+    const restaurant = await this.restaurantRepo.findOne({ where: { slug } });
+    if (!restaurant) return { newCustomers: 0, returningCustomers: 0, newPercentage: 0, returningPercentage: 0 };
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999);
+
+    const firstOrders = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('MIN(order.created_at)', 'firstOrderDate')
+      .addSelect('order.customerId', 'customerId')
+      .innerJoin('order.customer', 'customer')
+      .where('order.restaurantId = :restaurantId', { restaurantId: restaurant.id })
+      .andWhere('order.exist = true')
+      .groupBy('order.customerId')
+      .getRawMany();
+
+    const ordersInRange = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('DISTINCT order.customerId', 'customerId')
+      .where('order.restaurantId = :restaurantId', { restaurantId: restaurant.id })
+      .andWhere('order.created_at BETWEEN :from AND :to', { from: fromDate, to: toDate })
+      .andWhere('order.exist = true')
+      .getRawMany();
+
+    const customersInRange = ordersInRange.map((r) => r.customerId);
+
+    const firstOrderMap = new Map<string, string>();
+    for (const row of firstOrders) {
+      firstOrderMap.set(row.customerId, row.firstOrderDate);
+    }
+
+    let newCustomers = 0;
+    let returningCustomers = 0;
+
+    for (const customerId of customersInRange) {
+      const firstDate = firstOrderMap.get(customerId);
+      if (!firstDate) continue;
+
+      const firstOrderDate = new Date(firstDate);
+      if (firstOrderDate >= fromDate && firstOrderDate <= toDate) {
+        newCustomers++;
+      } else {
+        returningCustomers++;
+      }
+    }
+
+    const total = newCustomers + returningCustomers;
+    const newPercentage = total ? (newCustomers / total) * 100 : 0;
+    const returningPercentage = total ? (returningCustomers / total) * 100 : 0;
+
+    return {
+      newCustomers,
+      returningCustomers,
+      newPercentage: parseFloat(newPercentage.toFixed(2)),
+      returningPercentage: parseFloat(returningPercentage.toFixed(2)),
     };
   }
 }

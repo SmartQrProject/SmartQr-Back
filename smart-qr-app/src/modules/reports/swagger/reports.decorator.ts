@@ -61,3 +61,80 @@ export function GetSalesReportDoc() {
     }),
   );
 }
+
+export function GetTopProductsDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Get top selling products',
+      description: 'Returns the top 10 most or least sold products in a restaurant within a given date range.',
+    }),
+    ApiParam({
+      name: 'slug',
+      required: true,
+      description: 'Restaurant slug (unique identifier)',
+      example: 'test-cafe',
+    }),
+    ApiQuery({
+      name: 'from',
+      required: true,
+      type: String,
+      example: '2025-05-01',
+      description: 'Start date in YYYY-MM-DD format (inclusive)',
+    }),
+    ApiQuery({
+      name: 'to',
+      required: true,
+      type: String,
+      example: '2025-05-20',
+      description: 'End date in YYYY-MM-DD format (inclusive)',
+    }),
+    ApiQuery({
+      name: 'sort',
+      required: false,
+      type: String,
+      enum: ['asc', 'desc'],
+      example: 'desc',
+      description: 'Sorting direction: "desc" for most sold, "asc" for least sold',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Array of top sold products',
+      schema: {
+        example: [
+          {
+            name: 'Café Latte',
+            quantity: 120,
+          },
+          {
+            name: 'Té Verde',
+            quantity: 85,
+          },
+        ],
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized access',
+      schema: {
+        example: {
+          statusCode: 401,
+          message: 'Unauthorized',
+          error: 'Unauthorized',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 404,
+      description: 'Restaurant not found',
+      schema: {
+        example: {
+          statusCode: 404,
+          message: 'Restaurant with slug test-cafe not found',
+          error: 'Not Found',
+        },
+      },
+    }),
+  );
+}

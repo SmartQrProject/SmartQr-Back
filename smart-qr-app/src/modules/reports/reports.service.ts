@@ -2,12 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from 'src/shared/entities/order.entity';
+import { GetCustomersReportDto } from './dto/get-customers.dto';
+import { Customer } from 'src/shared/entities/customer.entity';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
+    @InjectRepository(Customer)
+    private readonly customerRepo: Repository<Customer>,
+
+    @InjectRepository(Restaurant)
+    private readonly restaurantRepo: Repository<Restaurant>,
   ) {}
 
   async getSalesTotal(start: string, end: string, slug: string): Promise<number> {
@@ -142,5 +151,53 @@ export class ReportsService {
       label,
       count: map.get(label) || 0,
     }));
+  }
+
+  async getCustomersReport(slug: string, query: GetCustomersReportDto) {
+    const { page = '1', limit = '10', sortBy = 'orders', order = 'desc' } = query;
+    const take = parseInt(limit);
+    const skip = (parseInt(page) - 1) * take;
+
+    const restaurant = await this.restaurantRepo.findOne({ where: { slug } });
+    if (!restaurant) return { data: [], total: 0 };
+
+    const customers = await this.customerRepo
+      .createQueryBuilder('c')
+      .leftJoin('c.orders', 'o', 'o.exist = true')
+      .where('c.restaurantId = :restaurantId', { restaurantId: restaurant.id })
+      .andWhere('c.exist = true')
+      .select('c.id', 'id')
+      .addSelect('c.name', 'name')
+      .addSelect('c.email', 'email')
+      .addSelect('c.created_at', 'createdAt')
+      .addSelect('COUNT(o.id)', 'orders')
+      .addSelect('COALESCE(SUM(o.total_price), 0)', 'totalSpent')
+      .addSelect('ROUND(COALESCE(SUM(o.total_price) / NULLIF(COUNT(o.id), 0), 0), 2)', 'averageOrder')
+      .addSelect('MAX(o.created_at)', 'lastVisit')
+      .addGroupBy('c.id')
+      .orderBy(sortBy, order.toUpperCase() as 'ASC' | 'DESC')
+      .skip(skip)
+      .take(take)
+      .getRawMany();
+
+    const enhanced = customers.map((c) => ({
+      ...c,
+      orders: parseInt(c.orders, 10),
+      totalSpent: parseFloat(c.totalSpent),
+      averageOrder: parseFloat(c.averageOrder),
+      daysSince: c.lastVisit ? dayjs().diff(dayjs(c.lastVisit), 'day') : null,
+    }));
+
+    const total = await this.customerRepo.count({
+      where: {
+        restaurant: { id: restaurant.id },
+        exist: true,
+      },
+    });
+
+    return {
+      data: enhanced,
+      total,
+    };
   }
 }

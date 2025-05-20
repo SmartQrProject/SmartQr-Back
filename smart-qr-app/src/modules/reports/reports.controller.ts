@@ -2,10 +2,11 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { GetSalesDto } from './dto/get-sales.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { GetSalesByCategoryDoc, GetSalesFrequencyDoc, GetSalesReportDoc, GetTopProductsDoc } from './swagger/reports.decorator';
+import { GetCustomersReportDoc, GetSalesByCategoryDoc, GetSalesFrequencyDoc, GetSalesReportDoc, GetTopProductsDoc } from './swagger/reports.decorator';
 import { GetTopProductsDto } from './dto/get-top-products.dto';
 import { GetSalesByCategoryDto } from './dto/get-sales-by-category.dto';
 import { GetSalesFrequencyDto } from './dto/get-sales-frequency.dto';
+import { GetCustomersReportDto } from './dto/get-customers.dto';
 
 @Controller(':slug/reports')
 @UseGuards(AuthGuard)
@@ -41,5 +42,11 @@ export class ReportsController {
   @GetSalesFrequencyDoc()
   async getSalesFrequency(@Param('slug') slug: string, @Query() query: GetSalesFrequencyDto) {
     return this.reportsService.getSalesFrequency(slug, query.group);
+  }
+
+  @Get('customers')
+  @GetCustomersReportDoc()
+  async getCustomerStats(@Param('slug') slug: string, @Query() query: GetCustomersReportDto) {
+    return this.reportsService.getCustomersReport(slug, query);
   }
 }

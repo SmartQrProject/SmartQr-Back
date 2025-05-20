@@ -231,3 +231,21 @@ export function GetSalesFrequencyDoc() {
     }),
   );
 }
+
+export function GetCustomersReportDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Reporte de clientes con métricas y ordenamiento',
+      description: 'Devuelve una lista paginada de clientes con su email, órdenes, total, promedio y fechas relevantes',
+    }),
+    ApiParam({ name: 'slug', example: 'test-cafe', description: 'Slug del restaurante' }),
+    ApiQuery({ name: 'sortBy', required: false, enum: ['name', 'email', 'orders', 'totalSpent', 'averageOrder', 'createdAt', 'lastVisit', 'daysSince'] }),
+    ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] }),
+    ApiQuery({ name: 'page', required: false, example: '1' }),
+    ApiQuery({ name: 'limit', required: false, example: '10' }),
+    ApiResponse({ status: 200, description: 'Lista de clientes con métricas' }),
+    ApiResponse({ status: 401, description: 'No autorizado' }),
+  );
+}

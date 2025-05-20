@@ -4,9 +4,11 @@ import { ReportsController } from './reports.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from 'src/shared/entities/order.entity';
 import { CommonModule } from 'src/common/common.module';
+import { Customer } from 'src/shared/entities/customer.entity';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order]), CommonModule],
+  imports: [TypeOrmModule.forFeature([Order, Customer, Restaurant]), CommonModule],
   controllers: [ReportsController],
   providers: [ReportsService],
 })

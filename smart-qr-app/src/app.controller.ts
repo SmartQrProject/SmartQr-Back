@@ -12,7 +12,6 @@ export class AppController {
 
   @Get('protected')
   getProtected(@Req() req: Request): any {
-    console.log('Token validado', req.user, req.auth);
     return {
       message: 'This is a protected endpoint',
       user: req.auth, // auth viene de express-oauth2-jwt-bearer

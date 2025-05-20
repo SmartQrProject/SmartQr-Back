@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
@@ -40,9 +35,7 @@ export class RestaurantTableRepository {
     });
 
     if (!tables) {
-      throw new NotFoundException(
-        `❌ No Tables found for this restaurant ${rest}`,
-      );
+      throw new NotFoundException(`❌ No Tables found for this restaurant ${rest}`);
     }
 
     return { page, limit, restaurantTables: tables };
@@ -61,18 +54,12 @@ export class RestaurantTableRepository {
     console.log(`Cantidad de registros:`, items.length);
     console.log(items);
 
-    const tablesArray = await this.restaurantTableRepository
-      .createQueryBuilder()
-      .insert()
-      .into(RestaurantTable)
-      .values(items)
-      .orIgnore()
-      .execute();
+    const tablesArray = await this.restaurantTableRepository.createQueryBuilder().insert().into(RestaurantTable).values(items).orIgnore().execute();
 
-    const subject = `Satisfactory Tables Creation for your restaurant ${rest.name}`;
-    const textmsg = `Congratulations!!!! Your have created the following tables for the restaurant.${items}`;
-    const htmlTemplate = 'signIn';
-    this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
+    // const subject = `Satisfactory Tables Creation for your restaurant ${rest.name}`;
+    // const textmsg = `Congratulations!!!! Your have created the following tables for the restaurant.${items}`;
+    // const htmlTemplate = 'signIn';
+    // this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
 
     return items;
   }
@@ -85,9 +72,7 @@ export class RestaurantTableRepository {
     });
 
     if (!restTable) {
-      throw new NotFoundException(
-        `❌ No Table found for this restaurant ${rest} and with this Id: ${id}`,
-      );
+      throw new NotFoundException(`❌ No Table found for this restaurant ${rest} and with this Id: ${id}`);
     }
 
     return restTable;
@@ -101,9 +86,7 @@ export class RestaurantTableRepository {
     });
 
     if (!restTable) {
-      throw new NotFoundException(
-        `❌ No Table found for this restaurant ${rest} and with this Id: ${id}`,
-      );
+      throw new NotFoundException(`❌ No Table found for this restaurant ${rest} and with this Id: ${id}`);
     }
     const updatedTable = this.restaurantTableRepository.merge(restTable, {
       exist: false,
@@ -113,25 +96,16 @@ export class RestaurantTableRepository {
     return updatedTable;
   }
   // GEA FINALIZADO Mayo 17 -------------------------------------------------
-  async updateById(
-    rest,
-    id,
-    updateRestaurantTable: Partial<UpdateRestaurantTableDto>,
-  ): Promise<RestaurantTable> {
+  async updateById(rest, id, updateRestaurantTable: Partial<UpdateRestaurantTableDto>): Promise<RestaurantTable> {
     const restTable = await this.restaurantTableRepository.findOne({
       where: { restaurant: { id: rest.id }, id: id },
       relations: ['restaurant'],
     });
 
     if (!restTable) {
-      throw new NotFoundException(
-        `❌ No Table found for this restaurant ${rest} and with this Id: ${id}`,
-      );
+      throw new NotFoundException(`❌ No Table found for this restaurant ${rest} and with this Id: ${id}`);
     }
-    const updatedTable = this.restaurantTableRepository.merge(
-      restTable,
-      updateRestaurantTable,
-    );
+    const updatedTable = this.restaurantTableRepository.merge(restTable, updateRestaurantTable);
     await this.restaurantTableRepository.save(updatedTable);
     return updatedTable;
   }

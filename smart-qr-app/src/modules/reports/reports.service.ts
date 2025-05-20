@@ -161,6 +161,18 @@ export class ReportsService {
     const restaurant = await this.restaurantRepo.findOne({ where: { slug } });
     if (!restaurant) return { data: [], total: 0 };
 
+    const sortOptions = {
+      name: 'c.name',
+      email: 'c.email',
+      createdAt: 'c.created_at',
+      orders: 'COUNT(o.id)',
+      totalSpent: 'COALESCE(SUM(o.total_price), 0)',
+      averageOrder: 'ROUND(COALESCE(SUM(o.total_price) / NULLIF(COUNT(o.id), 0), 0), 2)',
+      lastVisit: 'MAX(o.created_at)',
+    };
+
+    const sortField = sortOptions[sortBy] || 'COUNT(o.id)';
+
     const customers = await this.customerRepo
       .createQueryBuilder('c')
       .leftJoin('c.orders', 'o', 'o.exist = true')
@@ -174,8 +186,8 @@ export class ReportsService {
       .addSelect('COALESCE(SUM(o.total_price), 0)', 'totalSpent')
       .addSelect('ROUND(COALESCE(SUM(o.total_price) / NULLIF(COUNT(o.id), 0), 0), 2)', 'averageOrder')
       .addSelect('MAX(o.created_at)', 'lastVisit')
-      .addGroupBy('c.id')
-      .orderBy(sortBy, order.toUpperCase() as 'ASC' | 'DESC')
+      .groupBy('c.id')
+      .orderBy(sortField, order.toUpperCase() as 'ASC' | 'DESC')
       .skip(skip)
       .take(take)
       .getRawMany();

@@ -2,9 +2,10 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { GetSalesDto } from './dto/get-sales.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { GetSalesByCategoryDoc, GetSalesReportDoc, GetTopProductsDoc } from './swagger/reports.decorator';
+import { GetSalesByCategoryDoc, GetSalesFrequencyDoc, GetSalesReportDoc, GetTopProductsDoc } from './swagger/reports.decorator';
 import { GetTopProductsDto } from './dto/get-top-products.dto';
 import { GetSalesByCategoryDto } from './dto/get-sales-by-category.dto';
+import { GetSalesFrequencyDto } from './dto/get-sales-frequency.dto';
 
 @Controller(':slug/reports')
 @UseGuards(AuthGuard)
@@ -34,5 +35,11 @@ export class ReportsController {
     const { from, to, sort } = query;
     const data = await this.reportsService.getSalesByCategory(from, to, slug, sort);
     return data;
+  }
+
+  @Get('sales-frequency')
+  @GetSalesFrequencyDoc()
+  async getSalesFrequency(@Param('slug') slug: string, @Query() query: GetSalesFrequencyDto) {
+    return this.reportsService.getSalesFrequency(slug, query.group);
   }
 }

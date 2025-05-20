@@ -193,3 +193,41 @@ export function GetSalesByCategoryDoc() {
     }),
   );
 }
+
+export function GetSalesFrequencyDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Obtener cantidad de ventas agrupadas por unidad temporal',
+      description: 'Devuelve la frecuencia de ventas por hora, día de semana, día del mes o mes del año.',
+    }),
+    ApiParam({
+      name: 'slug',
+      required: true,
+      example: 'test-cafe',
+      description: 'Slug del restaurante',
+    }),
+    ApiQuery({
+      name: 'group',
+      enum: ['hour', 'weekday', 'monthday', 'month'],
+      required: true,
+      description: 'Unidad temporal para agrupar las ventas',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Frecuencia de ventas devuelta exitosamente',
+      schema: {
+        example: [
+          { label: '00', count: 5 },
+          { label: '01', count: 2 },
+          { label: '02', count: 0 },
+        ],
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'No autorizado',
+    }),
+  );
+}

@@ -82,4 +82,65 @@ export class ReportsService {
       average_price: parseFloat(r.average_price),
     }));
   }
+
+  async getSalesFrequency(slug: string, group: string) {
+    const qb = this.orderRepo.createQueryBuilder('order').innerJoin('order.restaurant', 'restaurant').where('restaurant.slug = :slug', { slug }).andWhere('order.exist = true');
+
+    let baseLabels: string[] = [];
+    const weekdayMap = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const monthMap = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    switch (group) {
+      case 'hour':
+        baseLabels = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+        qb.select("TO_CHAR(order.created_at, 'HH24')", 'label').addSelect('COUNT(*)', 'count').groupBy('label').orderBy('label');
+        break;
+
+      case 'weekday':
+        baseLabels = weekdayMap;
+        qb.select('EXTRACT(DOW FROM order.created_at)', 'index').addSelect('COUNT(*)', 'count').groupBy('index').orderBy('index');
+        break;
+
+      case 'monthday':
+        const today = new Date();
+        const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        baseLabels = Array.from({ length: totalDays }, (_, i) => (i + 1).toString().padStart(2, '0'));
+        qb.select("TO_CHAR(order.created_at, 'DD')", 'label').addSelect('COUNT(*)', 'count').groupBy('label').orderBy('label');
+        break;
+
+      case 'month':
+        baseLabels = monthMap;
+        qb.select('EXTRACT(MONTH FROM order.created_at)', 'index').addSelect('COUNT(*)', 'count').groupBy('index').orderBy('index');
+        break;
+
+      default:
+        return [];
+    }
+
+    const raw = await qb.getRawMany();
+    const map = new Map<string, number>();
+
+    if (group === 'weekday') {
+      raw.forEach((r) => {
+        const index = parseInt(r.index, 10);
+        const label = weekdayMap[index];
+        map.set(label, parseInt(r.count, 10));
+      });
+    } else if (group === 'month') {
+      raw.forEach((r) => {
+        const index = parseInt(r.index, 10);
+        const label = monthMap[index - 1];
+        map.set(label, parseInt(r.count, 10));
+      });
+    } else {
+      raw.forEach((r) => {
+        map.set(r.label.trim(), parseInt(r.count, 10));
+      });
+    }
+
+    return baseLabels.map((label) => ({
+      label,
+      count: map.get(label) || 0,
+    }));
+  }
 }

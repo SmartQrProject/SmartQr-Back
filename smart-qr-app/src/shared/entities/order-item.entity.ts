@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { IsUUID, IsInt, Min, IsDecimal } from 'class-validator';
+import { IsUUID, IsInt, Min, IsDecimal, IsOptional, IsNumber } from 'class-validator';
 import { Order } from './order.entity';
 import { Product } from './product.entity';
 
@@ -23,4 +23,14 @@ export class OrderItem {
   @Column('decimal', { precision: 10, scale: 2 })
   @IsDecimal()
   unit_price: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @IsOptional()
+  @IsNumber()
+  discount_applied?: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @IsOptional()
+  @IsNumber()
+  cost_price?: number;
 }

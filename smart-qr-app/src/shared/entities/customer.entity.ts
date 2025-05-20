@@ -1,21 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  OneToMany,
-  ManyToOne,
-  UpdateDateColumn,
-} from 'typeorm';
-import {
-  IsString,
-  IsEmail,
-  IsUUID,
-  IsBoolean,
-  IsInt,
-  Length,
-  Min,
-} from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, ManyToOne, UpdateDateColumn } from 'typeorm';
+import { IsString, IsEmail, IsUUID, IsBoolean, IsInt, Length, Min, IsOptional, IsDate, IsNumber } from 'class-validator';
 import { Order } from './order.entity';
 import { Restaurant } from './restaurant.entity';
 
@@ -38,6 +22,7 @@ export class Customer {
   name: string;
 
   @Column({ nullable: true })
+  @IsString()
   picture: string;
 
   @Column({ nullable: true })
@@ -52,6 +37,15 @@ export class Customer {
   @IsInt()
   @Min(0)
   reward: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @IsOptional()
+  @IsDate()
+  last_visit?: Date;
+
+  @Column({ type: 'int', default: 0 })
+  @IsNumber()
+  visits_count: number;
 
   @CreateDateColumn()
   created_at: Date;

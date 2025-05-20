@@ -16,6 +16,7 @@ import { WebSocketModule } from './modules/websocket/websocket.module';
 import { UsersModule } from './modules/users/users.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     WebSocketModule,
     ChatbotModule,
     CloudinaryModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [],

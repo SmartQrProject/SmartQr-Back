@@ -138,3 +138,58 @@ export function GetTopProductsDoc() {
     }),
   );
 }
+
+export function GetSalesByCategoryDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Ventas por categoría',
+      description: 'Devuelve las ventas agrupadas por categoría dentro de un rango de fechas.',
+    }),
+    ApiParam({
+      name: 'slug',
+      required: true,
+      example: 'test-cafe',
+    }),
+    ApiQuery({
+      name: 'from',
+      required: true,
+      type: String,
+      example: '2025-05-01',
+      description: 'Fecha de inicio (YYYY-MM-DD)',
+    }),
+    ApiQuery({
+      name: 'to',
+      required: true,
+      type: String,
+      example: '2025-05-20',
+      description: 'Fecha de fin (YYYY-MM-DD)',
+    }),
+    ApiQuery({
+      name: 'sort',
+      required: false,
+      enum: ['asc', 'desc'],
+      description: 'Orden por total vendido (asc = menos vendida, desc = más vendida)',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Lista de categorías con totales y porcentajes',
+      schema: {
+        example: [
+          {
+            category: 'Bebidas',
+            total: 230.5,
+            percentage: 48.2,
+            quantity: 84,
+            average_price: 2.74,
+          },
+        ],
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'No autorizado',
+    }),
+  );
+}

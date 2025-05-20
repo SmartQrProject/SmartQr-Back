@@ -49,4 +49,37 @@ export class ReportsService {
 
     return result;
   }
+
+  async getSalesByCategory(from: string, to: string, slug: string, sort: 'asc' | 'desc' = 'desc') {
+    const start = new Date(from);
+    const end = new Date(to);
+    end.setHours(23, 59, 59, 999);
+
+    const raw = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('category.name', 'category')
+      .addSelect('SUM(item.quantity * item.unit_price)', 'total')
+      .addSelect('SUM(item.quantity)', 'quantity')
+      .addSelect('AVG(item.unit_price)', 'average_price')
+      .innerJoin('order.items', 'item')
+      .innerJoin('item.product', 'product')
+      .innerJoin('product.category', 'category')
+      .innerJoin('order.restaurant', 'restaurant')
+      .where('order.exist = true')
+      .andWhere('restaurant.slug = :slug', { slug })
+      .andWhere('order.created_at BETWEEN :start AND :end', { start, end })
+      .groupBy('category.name')
+      .orderBy('total', sort.toUpperCase() as 'ASC' | 'DESC')
+      .getRawMany();
+
+    const totalSum = raw.reduce((sum, r) => sum + Number(r.total), 0);
+
+    return raw.map((r) => ({
+      category: r.category,
+      total: parseFloat(r.total),
+      percentage: totalSum ? parseFloat(((r.total / totalSum) * 100).toFixed(1)) : 0,
+      quantity: parseInt(r.quantity),
+      average_price: parseFloat(r.average_price),
+    }));
+  }
 }

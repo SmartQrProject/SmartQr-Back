@@ -40,10 +40,7 @@ export class UsersService {
       restaurant: user.restaurant,
     };
 
-    console.log('payload en signin:', jwtPayLoad);
-
     const access_token = this.jwtService.generateToken(jwtPayLoad);
-    console.log('token:', access_token);
 
     return { success: 'Logged Succesfully with token', access_token };
   }

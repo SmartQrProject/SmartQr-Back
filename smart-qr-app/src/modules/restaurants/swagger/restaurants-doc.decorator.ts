@@ -106,6 +106,7 @@ export function GetRestaurantPublicDoc() {
           name: 'Test Cafe',
           slug: 'test-cafe',
           is_active: true,
+          banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
           categories: [
             {
               name: 'Beverages',

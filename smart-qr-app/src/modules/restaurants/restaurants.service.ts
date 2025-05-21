@@ -106,6 +106,7 @@ export class RestaurantsService {
       name: restaurant.name,
       slug: restaurant.slug,
       is_active: restaurant.is_active,
+      banner: restaurant.banner,
       categories: restaurant.categories
         .filter((c) => c.exist)
         .map((category) => ({

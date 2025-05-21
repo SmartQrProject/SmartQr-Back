@@ -117,8 +117,8 @@ export function GetActiveStaff() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: 'Get paginated users list for an specific restaurant, only active staff users',
-      description: 'Retrieves a paginated list of users for a specific restaurant. Requires authentication.',
+      summary: 'Get paginated staff only active users list for an specific restaurant',
+      description: 'Retrieves a paginated staff active users list of users for a specific restaurant. Requires authentication.',
     }),
     ApiQuery({
       name: 'slug',

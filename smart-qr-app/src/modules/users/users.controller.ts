@@ -6,7 +6,7 @@ import { User } from 'src/shared/entities/user.entity';
 import { PutUserDto } from './dto/put-user.dto';
 import { SignInUserDto } from './dto/signIn-user.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { CreateUserDoc, DeleteUserByIdDoc, GetAllUsersDoc, UserLoginDoc, ModifyUserByIdDoc } from './swagger/user-doc.decorator';
+import { CreateUserDoc, DeleteUserByIdDoc, GetAllUsersDoc, UserLoginDoc, ModifyUserByIdDoc, GetActiveStaff } from './swagger/user-doc.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/common/decorators/role.enum';
@@ -41,7 +41,7 @@ export class UsersController {
 
   @Get('staff')
   @HttpCode(200)
-  @GetAllUsersDoc() //////////////////////////////////////////////////////////////////necesita slug mandamos como query dado q no tenemos otra option
+  @GetActiveStaff() //////////////////////////////////////////////////////////////////necesita slug mandamos como query dado q no tenemos otra option
   @Roles(Role.Owner, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   async getActiveStaff(

@@ -87,6 +87,37 @@ export class UsersRepository {
     return { page, limit, usuarios: usuariosSinClave };
   }
 
+  // GEA FINALIZADO Mayo 20
+  async getActiveStaff(
+    rest,
+    page: number,
+    limit: number,
+  ): Promise<{
+    page: number;
+    limit: number;
+    usuarios: Omit<User, 'password'>[];
+  }> {
+    const skip = (page - 1) * limit;
+    const [usuarios, total] = await this.userRepository.findAndCount({
+      skip,
+      take: limit,
+      where: {
+        role: 'staff',
+        exist: true,
+        restaurant: { id: rest.id },
+      },
+      order: { name: 'ASC' },
+    });
+
+    if (!usuarios) {
+      throw new NotFoundException('❌ No users found');
+    }
+
+    const usuariosSinClave = usuarios.map(({ password, ...resto }) => resto);
+
+    return { page, limit, usuarios: usuariosSinClave };
+  }
+
   // Finalizado GEA Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
   async createUser(rest, userToCreate): Promise<Omit<User, 'password'>> {
     console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', userToCreate, rest);

@@ -6,18 +6,25 @@ import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto
 import { Customer } from 'src/shared/entities/customer.entity';
 import { Auth0CustomerDto } from './dto/auth0-customer.dto';
 import { LogInCustomerDto } from './dto/login-customer.dto';
-import { CreateCustomerDoc, DeleteCustomerDoc, GetAllCustomersDoc, GetCustomerByIdDoc, SignInCustomerDoc, SyncAuth0Doc, UpdateCustomerDoc } from './swagger/customers.decorator';
+import {
+  CreateCustomerDoc,
+  DeleteCustomerDoc,
+  GetAllCustomersDoc,
+  GetCustomerByIdDoc,
+  SignInCustomerDoc,
+  SyncAuth0Doc,
+  UpdateCustomerDoc,
+} from './swagger/customers-doc.decorator';
 
-@ApiTags('CRUD EndPoints para Customers. SignUP, SignIn, etc')
+@ApiTags('CRUD EndPoints para Customers (restaurant customers). SignUP, SignIn, etc')
 @Controller(':slug/customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
-  // listo 14-Mayo GEA
   @Post('sincronizar')
   //@UseGuards(JwtAuthGuard)
   @SyncAuth0Doc()
-  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string, @Req() req): Promise<Customer> {
+  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string): Promise<Customer> {
     return this.customersService.sincronizarAuth0(customer, slug);
   }
 

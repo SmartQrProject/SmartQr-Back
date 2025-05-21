@@ -24,7 +24,7 @@ export class User {
 
   @Column({ length: 20 })
   @IsString()
-  role: string; // 'superadmin', 'restadmin', 'reststaff'
+  role: string; // 'superAdmin', 'owner', 'staff'
 
   @CreateDateColumn()
   created_at: Date;

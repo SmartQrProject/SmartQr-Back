@@ -39,6 +39,18 @@ export class UsersController {
     return this.usersService.getUsers(slug, page, limit);
   }
 
+  @Get('staff')
+  @HttpCode(200)
+  @GetAllUsersDoc() //////////////////////////////////////////////////////////////////necesita slug mandamos como query dado q no tenemos otra option
+  @Roles(Role.Owner, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  async getActiveStaff(
+    @Query('slug') slug: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+  ) {
+    return this.usersService.getActiveStaff(slug, page, limit);
+  }
   //  FINALIZADO GEA MAyo-13------ trabajando en este endpoint --------GEA Mayo-13
   @Delete(':slug/:id')
   @HttpCode(200)

@@ -112,6 +112,85 @@ export function GetAllUsersDoc() {
   );
 }
 
+//
+export function GetActiveStaff() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: 'Get paginated users list for an specific restaurant, only active staff users',
+      description: 'Retrieves a paginated list of users for a specific restaurant. Requires authentication.',
+    }),
+    ApiQuery({
+      name: 'slug',
+      description: 'Unique restaurant identifier',
+      example: 'test-cafe',
+      required: true,
+    }),
+    ApiQuery({
+      name: 'page',
+      description: 'Page number',
+      example: 1,
+      required: false,
+      type: Number,
+    }),
+    ApiQuery({
+      name: 'limit',
+      description: 'Items per page',
+      example: 5,
+      required: false,
+      type: Number,
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Users found successfully',
+      schema: {
+        example: {
+          users: [
+            {
+              id: '550e8400-e29b-41d4-a716-446655440000',
+              email: 'smartqr2@gmail.com',
+              name: 'owner Test Cafe',
+              role: 'owner',
+              created_at: '2024-03-20T12:34:56.789Z',
+              restaurant: {
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                name: 'Test Cafe',
+                slug: 'test-cafe',
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          limit: 5,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized',
+      schema: {
+        example: {
+          message: 'Unauthorized user',
+          error: 'Unauthorized',
+          statusCode: 401,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 404,
+      description: 'Restaurant not found',
+      schema: {
+        example: {
+          message: 'Restaurant with slug test-cafe not found',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    }),
+  );
+}
+
+//
 export function DeleteUserByIdDoc() {
   return applyDecorators(
     ApiBearerAuth(),

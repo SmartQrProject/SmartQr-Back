@@ -128,6 +128,20 @@ export class UsersService {
     return this.usersRepository.getUsers(rest, page, limit);
   }
 
+  // FINALIZDO GEA MAYO-20
+  async getActiveStaff(
+    slug,
+    page,
+    limit,
+  ): Promise<{
+    page: number;
+    limit: number;
+    usuarios: Omit<User, 'password'>[];
+  }> {
+    const rest = await this.restService.getRestaurants(slug);
+    return this.usersRepository.getActiveStaff(rest, page, limit);
+  }
+
   // Finalizado Mayo-13------ trabajando en este endpoint ---GEA Mayo 12-
   async userSignUp(slug, newUser): Promise<Omit<User, 'password'>> {
     const rest = await this.restService.getRestaurants(slug);

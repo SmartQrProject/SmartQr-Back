@@ -32,6 +32,9 @@ export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export const FRONTEND_URL = process.env.FRONTEND_URL;
 
+export const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+export const EMAIL_HOST = process.env.EMAIL_HOST;
+export const EMAIL_PORT = process.env.EMAIL_PORT;
 export const EMAIL_USER = process.env.EMAIL_USER;
 export const EMAIL_PASS = process.env.EMAIL_PASS;
 

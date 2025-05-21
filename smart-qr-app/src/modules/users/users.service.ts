@@ -16,7 +16,6 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
   async userLogin(/*slug,*/ { email, password }: SignInUserDto): Promise<object> {
     /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
@@ -24,6 +23,7 @@ export class UsersService {
     if (
       !user ||
       !user.exist ||
+      !user.is_active ||
       /*!rest ||
       user.restaurant.id !== rest.id ||*/
       !(await this.bcryptService.compare(password, user.password))
@@ -45,7 +45,6 @@ export class UsersService {
     return { success: 'Logged Succesfully with token', access_token };
   }
 
-  // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
   async modifyUserById(id, slug, user, req): Promise<string> {
     const usuario = await this.usersRepository.getUserById(id);
 
@@ -64,7 +63,9 @@ export class UsersService {
 
     if (user.email) {
       const usuario = await this.usersRepository.getUserByEmail(user.email);
-      if (usuario && usuario.id !== user.id) {
+      console.log('Usuario y user email:', usuario?.email, user.email);
+      console.log('Usuario y user id:', usuario?.id, id);
+      if (usuario && usuario.id !== id) {
         throw new ConflictException(`❌ Email already in use: ${user.email} !!`);
       }
     }
@@ -155,7 +156,6 @@ export class UsersService {
       throw new ConflictException('❌ Passwords are not equals!!!');
     }
 
-    console.log('YYYYYYYYYYYYYYYYYY ---------------nuevo usuario: ', newUser, ' restaurant: ', rest);
     return await this.usersRepository.createUser(rest, newUser);
   }
 }

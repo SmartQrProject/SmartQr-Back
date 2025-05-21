@@ -73,6 +73,7 @@ export function GetAllUsersDoc() {
               email: 'smartqr2@gmail.com',
               name: 'owner Test Cafe',
               role: 'owner',
+              is_active: true,
               created_at: '2024-03-20T12:34:56.789Z',
               restaurant: {
                 id: '550e8400-e29b-41d4-a716-446655440000',
@@ -152,6 +153,7 @@ export function GetActiveStaff() {
               name: 'owner Test Cafe',
               role: 'owner',
               created_at: '2024-03-20T12:34:56.789Z',
+              is_active: 'owner',
               restaurant: {
                 id: '550e8400-e29b-41d4-a716-446655440000',
                 name: 'Test Cafe',

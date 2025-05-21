@@ -32,6 +32,9 @@ export class User {
   @Column({ default: true })
   exist: boolean;
 
+  @Column({ default: true })
+  is_active: boolean;
+
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.users, {
     onDelete: 'CASCADE',
   })

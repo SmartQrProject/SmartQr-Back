@@ -5,6 +5,7 @@ import { User } from 'src/shared/entities/user.entity';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { PutUserDto } from './dto/put-user.dto';
+import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class UsersRepository {
@@ -12,9 +13,9 @@ export class UsersRepository {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly bcryptService: BcryptService,
+    private mailService: MailService,
   ) {}
 
-  // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
   async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<string> {
     const user = await this.userRepository.findOneBy({
       id: id,
@@ -25,11 +26,6 @@ export class UsersRepository {
       throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
     }
 
-    // if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
-    //   throw new NotFoundException(
-    //     `You can not update User data for a different user.`,
-    //   );
-    // }
     if (updateUser.password) {
       const hash = await this.bcryptService.hash(updateUser.password);
       if (!hash) {
@@ -41,10 +37,14 @@ export class UsersRepository {
     const { confirmPassword, ...putUser } = updateUser;
     const mergeUser = this.userRepository.merge(user, putUser);
     await this.userRepository.save(mergeUser);
+
+    const subject = `Successfull User Update for your restaurant ${rest.name}`;
+    const textmsg = `Your have updated the profile of the following user.${(mergeUser.email, mergeUser.name)}`;
+    const htmlTemplate = 'signIn';
+    this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
     return id + ' was updated';
   }
 
-  // GEA FINALIZADO Mayo 14------ trabajando en este endpoint ---GEA Mayo 12-
   async deleteById(id: string): Promise<string> {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -56,11 +56,11 @@ export class UsersRepository {
     }
 
     user.exist = false;
+    user.is_active = false;
     await this.userRepository.save(user);
     return 'Usuario bloquedao: ' + id;
   }
 
-  // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
   async getUsers(
     rest,
     page: number,
@@ -87,7 +87,6 @@ export class UsersRepository {
     return { page, limit, usuarios: usuariosSinClave };
   }
 
-  // GEA FINALIZADO Mayo 20
   async getActiveStaff(
     rest,
     page: number,
@@ -120,7 +119,6 @@ export class UsersRepository {
 
   // Finalizado GEA Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
   async createUser(rest, userToCreate): Promise<Omit<User, 'password'>> {
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', userToCreate, rest);
     const hash = await this.bcryptService.hash(userToCreate.password);
     if (!hash) {
       throw new InternalServerErrorException('Problem with the bcrypt library');
@@ -137,7 +135,7 @@ export class UsersRepository {
   // Finalizado GEA Mayo-13---- trabajando en este endpoint ---GEA Mayo 12-
   async getUserByEmail(email: string): Promise<User | null> {
     const usuario = await this.userRepository.findOne({
-      where: { email },
+      where: { email: email, exist: true },
       relations: ['restaurant'],
     });
 
@@ -147,7 +145,7 @@ export class UsersRepository {
   // Finalizado GEA Mayo-13---- trabajando en este endpoint ---GEA Mayo 12-
   async getUserById(id: string): Promise<User | null> {
     const usuario = await this.userRepository.findOne({
-      where: { id },
+      where: { id: id, exist: true },
       relations: ['restaurant'],
     });
 

@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiBody, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateRestaurantsDto } from '../dto/create-restaurants.dto';
 
 export function CreateRestaurantDoc() {
@@ -48,6 +48,7 @@ export function CreateRestaurantDoc() {
 
 export function GetRestaurantDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'Get restaurant information',
       description: 'Retrieves restaurant data and its categories/products using its unique slug.',
@@ -76,6 +77,50 @@ export function GetRestaurantDoc() {
               id: '7d1e3cd8-2a0d-4a40-8b2e-4e1c9578c8f3',
               name: 'Beverages',
               products: [],
+            },
+          ],
+        },
+      },
+    }),
+    ApiResponse({ status: 404, description: 'Restaurant not found' }),
+  );
+}
+
+export function GetRestaurantPublicDoc() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get restaurant public information',
+      description: 'Retrieves restaurant public data and its categories/products using its unique slug.',
+    }),
+    ApiQuery({
+      name: 'slug',
+      description: 'Unique restaurant identifier',
+      example: 'test-cafe',
+      required: true,
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Public restaurant info retrieved successfully',
+      schema: {
+        example: {
+          name: 'Test Cafe',
+          slug: 'test-cafe',
+          is_active: true,
+          categories: [
+            {
+              name: 'Beverages',
+              sequenceNumber: 0,
+              products: [
+                {
+                  sequenceNumber: 2,
+                  name: 'Fanta Zero',
+                  description: 'Sugar-free Fanta 355ml',
+                  price: '2.75',
+                  image_url: 'https://example.com/images/fanta-zero.jpg',
+                  is_available: true,
+                  details: ['sin gluten', 'vegano'],
+                },
+              ],
             },
           ],
         },

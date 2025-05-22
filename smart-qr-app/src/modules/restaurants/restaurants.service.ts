@@ -170,4 +170,12 @@ export class RestaurantsService {
 
     return `Restaurante ${slug} data were updated.`;
   }
+
+  async activatePlan(slug: string) {
+    const result = await this.restaurantRepository.update({ slug }, { is_active: true });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
+    }
+  }
 }

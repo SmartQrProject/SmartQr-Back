@@ -3,10 +3,12 @@ import { FRONTEND_URL, STRIPE_PRICE_ID, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 import { Request, Response } from 'express';
 import { HttpStatus } from '@nestjs/common';
 import Stripe from 'stripe';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Injectable()
 export class StripeService {
   private stripe = new Stripe(STRIPE_SECRET_KEY);
+  constructor(private readonly restaurantsService: RestaurantsService) {}
 
   // Para pagos únicos
   async createCheckoutSession(): Promise<Stripe.Checkout.Session> {
@@ -29,7 +31,7 @@ export class StripeService {
   }
 
   // Para suscripciones
-  async createSubscriptionSession(): Promise<Stripe.Checkout.Session> {
+  async createSubscriptionSession(slug: string): Promise<Stripe.Checkout.Session> {
     return await this.stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -41,6 +43,10 @@ export class StripeService {
       ],
       success_url: `${FRONTEND_URL}/success`,
       cancel_url: `${FRONTEND_URL}/cancel`,
+
+      metadata: {
+        slug: slug, // Cambia esto por el ID real del restaurante
+      },
     });
   }
 
@@ -56,12 +62,28 @@ export class StripeService {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        console.log('✅ Pago confirmado:', session.id);
+        try {
+          const session = event.data.object as Stripe.Checkout.Session;
+          const slug = session.metadata?.slug;
+
+          if (!slug) {
+            console.warn('⚠️ No se encontró slug en metadata.');
+            break;
+          }
+
+          console.log('✅ Pago confirmado:', slug);
+
+          await this.restaurantsService.activatePlan(slug);
+          console.log('✅ Plan activado para el restaurante:', slug);
+        } catch (err) {
+          console.error('❌ Error al procesar checkout.session.completed:', err);
+        }
         break;
       }
 
       case 'customer.subscription.created':
+        const session = event.data.object as Stripe.Subscription;
+
         console.log('📦 Suscripción creada');
         break;
 

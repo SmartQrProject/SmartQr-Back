@@ -64,7 +64,7 @@ export class Restaurant {
   @JoinColumn()
   subscription: Subscription;
 
-  @Column({ default: true })
+  @Column({ default: false })
   exist: boolean;
 
   @Column({

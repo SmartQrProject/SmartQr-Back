@@ -130,3 +130,47 @@ export function GetRestaurantPublicDoc() {
     ApiResponse({ status: 404, description: 'Restaurant not found' }),
   );
 }
+
+//PatchRestaurantBySlugDoc
+export function PatchRestaurantBySlugDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: 'Modify Name and Onwers email for a Restaurant',
+      description: 'Updates Name and Owner_Email. You should provide SLUG to access the data',
+    }),
+    ApiBody({
+      type: CreateRestaurantsDto,
+      description: 'Restaurant and owner data',
+      examples: {
+        testCafe: {
+          summary: 'Example of restaurant profile update',
+          value: {
+            name: 'Test Cafe',
+            bannerUrl: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+          },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Restaurant successfully created',
+      schema: {
+        example: {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          name: 'Test Cafe',
+          slug: 'test-cafe',
+          owner_email: 'smartqr2@gmail.com',
+          created_at: '2024-03-20T12:34:56.789Z',
+          updated_at: '2024-03-20T12:34:56.789Z',
+          exist: true,
+          is_active: true,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid data or slug already exists',
+    }),
+  );
+}

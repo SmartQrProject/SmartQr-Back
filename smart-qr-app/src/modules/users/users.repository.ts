@@ -40,7 +40,7 @@ export class UsersRepository {
 
     const subject = `Successfull User Update for your restaurant ${rest.name}`;
     const textmsg = `Your have updated the profile of the following user.${(mergeUser.email, mergeUser.name)}`;
-    const htmlTemplate = 'signIn';
+    const htmlTemplate = 'basico';
     this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
     return id + ' was updated';
   }

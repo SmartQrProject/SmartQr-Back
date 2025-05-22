@@ -21,7 +21,7 @@ export class UsersController {
   @ModifyUserByIdDoc()
   @Roles(Role.Owner, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
-  async modifyUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() user: Partial<PutUserDto>, @Req() req: Request): Promise<string> {
+  async modifyUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() user: Partial<PutUserDto>, @Req() req: Request): Promise<User> {
     return this.usersService.modifyUserById(id, slug, user, req);
   }
 
@@ -57,7 +57,7 @@ export class UsersController {
   @DeleteUserByIdDoc() //////////////////////////////////////////////////////////////////no necesita slug modifica por id
   @Roles(Role.Owner, Role.SuperAdmin, Role.Staff)
   @UseGuards(AuthGuard, RolesGuard)
-  async deleteUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request): Promise<string> {
+  async deleteUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request): Promise<User> {
     return this.usersService.deleteUserById(id, slug, req);
   }
 

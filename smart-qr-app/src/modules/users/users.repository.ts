@@ -34,8 +34,8 @@ export class UsersRepository {
 
     const { confirmPassword, ...putUser } = updateUser;
     const mergeUser = this.userRepository.merge(user, putUser);
-    await this.userRepository.save(mergeUser);
-    return mergeUser;
+    const updatedUser = await this.userRepository.save(mergeUser);
+    return updatedUser;
   }
 
   async deleteById(id: string): Promise<User> {
@@ -50,8 +50,8 @@ export class UsersRepository {
 
     user.exist = false;
     user.is_active = false;
-    await this.userRepository.save(user);
-    return user;
+    const deletedUser = await this.userRepository.save(user);
+    return deletedUser;
   }
 
   async getUsers(

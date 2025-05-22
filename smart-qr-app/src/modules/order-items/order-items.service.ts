@@ -28,13 +28,13 @@ export class OrderItemsService {
     await queryRunner.startTransaction();
 
     try {
-      // Verificar que el restaurante existe
+      
       const restaurant = await queryRunner.manager.findOneBy(Restaurant, { slug });
       if (!restaurant) {
         throw new NotFoundException('Restaurante no encontrado');
       }
 
-      // Verificar que la orden existe y pertenece al restaurante
+      
       const order = await queryRunner.manager.findOneBy(Order, {
         id: createOrderItemDto.orderId,
         restaurant: { id: restaurant.id },

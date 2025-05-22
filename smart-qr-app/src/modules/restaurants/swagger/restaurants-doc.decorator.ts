@@ -147,7 +147,7 @@ export function PatchRestaurantBySlugDoc() {
           summary: 'Example of restaurant profile update',
           value: {
             name: 'Test Cafe',
-            bannerUrl: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+            banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
           },
         },
       },

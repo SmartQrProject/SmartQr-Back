@@ -5,26 +5,25 @@ import { ProductsRepository } from './products.repository';
 import { Product } from '../../shared/entities/product.entity';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 import { SequenceUpdateException } from '../../common/exceptions/sequence-update.exception';
+import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
     private readonly productsRepository: ProductsRepository,
-    private readonly restService: RestaurantsService
+    private readonly restService: RestaurantsService,
+    private mailService: MailService,
   ) {}
 
   async create(createProductDto: CreateProductDto, slug: string): Promise<Product> {
-    console.log('Creating product for slug:', slug);
     const rest = await this.restService.getRestaurants(slug);
-    console.log('Found restaurant:', rest.id, rest.name);
-    return await this.productsRepository.createProduct(createProductDto, rest.id);
+    const producto = await this.productsRepository.createProduct(createProductDto, rest.id);
+    //nodemailer
+    this.sendEmail(rest, producto, 'added');
+    return producto;
   }
 
-  async findAll(
-    slug: string,
-    page: number = 1,
-    limit: number = 10
-  ): Promise<{ products: Product[]; total: number; page: number; limit: number }> {
+  async findAll(slug: string, page: number = 1, limit: number = 10): Promise<{ products: Product[]; total: number; page: number; limit: number }> {
     const rest = await this.restService.getRestaurants(slug);
     return await this.productsRepository.findAllByRestaurant(rest.id, page, limit);
   }
@@ -36,17 +35,22 @@ export class ProductsService {
 
   async update(id: string, updateProductDto: UpdateProductDto, slug: string): Promise<Product> {
     const rest = await this.restService.getRestaurants(slug);
-    return await this.productsRepository.updateProduct(id, updateProductDto, rest.id);
+    const producto = await this.productsRepository.updateProduct(id, updateProductDto, rest.id);
+    //nodemailer
+    this.sendEmail(rest, producto, 'updated');
+    return producto;
   }
 
   async remove(id: string, slug: string): Promise<{ message: string }> {
     const rest = await this.restService.getRestaurants(slug);
-    const product = await this.productsRepository.findOneByIdAndRestaurant(id, rest.id);
+    const producto = await this.productsRepository.findOneByIdAndRestaurant(id, rest.id);
     await this.productsRepository.softDeleteProduct(id, rest.id);
-    return { message: `Product ${product.name} has been deleted successfully` };
+    //nodemailer
+    this.sendEmail(rest, producto, 'in-activated');
+    return { message: `Product ${producto.name} has been deleted successfully` };
   }
 
-  async updateSequences(products: { id: string, sequenceNumber: number }[], slug: string): Promise<{ message: string }> {
+  async updateSequences(products: { id: string; sequenceNumber: number }[], slug: string): Promise<{ message: string }> {
     try {
       const rest = await this.restService.getRestaurants(slug);
       await this.productsRepository.updateProductSequences(products, rest.id);
@@ -55,9 +59,16 @@ export class ProductsService {
       if (error instanceof SequenceUpdateException) {
         throw error;
       }
-      throw new SequenceUpdateException(
-        'Failed to update product sequences. Please ensure all product IDs are valid and try again.'
-      );
+      throw new SequenceUpdateException('Failed to update product sequences. Please ensure all product IDs are valid and try again.');
     }
+  }
+
+  async sendEmail(rest, producto, accion) {
+    const subject = `Product ${producto.name} was ${accion} successfully. `;
+    const textmsg = `Hello ${rest.owner_email},  A product from your  Restaurant have been ${accion}.\n 
+      Restaurant Name: ${rest.name} 
+      Product: ${producto.name} \n ${producto.description} \n ${producto.price} \n  ${producto.details}`;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
   }
 }

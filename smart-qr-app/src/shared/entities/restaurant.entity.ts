@@ -1,12 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  OneToMany,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { IsBoolean, IsEmail, IsString, IsUUID, Length } from 'class-validator';
 import { User } from './user.entity';
 import { Order } from './order.entity';
@@ -74,4 +66,9 @@ export class Restaurant {
 
   @Column({ default: true })
   exist: boolean;
+
+  @Column({
+    default: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+  })
+  banner: string;
 }

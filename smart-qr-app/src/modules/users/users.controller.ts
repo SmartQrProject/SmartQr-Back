@@ -6,7 +6,7 @@ import { User } from 'src/shared/entities/user.entity';
 import { PutUserDto } from './dto/put-user.dto';
 import { SignInUserDto } from './dto/signIn-user.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { CreateUserDoc, DeleteUserByIdDoc, GetAllUsersDoc, UserLoginDoc, ModifyUserByIdDoc } from './swagger/user-doc.decorator';
+import { CreateUserDoc, DeleteUserByIdDoc, GetAllUsersDoc, UserLoginDoc, ModifyUserByIdDoc, GetActiveStaff } from './swagger/user-doc.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/common/decorators/role.enum';
@@ -19,7 +19,7 @@ export class UsersController {
   @Patch(':slug/:id')
   @HttpCode(200)
   @ModifyUserByIdDoc()
-  @Roles(Role.Owner, Role.SuperAdmin, Role.Staff)
+  @Roles(Role.Owner, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   async modifyUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() user: Partial<PutUserDto>, @Req() req: Request): Promise<string> {
     return this.usersService.modifyUserById(id, slug, user, req);
@@ -39,6 +39,18 @@ export class UsersController {
     return this.usersService.getUsers(slug, page, limit);
   }
 
+  @Get('staff')
+  @HttpCode(200)
+  @GetActiveStaff() //////////////////////////////////////////////////////////////////necesita slug mandamos como query dado q no tenemos otra option
+  @Roles(Role.Owner, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  async getActiveStaff(
+    @Query('slug') slug: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+  ) {
+    return this.usersService.getActiveStaff(slug, page, limit);
+  }
   //  FINALIZADO GEA MAyo-13------ trabajando en este endpoint --------GEA Mayo-13
   @Delete(':slug/:id')
   @HttpCode(200)

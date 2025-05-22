@@ -16,15 +16,14 @@ export class JwtStrategy4Auth0 extends PassportStrategy(Strategy) {
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri:
-          'https://dev-yxlpehy8hq451y84.us.auth0.com/.well-known/jwks.json',
+        jwksUri: 'https://dev-yxlpehy8hq451y84.us.auth0.com/.well-known/jwks.json',
       }),
     });
   }
 
   async validate(payload: any) {
     // Este método es llamado si el token es válido
-    console.log('======>>>>>', payload);
+
     return { userId: payload.sub, email: payload.email };
   }
 }

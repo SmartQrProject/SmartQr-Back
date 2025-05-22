@@ -7,10 +7,11 @@ import { RestaurantsModule } from '../restaurants/restaurants.module';
 import { CommonModule } from 'src/common/common.module';
 import { UsersRepository } from './users.repository';
 import { UsersController } from './users.controller';
+import { MailService } from 'src/common/services/mail.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), RestaurantsModule, CommonModule],
-  providers: [UsersService, UsersRepository],
+  providers: [UsersService, UsersRepository, MailService],
   controllers: [UsersController],
   exports: [UsersRepository],
 })

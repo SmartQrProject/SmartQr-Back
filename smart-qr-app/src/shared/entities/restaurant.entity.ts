@@ -29,7 +29,7 @@ export class Restaurant {
   @IsEmail()
   owner_email: string;
 
-  @Column({ default: true })
+  @Column({ default: false })
   @IsBoolean()
   is_active: boolean;
 
@@ -64,7 +64,7 @@ export class Restaurant {
   @JoinColumn()
   subscription: Subscription;
 
-  @Column({ default: false })
+  @Column({ default: true })
   exist: boolean;
 
   @Column({

@@ -65,8 +65,6 @@ export class UsersService {
 
     if (user.email) {
       const usuario = await this.usersRepository.getUserByEmail(user.email);
-      console.log('Usuario y user email:', usuario?.email, user.email);
-      console.log('Usuario y user id:', usuario?.id, id);
       if (usuario && usuario.id !== id) {
         throw new ConflictException(`❌ Email already in use: ${user.email} !!`);
       }
@@ -84,8 +82,10 @@ export class UsersService {
       }
     }
 
+    //console.log('Usuario y user email:', usuario.email, user.email);
+    //console.log('Usuario y user id:', usuario.id, id);
     const updatedUser = this.usersRepository.patchById(id, rest, user, req);
-    this.sendEmail(rest, updatedUser, 'updated'); //nodemailer
+    this.sendEmail(rest, usuario, 'updated'); //nodemailer
     return updatedUser;
   }
 
@@ -116,7 +116,7 @@ export class UsersService {
     }
 
     const userDeleted = this.usersRepository.deleteById(id);
-    this.sendEmail(rest, userDeleted, 'deleted'); //nodemailer
+    this.sendEmail(rest, usuario, 'deleted'); //nodemailer
     return userDeleted;
   }
 

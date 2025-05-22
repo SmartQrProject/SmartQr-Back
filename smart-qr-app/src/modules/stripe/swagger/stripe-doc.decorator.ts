@@ -1,11 +1,24 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiHeader } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiHeader, ApiBody } from '@nestjs/swagger';
 
 export function GetCheckoutSessionDoc() {
   return applyDecorators(
     ApiOperation({
       summary: 'Crear sesión de pago única (Checkout)',
       description: 'Devuelve un ID de sesión y una URL para redirigir al usuario al checkout de Stripe.',
+    }),
+    ApiBody({
+      description: 'Total en centavos (ej: 2500 para $25.00)',
+      schema: {
+        type: 'object',
+        properties: {
+          total: {
+            type: 'string',
+            example: '2500',
+          },
+        },
+        required: ['total'],
+      },
     }),
     ApiResponse({
       status: 200,

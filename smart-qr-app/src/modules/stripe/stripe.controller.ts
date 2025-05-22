@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, Headers, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Headers, HttpStatus, Body } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import Stripe from 'stripe';
 import { Request, Response } from 'express';
@@ -11,17 +11,17 @@ export class StripeController {
 
   constructor(private readonly stripeService: StripeService) {}
 
-  @Get('checkout-session')
+  @Post('checkout-session')
   @GetCheckoutSessionDoc()
-  async getCheckoutSession() {
-    const session = await this.stripeService.createCheckoutSession();
+  async getCheckoutSession(@Body('total') total: string) {
+    const session = await this.stripeService.createCheckoutSession(total);
     return { id: session.id, url: session.url };
   }
 
-  @Get('subscription-session')
+  @Post('subscription-session')
   @GetSubscriptionSessionDoc()
-  async getSubscriptionSession() {
-    const session = await this.stripeService.createSubscriptionSession();
+  async getSubscriptionSession(@Body('slug') slug: string) {
+    const session = await this.stripeService.createSubscriptionSession(slug);
     return { id: session.id, url: session.url };
   }
 

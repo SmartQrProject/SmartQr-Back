@@ -8,17 +8,26 @@ import {
 import { CreateOrderItemDto } from '../dto/create-order-item.dto';
 import { UpdateOrderItemDto } from '../dto/update-order-item.dto';
 
+const SlugParam = ApiParam({
+  name: 'slug',
+  description: 'Unique restaurant identifier',
+  example: 'test-cafe',
+  required: true,
+});
+
+const IdParam = ApiParam({
+  name: 'id',
+  description: 'Order item ID',
+  example: '123e4567-e89b-12d3-a456-426614174002',
+});
+
 export const CreateOrderItemDoc = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Crear un nuevo item de orden' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Slug del restaurante',
-      example: 'test-cafe',
-    }),
+    ApiOperation({ summary: 'Create a new order item' }),
+    SlugParam,
     ApiBody({
       type: CreateOrderItemDto,
-      description: 'Datos del item de orden a crear',
+      description: 'Order item data to create',
       examples: {
         example1: {
           value: {
@@ -27,16 +36,16 @@ export const CreateOrderItemDoc = () => {
             quantity: 2,
             unit_price: 15.99,
           },
-          summary: 'Ejemplo de creación de item de orden para test-cafe',
+          summary: 'Example of creating an order item for test-cafe',
         },
       },
     }),
     ApiResponse({
       status: 201,
-      description: 'El item de orden ha sido creado exitosamente',
+      description: 'Order item created successfully',
       schema: {
         example: {
-          message: 'Item de orden creado exitosamente',
+          message: 'Order item created successfully',
           orderItem: {
             id: '123e4567-e89b-12d3-a456-426614174002',
             quantity: 2,
@@ -49,7 +58,7 @@ export const CreateOrderItemDoc = () => {
             },
             product: {
               id: '123e4567-e89b-12d3-a456-426614174001',
-              name: 'Producto Ejemplo',
+              name: 'Example Product',
               price: 15.99,
               is_available: true,
             },
@@ -59,29 +68,29 @@ export const CreateOrderItemDoc = () => {
     }),
     ApiResponse({
       status: 400,
-      description: 'Datos inválidos',
+      description: 'Invalid data provided',
       schema: {
         example: {
           statusCode: 400,
-          message: ['El producto no está disponible', 'La cantidad debe ser mayor a 0'],
+          message: ['Product is not available', 'Quantity must be greater than 0'],
           error: 'Bad Request',
         },
       },
     }),
     ApiResponse({
       status: 404,
-      description: 'Recurso no encontrado',
+      description: 'Resource not found',
       schema: {
         example: {
           statusCode: 404,
-          message: ['Restaurante no encontrado', 'Orden no encontrada', 'Producto no encontrado'],
+          message: ['Restaurant not found', 'Order not found', 'Product not found'],
           error: 'Not Found',
         },
       },
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized access',
       schema: {
         example: {
           statusCode: 401,
@@ -95,15 +104,11 @@ export const CreateOrderItemDoc = () => {
 
 export const GetAllOrderItemsDoc = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Obtener todos los items de orden' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Slug del restaurante',
-      example: 'test-cafe',
-    }),
+    ApiOperation({ summary: 'Get all order items' }),
+    SlugParam,
     ApiResponse({
       status: 200,
-      description: 'Lista de items de orden obtenida exitosamente',
+      description: 'List of order items retrieved successfully',
       schema: {
         example: [
           {
@@ -118,7 +123,7 @@ export const GetAllOrderItemsDoc = () => {
             },
             product: {
               id: '123e4567-e89b-12d3-a456-426614174001',
-              name: 'Producto Ejemplo',
+              name: 'Example Product',
               price: 15.99,
               is_available: true,
             },
@@ -128,18 +133,18 @@ export const GetAllOrderItemsDoc = () => {
     }),
     ApiResponse({
       status: 404,
-      description: 'Restaurante no encontrado',
+      description: 'Restaurant not found',
       schema: {
         example: {
           statusCode: 404,
-          message: 'Restaurante no encontrado',
+          message: 'Restaurant not found',
           error: 'Not Found',
         },
       },
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized access',
       schema: {
         example: {
           statusCode: 401,
@@ -153,20 +158,12 @@ export const GetAllOrderItemsDoc = () => {
 
 export const GetOrderItemByIdDoc = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Obtener un item de orden por su ID' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Slug del restaurante',
-      example: 'test-cafe',
-    }),
-    ApiParam({
-      name: 'id',
-      description: 'ID del item de orden',
-      example: '123e4567-e89b-12d3-a456-426614174002',
-    }),
+    ApiOperation({ summary: 'Get order item by ID' }),
+    SlugParam,
+    IdParam,
     ApiResponse({
       status: 200,
-      description: 'Item de orden encontrado exitosamente',
+      description: 'Order item retrieved successfully',
       schema: {
         example: {
           id: '123e4567-e89b-12d3-a456-426614174002',
@@ -180,7 +177,7 @@ export const GetOrderItemByIdDoc = () => {
           },
           product: {
             id: '123e4567-e89b-12d3-a456-426614174001',
-            name: 'Producto Ejemplo',
+            name: 'Example Product',
             price: 15.99,
             is_available: true,
           },
@@ -189,18 +186,18 @@ export const GetOrderItemByIdDoc = () => {
     }),
     ApiResponse({
       status: 404,
-      description: 'Recurso no encontrado',
+      description: 'Resource not found',
       schema: {
         example: {
           statusCode: 404,
-          message: ['Restaurante no encontrado', 'Item de orden no encontrado'],
+          message: ['Restaurant not found', 'Order item not found'],
           error: 'Not Found',
         },
       },
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized access',
       schema: {
         example: {
           statusCode: 401,
@@ -214,20 +211,12 @@ export const GetOrderItemByIdDoc = () => {
 
 export const UpdateOrderItemDoc = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Actualizar un item de orden' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Slug del restaurante',
-      example: 'test-cafe',
-    }),
-    ApiParam({
-      name: 'id',
-      description: 'ID del item de orden',
-      example: '123e4567-e89b-12d3-a456-426614174002',
-    }),
+    ApiOperation({ summary: 'Update an order item' }),
+    SlugParam,
+    IdParam,
     ApiBody({
       type: UpdateOrderItemDto,
-      description: 'Datos del item de orden a actualizar',
+      description: 'Order item data to update',
       examples: {
         example1: {
           value: {
@@ -235,16 +224,16 @@ export const UpdateOrderItemDoc = () => {
             unit_price: 16.99,
             productId: '123e4567-e89b-12d3-a456-426614174001',
           },
-          summary: 'Ejemplo de actualización de item de orden para test-cafe',
+          summary: 'Example of updating an order item for test-cafe',
         },
       },
     }),
     ApiResponse({
       status: 200,
-      description: 'Item de orden actualizado exitosamente',
+      description: 'Order item updated successfully',
       schema: {
         example: {
-          message: 'Item de orden actualizado exitosamente',
+          message: 'Order item updated successfully',
           orderItem: {
             id: '123e4567-e89b-12d3-a456-426614174002',
             quantity: 3,
@@ -257,7 +246,7 @@ export const UpdateOrderItemDoc = () => {
             },
             product: {
               id: '123e4567-e89b-12d3-a456-426614174001',
-              name: 'Producto Ejemplo',
+              name: 'Example Product',
               price: 16.99,
               is_available: true,
             },
@@ -267,29 +256,29 @@ export const UpdateOrderItemDoc = () => {
     }),
     ApiResponse({
       status: 400,
-      description: 'Datos inválidos',
+      description: 'Invalid data provided',
       schema: {
         example: {
           statusCode: 400,
-          message: ['El producto no está disponible', 'La cantidad debe ser mayor a 0'],
+          message: ['Product is not available', 'Quantity must be greater than 0'],
           error: 'Bad Request',
         },
       },
     }),
     ApiResponse({
       status: 404,
-      description: 'Recurso no encontrado',
+      description: 'Resource not found',
       schema: {
         example: {
           statusCode: 404,
-          message: ['Restaurante no encontrado', 'Item de orden no encontrado', 'Producto no encontrado'],
+          message: ['Restaurant not found', 'Order item not found', 'Product not found'],
           error: 'Not Found',
         },
       },
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized access',
       schema: {
         example: {
           statusCode: 401,
@@ -303,40 +292,32 @@ export const UpdateOrderItemDoc = () => {
 
 export const DeleteOrderItemDoc = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Eliminar un item de orden' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Slug del restaurante',
-      example: 'test-cafe',
-    }),
-    ApiParam({
-      name: 'id',
-      description: 'ID del item de orden',
-      example: '123e4567-e89b-12d3-a456-426614174002',
-    }),
+    ApiOperation({ summary: 'Delete an order item' }),
+    SlugParam,
+    IdParam,
     ApiResponse({
       status: 200,
-      description: 'Item de orden eliminado exitosamente',
+      description: 'Order item deleted successfully',
       schema: {
         example: {
-          message: 'Item de orden eliminado exitosamente',
+          message: 'Order item deleted successfully',
         },
       },
     }),
     ApiResponse({
       status: 404,
-      description: 'Recurso no encontrado',
+      description: 'Resource not found',
       schema: {
         example: {
           statusCode: 404,
-          message: ['Restaurante no encontrado', 'Item de orden no encontrado'],
+          message: ['Restaurant not found', 'Order item not found'],
           error: 'Not Found',
         },
       },
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized access',
       schema: {
         example: {
           statusCode: 401,

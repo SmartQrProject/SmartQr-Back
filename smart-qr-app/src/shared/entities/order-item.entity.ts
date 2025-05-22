@@ -33,4 +33,7 @@ export class OrderItem {
   @IsOptional()
   @IsNumber()
   cost_price?: number;
+
+  @Column({ type: 'boolean', default: true })
+  exist: boolean;
 }

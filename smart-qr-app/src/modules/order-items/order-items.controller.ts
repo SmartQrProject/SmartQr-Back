@@ -36,7 +36,7 @@ export class OrderItemsController {
   ) {
     const orderItem = await this.orderItemsService.create(slug, createOrderItemDto);
     return {
-      message: 'Item de orden creado exitosamente',
+      message: 'Order item created successfully',
       orderItem,
     };
   }
@@ -44,7 +44,11 @@ export class OrderItemsController {
   @Get()
   @GetAllOrderItemsDoc()
   async findAll(@Param('slug') slug: string) {
-    return this.orderItemsService.findAll(slug);
+    const orderItems = await this.orderItemsService.findAll(slug);
+    return {
+      message: 'Order items retrieved successfully',
+      orderItems,
+    };
   }
 
   @Get(':id')
@@ -53,7 +57,11 @@ export class OrderItemsController {
     @Param('slug') slug: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.orderItemsService.findOne(slug, id);
+    const orderItem = await this.orderItemsService.findOne(slug, id);
+    return {
+      message: 'Order item retrieved successfully',
+      orderItem,
+    };
   }
 
   @Put(':id')
@@ -65,7 +73,7 @@ export class OrderItemsController {
   ) {
     const orderItem = await this.orderItemsService.update(slug, id, updateOrderItemDto);
     return {
-      message: 'Item de orden actualizado exitosamente',
+      message: 'Order item updated successfully',
       orderItem,
     };
   }
@@ -78,7 +86,7 @@ export class OrderItemsController {
   ) {
     await this.orderItemsService.remove(slug, id);
     return {
-      message: 'Item de orden eliminado exitosamente',
+      message: 'Order item deleted successfully',
     };
   }
 }

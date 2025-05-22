@@ -5,7 +5,6 @@ import { User } from 'src/shared/entities/user.entity';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { PutUserDto } from './dto/put-user.dto';
-import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class UsersRepository {
@@ -13,10 +12,9 @@ export class UsersRepository {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly bcryptService: BcryptService,
-    private mailService: MailService,
   ) {}
 
-  async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<string> {
+  async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<User> {
     const user = await this.userRepository.findOneBy({
       id: id,
       restaurant: { id: rest.id },
@@ -37,15 +35,10 @@ export class UsersRepository {
     const { confirmPassword, ...putUser } = updateUser;
     const mergeUser = this.userRepository.merge(user, putUser);
     await this.userRepository.save(mergeUser);
-
-    const subject = `Successfull User Update for your restaurant ${rest.name}`;
-    const textmsg = `Your have updated the profile of the following user.${(mergeUser.email, mergeUser.name)}`;
-    const htmlTemplate = 'basico';
-    this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
-    return id + ' was updated';
+    return mergeUser;
   }
 
-  async deleteById(id: string): Promise<string> {
+  async deleteById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['restaurant'],
@@ -58,7 +51,7 @@ export class UsersRepository {
     user.exist = false;
     user.is_active = false;
     await this.userRepository.save(user);
-    return 'Usuario bloquedao: ' + id;
+    return user;
   }
 
   async getUsers(

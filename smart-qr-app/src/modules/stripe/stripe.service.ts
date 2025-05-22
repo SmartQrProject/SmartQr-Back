@@ -60,6 +60,15 @@ export class StripeService {
       return res.status(HttpStatus.BAD_REQUEST).send(`Webhook error: ${err.message}`);
     }
 
+    // ✅ Responder de inmediato para que Stripe no reintente
+    res.status(200).json({ received: true });
+
+    setTimeout(() => {
+      this.handleEvent(event);
+    }, 20000);
+  }
+
+  private async handleEvent(event: Stripe.Event) {
     switch (event.type) {
       case 'checkout.session.completed': {
         try {
@@ -81,11 +90,11 @@ export class StripeService {
         break;
       }
 
-      case 'customer.subscription.created':
+      case 'customer.subscription.created': {
         const session = event.data.object as Stripe.Subscription;
-
         console.log('📦 Suscripción creada');
         break;
+      }
 
       case 'customer.subscription.updated':
         console.log('🔁 Suscripción actualizada');
@@ -111,7 +120,5 @@ export class StripeService {
         console.log(`📌 Evento recibido (no manejado): ${event.type}`);
         break;
     }
-
-    return res.status(200).json({ received: true });
   }
 }

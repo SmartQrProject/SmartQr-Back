@@ -11,10 +11,10 @@ export class StripeController {
 
   constructor(private readonly stripeService: StripeService) {}
 
-  @Get('checkout-session')
+  @Post('checkout-session')
   @GetCheckoutSessionDoc()
-  async getCheckoutSession() {
-    const session = await this.stripeService.createCheckoutSession();
+  async getCheckoutSession(@Body('total') total: string) {
+    const session = await this.stripeService.createCheckoutSession(total);
     return { id: session.id, url: session.url };
   }
 

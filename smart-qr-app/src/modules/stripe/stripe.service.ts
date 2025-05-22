@@ -11,7 +11,7 @@ export class StripeService {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
   // Para pagos únicos
-  async createCheckoutSession(): Promise<Stripe.Checkout.Session> {
+  async createCheckoutSession(total): Promise<Stripe.Checkout.Session> {
     return await this.stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -20,7 +20,7 @@ export class StripeService {
           price_data: {
             currency: 'aud',
             product_data: { name: 'Producto de prueba' },
-            unit_amount: 50,
+            unit_amount: Number(total) * 100,
           },
           quantity: 1,
         },

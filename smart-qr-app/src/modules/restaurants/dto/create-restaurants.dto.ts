@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, IsNotEmpty, IsUrl } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional } from 'class-validator';
 
 export class CreateRestaurantsDto {
   @IsNotEmpty({ message: 'Restaurant name is required' })
@@ -39,9 +39,10 @@ export class CreateRestaurantsDto {
   owner_pass: string;
 
   @IsUrl()
+  @IsOptional()
   @ApiProperty({
     description: 'Url for the banner of the restaurant landing page',
     example: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
   })
-  banner: string;
+  banner?: string;
 }

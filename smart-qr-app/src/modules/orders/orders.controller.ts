@@ -15,7 +15,7 @@ export class OrdersController {
   @Post()
   @CreateOrderDoc()
   async create(@Param('slug') slug: string, @Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+    return this.ordersService.create(createOrderDto, slug);
   }
 
   @Get()

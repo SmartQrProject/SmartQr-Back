@@ -22,7 +22,26 @@ export function CreateOrderDoc() {
     ApiOperation({ summary: 'Create a new order' }),
     ApiBody({
       type: CreateOrderDto,
-      description: 'Order data including customer, table, and order items',
+      description: 'Payload required to create a new order, including optional client ID, table ID, and the list of ordered products with quantities.',
+      examples: {
+        exampleOrder: {
+          summary: 'Order with client and products',
+          value: {
+            customerId: '05f67a0f-0d2c-4119-927a-9e1047d2851d',
+            code: 'T07',
+            products: [
+              {
+                id: '1c64190d-3c81-43db-b8a3-40e4d768b42a',
+                quantity: 2,
+              },
+              {
+                id: '2cea0878-d961-4d53-af44-197022bcfead',
+                quantity: 1,
+              },
+            ],
+          },
+        },
+      },
     }),
     ApiResponse({ status: 201, description: 'Order created successfully' }),
     ApiResponse({ status: 400, description: 'Invalid data' }),

@@ -1,23 +1,12 @@
-import {
-  IsArray,
-  IsInt,
-  IsUUID,
-  Min,
-  IsString,
-  IsOptional,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsInt, IsUUID, Min, IsString, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateOrderDto {
   @IsUUID()
   customerId: string;
 
-  @IsUUID()
-  restaurantId: string;
-
-  @IsUUID()
-  tableId: string;
+  @IsString()
+  code: string;
 
   @IsOptional()
   @IsString()

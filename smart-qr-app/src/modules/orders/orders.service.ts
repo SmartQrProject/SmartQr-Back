@@ -24,7 +24,7 @@ export class OrdersService {
     private dataSource: DataSource,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto, slug: string) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -37,12 +37,12 @@ export class OrdersService {
       if (!customer) throw new NotFoundException('Cliente no encontrado');
 
       const restaurant = await queryRunner.manager.findOneBy(Restaurant, {
-        id: createOrderDto.restaurantId,
+        slug: slug,
       });
       if (!restaurant) throw new NotFoundException('Restaurante no encontrado');
 
       const table = await queryRunner.manager.findOneBy(RestaurantTable, {
-        id: createOrderDto.tableId,
+        code: createOrderDto.code,
       });
       if (!table) throw new NotFoundException('Mesa no encontrada');
 

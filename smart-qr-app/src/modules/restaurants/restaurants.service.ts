@@ -127,6 +127,7 @@ export class RestaurantsService {
             .filter((p) => p.exist)
             .map((product) => ({
               sequenceNumber: product.sequenceNumber,
+              id: product.id,
               name: product.name,
               description: product.description,
               price: product.price,

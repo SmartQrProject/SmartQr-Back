@@ -201,6 +201,7 @@ export class OrdersService {
   async findOne(id: string) {
     const order = await this.orderRepository.findOne({
       where: { id, exist: true },
+      relations: ['items'],
     });
 
     if (!order) {

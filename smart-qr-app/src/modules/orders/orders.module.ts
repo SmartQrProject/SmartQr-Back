@@ -11,6 +11,7 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RewardCodeModule } from '../reward-code/reward-code.module';
 import { CommonModule } from 'src/common/common.module';
+import { MailService } from 'src/common/services/mail.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { CommonModule } from 'src/common/common.module';
     CommonModule,
   ],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [OrdersService, MailService],
 })
 export class OrdersModule {}

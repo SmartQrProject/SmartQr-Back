@@ -11,6 +11,7 @@ import { In } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RewardCodeService } from '../reward-code/reward-code.service';
+import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class OrdersService {
@@ -22,6 +23,7 @@ export class OrdersService {
     private orderItemRepository: Repository<OrderItem>,
     private readonly rewardCodeService: RewardCodeService,
     private dataSource: DataSource,
+    private mailService: MailService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, slug: string) {
@@ -112,7 +114,8 @@ export class OrdersService {
 
       await queryRunner.commitTransaction();
 
-      return {
+      // 5. Generacion email al cliente con su Order
+      const order = {
         orderId: savedOrder.id,
         total: totalPrice,
         rewardCode: createOrderDto.rewardCode ?? null,
@@ -123,6 +126,9 @@ export class OrdersService {
           unit_price: prod.unit_price,
         })),
       };
+      this.sendEmail(customer, restaurant, order, 'created'); //nodemailer
+
+      return order;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -169,5 +175,13 @@ export class OrdersService {
 
     order.exist = false;
     return this.orderRepository.save(order);
+  }
+
+  async sendEmail(customer: Customer, restaurant: Restaurant, order, accion) {
+    const subject = `Your Order # ${order.orderId} was ${accion} and have been sent to preparation. `;
+    const textmsg = `Hello ${customer.name},  the following Order has been ${accion} in the Restaurant ${restaurant.name}.
+      - Total Amount: ${order.total}`;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(customer.email, subject, textmsg, htmlTemplate);
   }
 }

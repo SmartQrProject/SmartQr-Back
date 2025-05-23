@@ -20,7 +20,7 @@ const IdParam = ApiParam({
 export function CreateOrderDoc() {
   return applyDecorators(
     SlugParam,
-    ApiOperation({ summary: 'Create a new order' }),
+    ApiOperation({ summary: 'Create a new order-only works with AUTH0 token' }),
     ApiBody({
       type: CreateOrderDto,
       description: 'Payload required to create a new order, including optional client ID, table ID, and the list of ordered products with quantities.',

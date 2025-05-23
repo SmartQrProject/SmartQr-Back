@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { LoggerMiddleware } from './middleware/logger/logger.middleware';
 import { auth } from 'express-openid-connect';
-import { config } from './config/auth0.config';
+//import { config } from './config/auth0.config';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import * as express from 'express';
 
@@ -38,22 +38,13 @@ async function bootstrap() {
   //   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
   // });
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Smart Qr API')
-    .setDescription('Smart Qr API para el PF')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+  const swaggerConfig = new DocumentBuilder().setTitle('Smart Qr API').setDescription('Smart Qr API para el PF').setVersion('1.0').addBearerAuth().build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
   const port = process.env.PORT ?? 3000;
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://smart-qr-front.vercel.app',
-      'https://www.smart-qr.tech',
-    ],
+    origin: ['http://localhost:3000', 'https://smart-qr-front.vercel.app', 'https://www.smart-qr.tech'],
     credentials: true,
   });
 

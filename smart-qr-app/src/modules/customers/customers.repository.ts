@@ -6,6 +6,7 @@ import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/common/services/mail.service';
+import { Auth0CustomerDto } from './dto/auth0-customer.dto';
 
 @Injectable()
 export class CustomersRepository {
@@ -17,33 +18,31 @@ export class CustomersRepository {
   ) {}
 
   // ------ trabajando en este endpoint ---GEA Mayo 14-
-  async sincronizarAuth0(customer, rest): Promise<Customer> {
-    // ¿Ya existe un usuario con este sub (de Auth0)?
-    const { email, name, auth0Id, picture } = customer;
+  async sincronizarAuth0(customer: Auth0CustomerDto, rest): Promise<Customer> {
+    const { auth0Id, email, name, picture } = customer;
 
-    let wrkCust = await this.customerRepository.findOne({
-      where: { auth0Id: auth0Id },
+    let existing = await this.customerRepository.findOne({
+      where: { auth0Id },
+      relations: ['restaurant'],
     });
 
-    if (wrkCust) {
-      wrkCust.exist = true;
-      wrkCust.restaurant = rest;
-      this.customerRepository.merge(wrkCust, customer);
-      const wrk2Cust = await this.customerRepository.save(wrkCust);
-      return wrk2Cust;
+    if (existing) {
+      if (!existing.exist) existing.exist = true;
+      if (!existing.restaurant) existing.restaurant = rest;
+
+      return await this.customerRepository.save(existing);
     }
 
-    // Si no existe, lo creamos
     const newCustomer = this.customerRepository.create({
-      auth0Id: auth0Id,
-      email: email,
-      name: name,
-      picture: picture,
+      auth0Id,
+      email,
+      name,
+      picture,
+      exist: true,
       restaurant: rest,
     });
 
-    const wrk3Cust = await this.customerRepository.save(newCustomer);
-    return wrk3Cust;
+    return await this.customerRepository.save(newCustomer);
   }
 
   // GEA 14-mayo

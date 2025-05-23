@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Get, Req, Post, Body, Patch, Param, Delete, Request, HttpCode, Query, DefaultValuePipe, ParseIntPipe, Put, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, UseGuards, Get, Req, Post, Body, Patch, Param, Delete, HttpCode, Query, DefaultValuePipe, ParseIntPipe, Put, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
@@ -15,6 +15,7 @@ import {
   SyncAuth0Doc,
   UpdateCustomerDoc,
 } from './swagger/customers-doc.decorator';
+import { Request } from 'express';
 
 @ApiTags('CRUD EndPoints para Customers (restaurant customers). SignUP, SignIn, etc')
 @Controller(':slug/customers')
@@ -24,7 +25,8 @@ export class CustomersController {
   @Post('sincronizar')
   //@UseGuards(JwtAuthGuard)
   @SyncAuth0Doc()
-  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string): Promise<Customer> {
+  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string, @Req() req: Request): Promise<Customer> {
+    console.log('customer', req);
     return this.customersService.sincronizarAuth0(customer, slug);
   }
 

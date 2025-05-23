@@ -30,7 +30,7 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @UpdateOrderDoc()
   async update(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(id, updateOrderDto);

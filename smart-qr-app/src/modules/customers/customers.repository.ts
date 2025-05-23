@@ -158,6 +158,8 @@ export class CustomersRepository {
   async findById(id): Promise<Omit<Customer, 'password'>> {
     const customer = await this.customerRepository.findOne({
       where: { id },
+      relations: ['orders'],
+      loadEagerRelations: false, // ignora los eager de Order
     });
 
     if (!customer) {

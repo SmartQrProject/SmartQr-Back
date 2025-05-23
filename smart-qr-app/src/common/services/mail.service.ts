@@ -28,7 +28,14 @@ export class MailService {
   }
 
   async sendMail(to: string, subject: string, text: string, tipoEmail: string) {
-    const templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html');
+    let templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html'); // default
+    if (tipoEmail == 'basico') {
+      templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html');
+    }
+    if (tipoEmail == 'order') {
+      templatePath = path.join('src/common/emailTemplates/orderEmailTemplate.html');
+    }
+
     let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
 
     // Reemplazamos la variable {{nombre}} en el HTML

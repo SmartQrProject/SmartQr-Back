@@ -5,7 +5,16 @@ export function CustomerSlugParam() {
   return ApiParam({
     name: 'slug',
     description: 'Unique identifier of the restaurant',
-    example: 'test-cafe',
+    example: 'eli-cafe',
+    required: true,
+  });
+}
+
+export function CustomerIdParam() {
+  return ApiParam({
+    name: 'id',
+    description: 'Unique identifier for the Customer',
+    example: '52cbd705-2edd-4809-947a-72951a93ae82',
     required: true,
   });
 }
@@ -34,9 +43,10 @@ export function GetAllCustomersDoc() {
 export function GetCustomerByIdDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'Get data from one Customer by ID' }),
+    ApiOperation({ summary: 'Get data from one Customer by his ID and retrieve the Orders history of this customer' }),
     ApiResponse({ status: 404, description: 'No Customers defined in the database' }),
     CustomerSlugParam(),
+    CustomerIdParam(),
   );
 }
 

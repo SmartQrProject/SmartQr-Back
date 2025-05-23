@@ -1,0 +1,98 @@
+const htmlEmail = `
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Detalle de tu pedido</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4">
+    <!-- Contenedor principal -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0">
+      <tr>
+        <td align="center">
+          <!-- Caja interior -->
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden">
+            <!-- Header -->
+            <tr>
+              <td style="background-color: #1a73e8; padding: 20px; text-align: center; color: #ffffff">
+                <h1 style="margin: 0; font-size: 24px">Gracias por tu compra</h1>
+              </td>
+            </tr>
+
+            <!-- Detalles de la orden -->
+            <tr>
+              <td style="padding: 20px">
+                <p style="margin: 0 0 8px">Hola,</p>
+                <p style="margin: 0 0 16px">
+                  Tu pedido <strong>#\${order.orderId}</strong> ha sido recibido con éxito.
+                  <br />
+                  <small style="color: #555">Fecha: \${new Date().toLocaleDateString('es-AR')}</small>
+                </p>
+
+                <!-- Tabla de items -->
+                <table width="100%" cellpadding="6" cellspacing="0" style="border-collapse: collapse">
+                  <thead>
+                    <tr>
+                      <th align="left" style="border-bottom: 2px solid #ddd">Producto</th>
+                      <th align="center" style="border-bottom: 2px solid #ddd">Cantidad</th>
+                      <th align="right" style="border-bottom: 2px solid #ddd">Precio unit.</th>
+                      <th align="right" style="border-bottom: 2px solid #ddd">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    \${order.items.map(item => `
+                    <tr>
+                      <td style="border-bottom: 1px solid #eee">ID \${item.productId}</td>
+                      <td align="center" style="border-bottom: 1px solid #eee">\${item.quantity}</td>
+                      <td align="right" style="border-bottom: 1px solid #eee">\$ \${item.unit_price.toFixed(2)}</td>
+                      <td align="right" style="border-bottom: 1px solid #eee">\$ \${(item.unit_price * item.quantity).toFixed(2)}</td>
+                    </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+
+                <!-- Resumen -->
+                <table width="100%" cellpadding="6" cellspacing="0" style="margin-top: 16px">
+                  <tbody>
+                    <!-- Descuento -->
+                    \${order.discountPercentage > 0 ? `
+                    <tr>
+                      <td style="border-top: 2px solid #ddd">Descuento (${order.discountPercentage}%):</td>
+                      <td align="right" style="border-top: 2px solid #ddd">- \$ \${(order.total * order.discountPercentage / 100).toFixed(2)}</td>
+                    </tr>
+                    ` : ''}
+
+                    <!-- Código de recompensa -->
+                    \${order.rewardCode ? `
+                    <tr>
+                      <td>Código de recompensa:</td>
+                      <td align="right">\${order.rewardCode}</td>
+                    </tr>
+                    ` : ''}
+
+                    <!-- Total final -->
+                    <tr>
+                      <td style="font-weight: bold; border-top: 2px solid #1a73e8">Total:</td>
+                      <td align="right" style="font-weight: bold; border-top: 2px solid #1a73e8">\$ \${order.total.toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p style="margin: 24px 0 0; font-size: 14px; color: #555">Si tienes alguna duda, responde a este correo o contáctanos en soporte@tuempresa.com.</p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="background-color: #f9f9f9; padding: 16px; text-align: center; font-size: 12px; color: #999">
+                © \${new Date().getFullYear()} Tu Empresa S.A. Todos los derechos reservados.
+              </td>
+            </tr>
+          </table>
+          <!-- /Caja interior -->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`;

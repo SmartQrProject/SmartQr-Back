@@ -1,7 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
+import { OrderResponseDto } from '../dto/order-response.dto';
 
 const SlugParam = ApiParam({
   name: 'slug',
@@ -49,7 +50,13 @@ export function CreateOrderDoc() {
 }
 
 export function GetAllOrdersDoc() {
-  return applyDecorators(SlugParam, ApiOperation({ summary: 'Get all orders for the restaurant' }), ApiResponse({ status: 200, description: 'List of orders' }));
+  return applyDecorators(
+    ApiOperation({ summary: 'Get all orders for a restaurant by slug' }),
+    ApiOkResponse({
+      description: 'List of orders with basic customer and product info',
+      type: [OrderResponseDto],
+    }),
+  );
 }
 
 export function GetOrderByIdDoc() {

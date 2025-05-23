@@ -137,8 +137,65 @@ export class OrdersService {
     }
   }
 
-  async findAll() {
-    return this.orderRepository.find({ where: { exist: true } });
+  async findAll(slug: string): Promise<any[]> {
+    const orders = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.restaurant', 'restaurant')
+      .leftJoin('order.customer', 'customer')
+      .leftJoin('order.table', 'table')
+      .leftJoin('order.items', 'item')
+      .leftJoin('item.product', 'product')
+      .where('restaurant.slug = :slug', { slug })
+      .andWhere('order.exist = true')
+      .select([
+        'order.id',
+        'order.status',
+        'order.order_type',
+        'order.total_price',
+        'order.created_at',
+
+        'table.id',
+
+        'restaurant.slug',
+
+        'customer.id',
+        'customer.name',
+        'customer.email',
+        'customer.phone',
+
+        'item.id',
+        'item.quantity',
+
+        'product.id',
+        'product.name',
+        'product.description',
+        'product.price',
+      ])
+      .orderBy('order.created_at', 'DESC')
+      .getMany();
+
+    return orders.map((order) => ({
+      id: order.id,
+      status: order.status,
+      order_type: order.order_type,
+      tableId: order.table?.id,
+      restaurantSlug: order.restaurant?.slug,
+      userId: order.customer?.id,
+      created_at: order.created_at,
+      total_price: order.total_price,
+      customer: {
+        name: order.customer?.name,
+        email: order.customer?.email,
+        phone: order.customer?.phone,
+      },
+      items: order.items.map((item) => ({
+        id: item.id,
+        name: item.product?.name,
+        description: item.product?.description,
+        price: item.product?.price,
+        quantity: item.quantity,
+      })),
+    }));
   }
 
   async findOne(id: string) {

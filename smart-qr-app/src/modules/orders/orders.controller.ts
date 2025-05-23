@@ -21,7 +21,7 @@ export class OrdersController {
   @Get()
   @GetAllOrdersDoc()
   async findAll(@Param('slug') slug: string) {
-    return this.ordersService.findAll();
+    return this.ordersService.findAll(slug);
   }
 
   @Get(':id')

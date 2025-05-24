@@ -247,13 +247,13 @@ export function UpdateCategoryDoc() {
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiParam({
       name: 'id',
       description: 'Category ID',
-      example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+      example: 'e97d1673-1891-488d-88cb-b33534028375',
     }),
     ApiBody({
       type: UpdateCategoryDto,
@@ -391,7 +391,7 @@ export function UpdateCategorySequenceDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Update categories sequence',
-      description: 'Updates the display order of multiple categories at once. Useful for drag and drop reordering.'
+      description: 'Updates the display order of multiple categories at once. Useful for drag and drop reordering.',
     }),
     ApiParam({
       name: 'slug',
@@ -420,47 +420,47 @@ export function UpdateCategorySequenceDoc() {
         },
       },
     }),
-    ApiResponse({ 
-      status: 200, 
+    ApiResponse({
+      status: 200,
       description: 'Categories reordered successfully',
       schema: {
         example: {
-          message: 'Category sequences have been updated successfully'
-        }
-      }
+          message: 'Category sequences have been updated successfully',
+        },
+      },
     }),
-    ApiResponse({ 
-      status: 400, 
+    ApiResponse({
+      status: 400,
       description: 'Sequence update failed',
       schema: {
         example: {
           message: 'Failed to update category sequences. Please ensure all category IDs are valid and try again.',
           error: 'Sequence Update Failed',
-          statusCode: 400
-        }
-      }
+          statusCode: 400,
+        },
+      },
     }),
-    ApiResponse({ 
-      status: 401, 
+    ApiResponse({
+      status: 401,
       description: 'Unauthorized',
       schema: {
         example: {
           message: 'Unauthorized user',
           error: 'Unauthorized',
-          statusCode: 401
-        }
-      }
+          statusCode: 401,
+        },
+      },
     }),
-    ApiResponse({ 
-      status: 404, 
+    ApiResponse({
+      status: 404,
       description: 'Restaurant or categories not found',
       schema: {
         example: {
           message: 'One or more categories not found in restaurant test-cafe',
           error: 'Not Found',
-          statusCode: 404
-        }
-      }
+          statusCode: 404,
+        },
+      },
     }),
   );
 }

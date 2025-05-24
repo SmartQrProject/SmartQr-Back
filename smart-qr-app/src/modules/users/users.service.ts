@@ -82,8 +82,6 @@ export class UsersService {
       }
     }
 
-    //console.log('Usuario y user email:', usuario.email, user.email);
-    //console.log('Usuario y user id:', usuario.id, id);
     const updatedUser = this.usersRepository.patchById(id, rest, user, req);
     this.sendEmail(rest, usuario, 'updated'); //nodemailer
     return updatedUser;

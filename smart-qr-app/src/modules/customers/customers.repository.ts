@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
@@ -7,6 +7,9 @@ import { BcryptService } from 'src/common/services/bcrypt.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/common/services/mail.service';
 import { Auth0CustomerDto } from './dto/auth0-customer.dto';
+import { plainToInstance } from 'class-transformer';
+import { CustomerResponseDto } from './dto/customer-response.dto';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
 
 @Injectable()
 export class CustomersRepository {
@@ -18,7 +21,7 @@ export class CustomersRepository {
   ) {}
 
   // ------ trabajando en este endpoint ---GEA Mayo 14-
-  async sincronizarAuth0(customer: Auth0CustomerDto, rest): Promise<Customer> {
+  async sincronizarAuth0(customer: Auth0CustomerDto, rest: Restaurant) {
     const { auth0Id, email, name, picture } = customer;
 
     let existing = await this.customerRepository.findOne({
@@ -27,10 +30,38 @@ export class CustomersRepository {
     });
 
     if (existing) {
+      // Validación: evitar modificar el auth0Id si se intenta forzar otro distinto
+      if (existing.auth0Id !== auth0Id) {
+        throw new BadRequestException('auth0Id cannot be modified');
+      }
+
       if (!existing.exist) existing.exist = true;
       if (!existing.restaurant) existing.restaurant = rest;
 
-      return await this.customerRepository.save(existing);
+      if (email) existing.email = email;
+      if (name) existing.name = name;
+      if (picture) existing.picture = picture;
+
+      const updated = await this.customerRepository.save(existing);
+
+      return {
+        id: updated.id,
+        auth0Id: updated.auth0Id,
+        email: updated.email,
+        name: updated.name,
+        picture: updated.picture,
+        phone: updated.phone,
+        reward: updated.reward,
+        last_visit: updated.last_visit,
+        visits_count: updated.visits_count,
+        created_at: updated.created_at,
+        modified_at: updated.modified_at,
+        restaurant: {
+          name: updated.restaurant?.name,
+          slug: updated.restaurant?.slug,
+        },
+        exist: updated.exist,
+      };
     }
 
     const newCustomer = this.customerRepository.create({
@@ -42,7 +73,26 @@ export class CustomersRepository {
       restaurant: rest,
     });
 
-    return await this.customerRepository.save(newCustomer);
+    const saved = await this.customerRepository.save(newCustomer);
+
+    return {
+      id: saved.id,
+      auth0Id: saved.auth0Id,
+      email: saved.email,
+      name: saved.name,
+      picture: saved.picture,
+      phone: saved.phone,
+      reward: saved.reward,
+      last_visit: saved.last_visit,
+      visits_count: saved.visits_count,
+      created_at: saved.created_at,
+      modified_at: saved.modified_at,
+      restaurant: {
+        name: saved.restaurant?.name,
+        slug: saved.restaurant?.slug,
+      },
+      exist: saved.exist,
+    };
   }
 
   // GEA 14-mayo

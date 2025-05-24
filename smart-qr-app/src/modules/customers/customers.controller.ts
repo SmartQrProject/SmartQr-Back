@@ -15,7 +15,7 @@ import {
   SyncAuth0Doc,
   UpdateCustomerDoc,
 } from './swagger/customers-doc.decorator';
-import { Request } from 'express';
+import { CustomerResponseDto } from './dto/customer-response.dto';
 
 @ApiTags('CRUD EndPoints para Customers (restaurant customers). SignUP, SignIn, etc')
 @Controller(':slug/customers')
@@ -25,8 +25,7 @@ export class CustomersController {
   @Post('sincronizar')
   //@UseGuards(JwtAuthGuard)
   @SyncAuth0Doc()
-  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string, @Req() req: Request): Promise<Customer> {
-    console.log('customer', req);
+  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string): Promise<CustomerResponseDto> {
     return this.customersService.sincronizarAuth0(customer, slug);
   }
 

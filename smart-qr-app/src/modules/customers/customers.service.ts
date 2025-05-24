@@ -8,6 +8,7 @@ import { JwtService } from 'src/common/services/jwt.service';
 import { MailService } from 'src/common/services/mail.service';
 import { LogInCustomerDto } from './dto/login-customer.dto';
 import { RestaurantsService } from '../restaurants/restaurants.service';
+import { CustomerResponseDto } from './dto/customer-response.dto';
 
 @Injectable()
 export class CustomersService {
@@ -19,7 +20,7 @@ export class CustomersService {
     private mailService: MailService,
   ) {}
 
-  async sincronizarAuth0(customer, slug): Promise<Customer> {
+  async sincronizarAuth0(customer, slug): Promise<CustomerResponseDto> {
     const rest = await this.restaurantService.getRestaurants(slug);
     return await this.customersRepository.sincronizarAuth0(customer, rest);
   }

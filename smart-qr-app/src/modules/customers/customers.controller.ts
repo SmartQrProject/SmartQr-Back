@@ -16,14 +16,16 @@ import {
   UpdateCustomerDoc,
 } from './swagger/customers-doc.decorator';
 import { CustomerResponseDto } from './dto/customer-response.dto';
+import { JwtAuth0Guard } from 'src/common/guards/jwt-auth0.guard';
 
 @ApiTags('CRUD EndPoints para Customers (restaurant customers). SignUP, SignIn, etc')
+@ApiBearerAuth()
 @Controller(':slug/customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post('sincronizar')
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuth0Guard)
   @SyncAuth0Doc()
   async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string): Promise<CustomerResponseDto> {
     return this.customersService.sincronizarAuth0(customer, slug);
@@ -31,6 +33,7 @@ export class CustomersController {
 
   // listo 14-Mayo GEA
   @Post('signup')
+  @UseGuards(JwtAuth0Guard)
   @CreateCustomerDoc()
   async create(@Body() createCustomerDto: CreateCustomerDto, @Param('slug') slug: string) {
     return this.customersService.create(createCustomerDto, slug);
@@ -41,6 +44,7 @@ export class CustomersController {
   @HttpCode(200)
   // @Roles(Role.Admin)
   // @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(JwtAuth0Guard)
   @GetAllCustomersDoc()
   async getAllCustomers(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -52,16 +56,18 @@ export class CustomersController {
 
   // listo 14-Mayo GEA
   @Get(':id')
+  @UseGuards(JwtAuth0Guard)
   @HttpCode(200)
   // @Roles(Role.Admin)
   // @UseGuards(AuthGuard, RolesGuard)
   @GetCustomerByIdDoc()
   async findById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string) {
-    return this.customersService.findOne(id);
+    return this.customersService.findOne(id, slug);
   }
 
   // listo 14-Mayo GEA
   @Put(':id')
+  @UseGuards(JwtAuth0Guard)
   @HttpCode(200)
   //@ApiBearerAuth()
   @UpdateCustomerDoc()
@@ -83,6 +89,7 @@ export class CustomersController {
 
   //  FINALIZADO GEA MAyo-14
   @Post('signin')
+  @UseGuards(JwtAuth0Guard)
   @HttpCode(201)
   @SignInCustomerDoc()
   async customerLogin(@Param('slug') slug: string, @Body() customer: LogInCustomerDto): Promise<object> {

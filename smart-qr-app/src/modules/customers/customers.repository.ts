@@ -204,19 +204,24 @@ export class CustomersRepository {
   }
 
   // GEA FINALIZADO Mayo 14
-  async findById(id): Promise<Omit<Customer, 'password'>> {
-    const customer = await this.customerRepository.findOne({
-      where: { id },
-      relations: ['orders'],
-      loadEagerRelations: false, // ignora los eager de Order
-    });
+  async findById(id: string, slug: string): Promise<Omit<Customer, 'password'>> {
+    const customer = await this.customerRepository
+      .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.orders', 'orders')
+      .leftJoinAndSelect('orders.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoin('orders.restaurant', 'restaurant')
+      .where('customer.id = :id', { id })
+      .andWhere('restaurant.slug = :slug', { slug })
+      .andWhere('orders.restaurantId = restaurant.id') // clave
+      .getOne();
 
     if (!customer) {
       throw new NotFoundException('❌ No customer found');
     }
 
-    const { password, ...customerSinPass } = customer;
-    return customer;
+    const { password, ...customerSinPass } = customer as any;
+    return customerSinPass;
   }
 
   // Finalizado GEA Mayo-14

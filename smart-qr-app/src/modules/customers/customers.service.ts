@@ -65,8 +65,8 @@ export class CustomersService {
   }
 
   // FINALIZDO GEA MAYO-14
-  findOne(id) {
-    return this.customersRepository.findById(id);
+  findOne(id, slug) {
+    return this.customersRepository.findById(id, slug);
   }
 
   // FINALIZDO GEA MAYO-14

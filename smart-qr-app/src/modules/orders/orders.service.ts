@@ -85,6 +85,7 @@ export class OrdersService {
       }
 
       // 3,5. Aplicar código de recompensa
+
       let discountPercentage = 0;
       if (createOrderDto.rewardCode) {
         const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode);
@@ -128,7 +129,7 @@ export class OrdersService {
         };
       });
 
-      const stripeSession = await this.stripeService.createCheckoutSession(stripeLineItems, savedOrder.id, savedOrder.rewardCode);
+      const stripeSession = await this.stripeService.createCheckoutSession(stripeLineItems, savedOrder.id, createOrderDto.rewardCode);
 
       await queryRunner.commitTransaction();
 

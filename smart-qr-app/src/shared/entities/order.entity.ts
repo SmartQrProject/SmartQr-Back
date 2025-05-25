@@ -60,6 +60,9 @@ export class Order {
   })
   restaurant: Restaurant;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  rewardCode?: string;
+
   @Column({ default: true })
   exist: boolean;
 }

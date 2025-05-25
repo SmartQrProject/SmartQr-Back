@@ -18,7 +18,7 @@ export class StripeService {
   ) {}
 
   // Para pagos únicos
-  async createCheckoutSession(line_items: Stripe.Checkout.SessionCreateParams.LineItem[], id): Promise<Stripe.Checkout.Session> {
+  async createCheckoutSession(line_items: Stripe.Checkout.SessionCreateParams.LineItem[], id, rewardCode): Promise<Stripe.Checkout.Session> {
     return await this.stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -27,7 +27,8 @@ export class StripeService {
       cancel_url: `${FRONTEND_URL}/cancel-orders`,
       metadata: {
         type: 'order',
-        slug: id, // Cambia esto por el ID real del restaurante
+        orderId: id,
+        rewardCode: rewardCode ?? '',
       },
     });
   }

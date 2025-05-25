@@ -71,7 +71,8 @@ export class OrdersService {
         const product = availableProducts.find((prod) => prod.id === id)!;
         const unit_price = Number(product.price);
 
-        totalPrice += parseFloat((totalPrice + unit_price * quantity).toFixed(2));
+        totalPrice += unit_price * quantity;
+        totalPrice = parseFloat(totalPrice.toFixed(2));
 
         const orderItem = queryRunner.manager.create(OrderItem, {
           product,
@@ -111,19 +112,23 @@ export class OrdersService {
       });
 
       const savedOrder = await queryRunner.manager.save(Order, newOrder);
-      const stripeLineItems = orderItems.map((item) => ({
-        price_data: {
-          currency: 'aud',
-          product_data: {
-            name: item.product.name,
-            description: item.product.description ?? '',
-          },
-          unit_amount: Math.round(item.unit_price * 100),
-        },
-        quantity: item.quantity,
-      }));
+      const stripeLineItems = orderItems.map((item) => {
+        const discountedUnitPrice = discountPercentage ? item.unit_price - (item.unit_price * discountPercentage) / 100 : item.unit_price;
 
-      const stripeSession = await this.stripeService.createCheckoutSession(stripeLineItems, savedOrder.id);
+        return {
+          price_data: {
+            currency: 'aud',
+            product_data: {
+              name: item.product.name,
+              description: item.product.description ?? '',
+            },
+            unit_amount: Math.round(discountedUnitPrice * 100), // 👈 precio ya con descuento
+          },
+          quantity: item.quantity,
+        };
+      });
+
+      const stripeSession = await this.stripeService.createCheckoutSession(stripeLineItems, savedOrder.id, savedOrder.rewardCode);
 
       await queryRunner.commitTransaction();
 

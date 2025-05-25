@@ -23,7 +23,7 @@ export class Customer {
 
   @Column({ nullable: true })
   @IsString()
-  picture: string;
+  image_url: string;
 
   @Column({ nullable: true })
   @IsString()

@@ -18,7 +18,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = (client.handshake.query.userId as string) || client.id;
     if (!userId) {
       console.warn(`❌ Cliente ${client.id} intentó conectarse sin userId`);
-      client.emit('connection_error', 'Falta userId en la conexión');
+      client.emit('connection_error', 'The connection is missing a userId');
       client.disconnect();
       return;
     }

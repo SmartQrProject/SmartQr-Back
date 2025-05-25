@@ -30,6 +30,7 @@ export function CreateOrderDoc() {
           value: {
             customerId: '05f67a0f-0d2c-4119-927a-9e1047d2851d',
             code: 'T07',
+            rewardCode: 'KDB38D35JV',
             products: [
               {
                 id: '1c64190d-3c81-43db-b8a3-40e4d768b42a',

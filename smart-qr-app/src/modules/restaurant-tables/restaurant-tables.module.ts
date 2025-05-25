@@ -13,11 +13,9 @@ import { MailService } from 'src/common/services/mail.service';
   imports: [TypeOrmModule.forFeature([RestaurantTable]), RestaurantsModule, CommonModule],
   providers: [RestaurantTablesService, RestaurantTableRepository, MailService],
   controllers: [RestaurantTablesController],
-  exports: [RestaurantTablesService],
 })
-export class RestaurantTablesModule {}
-// export class RestaurantTablesModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(LoggerMiddleware).forRoutes(':slug/restaurant-tables');
-//   }
-// }
+export class RestaurantTablesModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('users');
+  }
+}

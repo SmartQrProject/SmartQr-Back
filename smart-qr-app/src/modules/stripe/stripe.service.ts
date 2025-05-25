@@ -78,7 +78,7 @@ export class StripeService {
         try {
           const session = event.data.object as Stripe.Checkout.Session;
           const { slug, type, orderId, rewardCode } = session.metadata || {};
-
+          console.log('✅ metadata :', session.metadata);
           if (!slug || !type) {
             console.warn('⚠️ Faltan datos en metadata.');
             break;

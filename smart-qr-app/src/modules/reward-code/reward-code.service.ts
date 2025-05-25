@@ -13,9 +13,7 @@ export class RewardCodeService {
 
   private generateCode(length = 10): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    return Array.from({ length }, () =>
-      chars.charAt(Math.floor(Math.random() * chars.length)),
-    ).join('');
+    return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
   }
 
   async generateUniqueCode(): Promise<string> {
@@ -30,9 +28,7 @@ export class RewardCodeService {
     return code;
   }
 
-  async create(
-    dto: CreateRewardCodeDto,
-  ): Promise<{ id: string; code: string; percentage: number }> {
+  async create(dto: CreateRewardCodeDto): Promise<{ id: string; code: string; percentage: number }> {
     const code = await this.generateUniqueCode();
 
     const newReward = this.rewardCodeRepo.create({
@@ -58,7 +54,7 @@ export class RewardCodeService {
     const reward = await this.rewardCodeRepo.findOne({
       where: { id, exist: true },
     });
-    if (!reward) throw new NotFoundException('Código no encontrado');
+    if (!reward) throw new NotFoundException('Code not found');
     return reward;
   }
 
@@ -72,14 +68,14 @@ export class RewardCodeService {
     const reward = await this.findOne(id);
     reward.exist = false;
     await this.rewardCodeRepo.save(reward);
-    return { message: 'Código eliminado lógicamente' };
+    return { message: 'Code logically deleted' };
   }
 
   async deactivateCode(code: string): Promise<void> {
     const reward = await this.rewardCodeRepo.findOne({
       where: { code, isActive: true },
     });
-    if (!reward) throw new NotFoundException('Código no válido o ya utilizado');
+    if (!reward) throw new NotFoundException('Invalid or already used code');
 
     reward.isActive = false;
     await this.rewardCodeRepo.save(reward);

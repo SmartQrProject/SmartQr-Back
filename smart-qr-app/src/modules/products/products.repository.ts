@@ -26,7 +26,7 @@ export class ProductsRepository {
     });
 
     if (existingProduct) {
-      throw new ConflictException(`Ya existe un producto con el nombre "${name}" en este restaurante`);
+      throw new ConflictException(`A product with the name "${name}" already exists in this restaurant`);
     }
   }
 
@@ -41,7 +41,7 @@ export class ProductsRepository {
       });
 
       if (!category) {
-        throw new BadRequestException('La categoría no existe o no pertenece a este restaurante');
+        throw new BadRequestException('The category does not exist or does not belong to this restaurant');
       }
 
       await this.validateProductName(createProductDto.name, restaurantId);

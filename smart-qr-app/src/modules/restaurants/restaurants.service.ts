@@ -93,7 +93,7 @@ export class RestaurantsService {
         },
       },
     });
-    if (!restaurantsBySlug) throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
+    if (!restaurantsBySlug) throw new NotFoundException(`Restaurant with slug ${slug} not found`);
     return restaurantsBySlug;
   }
   async getRestaurantsPublic(slug: string) {
@@ -110,7 +110,7 @@ export class RestaurantsService {
       },
     });
 
-    if (!restaurant) throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
+    if (!restaurant) throw new NotFoundException(`Restaurant with slug ${slug} not found`);
 
     // Manual transformation to DTO structure
     const result = {
@@ -175,7 +175,7 @@ export class RestaurantsService {
     const result = await this.restaurantRepository.update({ slug }, { is_active: true });
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
+      throw new NotFoundException(`Restaurant with slug ${slug} not found`);
     }
   }
 
@@ -183,7 +183,7 @@ export class RestaurantsService {
     const result = await this.restaurantRepository.update({ slug }, { is_active: false });
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
+      throw new NotFoundException(`Restaurant with slug ${slug} not found`);
     }
   }
 

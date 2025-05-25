@@ -1,12 +1,8 @@
-import { IsInt, IsString, Length, Max, Min } from 'class-validator';
+import { IsInt, Max, Min } from 'class-validator';
 
 export class CreateRewardCodeDto {
   @IsInt()
   @Min(1)
   @Max(100)
   percentage: number;
-
-  @IsString()
-  @Length(10, 10)
-  code: string;
 }

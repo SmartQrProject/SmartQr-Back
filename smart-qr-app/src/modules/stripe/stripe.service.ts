@@ -67,9 +67,9 @@ export class StripeService {
     // ✅ Responder de inmediato para que Stripe no reintente
     res.status(200).json({ received: true });
 
-    // setTimeout(() => {
-    this.handleEvent(event);
-    //}, 20000);
+    setTimeout(() => {
+      this.handleEvent(event);
+    }, 20000);
   }
 
   private async handleEvent(event: Stripe.Event) {

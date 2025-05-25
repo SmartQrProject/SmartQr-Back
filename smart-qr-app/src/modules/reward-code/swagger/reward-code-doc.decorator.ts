@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CreateRewardCodeDto } from '../dto/create-reward-code.dto';
 
+// Param for identifying the restaurant
 const SlugParam = ApiParam({
   name: 'slug',
   description: 'Unique restaurant identifier',
@@ -9,6 +10,7 @@ const SlugParam = ApiParam({
   required: true,
 });
 
+// Param for identifying the reward code
 const IdParam = ApiParam({
   name: 'id',
   description: 'Reward Code ID',
@@ -58,7 +60,28 @@ export function UpdateRewardCodeDoc() {
     ApiOperation({ summary: 'Update reward code by ID' }),
     ApiBody({
       type: CreateRewardCodeDto,
-      description: 'Partial or full update',
+      description: 'Partial or full update of an existing reward code. You can send one or more fields to update.',
+      examples: {
+        updateCodeOnly: {
+          summary: 'Update only the code value',
+          value: {
+            code: 'NEWCODE2025',
+          },
+        },
+        updatePercentageOnly: {
+          summary: 'Update only the discount percentage',
+          value: {
+            percentage: 20,
+          },
+        },
+        fullUpdate: {
+          summary: 'Update code and percentage',
+          value: {
+            code: 'SUMMER20',
+            percentage: 20,
+          },
+        },
+      },
     }),
     ApiResponse({ status: 200, description: 'Reward code updated successfully' }),
     ApiResponse({ status: 404, description: 'Reward code not found' }),
@@ -71,6 +94,15 @@ export function DeleteRewardCodeDoc() {
     IdParam,
     ApiOperation({ summary: 'Delete reward code by ID' }),
     ApiResponse({ status: 200, description: 'Reward code deleted successfully' }),
+    ApiResponse({ status: 404, description: 'Reward code not found' }),
+  );
+}
+
+export function GetRewardCodeByCodeDoc() {
+  return applyDecorators(
+    SlugParam,
+    ApiOperation({ summary: 'Get reward code by ID' }),
+    ApiResponse({ status: 200, description: 'Reward code found' }),
     ApiResponse({ status: 404, description: 'Reward code not found' }),
   );
 }

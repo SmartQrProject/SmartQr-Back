@@ -2,7 +2,14 @@ import { Controller, Post, Get, Param, Body, Put, Delete } from '@nestjs/common'
 import { RewardCodeService } from './reward-code.service';
 import { CreateRewardCodeDto } from './dto/create-reward-code.dto';
 import { ApiParam } from '@nestjs/swagger';
-import { CreateRewardCodeDoc, GetAllRewardCodesDoc, GetRewardCodeByIdDoc, UpdateRewardCodeDoc, DeleteRewardCodeDoc } from './swagger/reward-code-doc.decorator';
+import {
+  CreateRewardCodeDoc,
+  GetAllRewardCodesDoc,
+  GetRewardCodeByIdDoc,
+  UpdateRewardCodeDoc,
+  DeleteRewardCodeDoc,
+  GetRewardCodeByCodeDoc,
+} from './swagger/reward-code-doc.decorator';
 
 @Controller(':slug/reward-codes')
 export class RewardCodeController {
@@ -36,5 +43,11 @@ export class RewardCodeController {
   @DeleteRewardCodeDoc()
   async remove(@Param('slug') slug: string, @Param('id') id: string) {
     return this.rewardCodeService.remove(id);
+  }
+
+  @Get('code/:code')
+  @GetRewardCodeByCodeDoc()
+  async findOneByCode(@Param('slug') slug: string, @Param('code') code: string) {
+    return this.rewardCodeService.findOneByCode(code);
   }
 }

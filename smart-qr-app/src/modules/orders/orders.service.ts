@@ -12,6 +12,7 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RewardCodeService } from '../reward-code/reward-code.service';
 import { MailService } from 'src/common/services/mail.service';
+import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
 export class OrdersService {
@@ -24,6 +25,7 @@ export class OrdersService {
     private readonly rewardCodeService: RewardCodeService,
     private dataSource: DataSource,
     private mailService: MailService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, slug: string) {
@@ -69,7 +71,8 @@ export class OrdersService {
         const product = availableProducts.find((prod) => prod.id === id)!;
         const unit_price = Number(product.price);
 
-        totalPrice += parseFloat((totalPrice + unit_price * quantity).toFixed(2));
+        totalPrice += unit_price * quantity;
+        totalPrice = parseFloat(totalPrice.toFixed(2));
 
         const orderItem = queryRunner.manager.create(OrderItem, {
           product,
@@ -82,6 +85,7 @@ export class OrdersService {
       }
 
       // 3,5. Aplicar código de recompensa
+
       let discountPercentage = 0;
       if (createOrderDto.rewardCode) {
         const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode);
@@ -94,8 +98,6 @@ export class OrdersService {
 
         const discount = totalPrice * (discountPercentage / 100);
         totalPrice -= discount;
-
-        await this.rewardCodeService.deactivateCode(rewardCode.code);
       }
 
       // 4. Crear y guardar orden
@@ -111,6 +113,23 @@ export class OrdersService {
       });
 
       const savedOrder = await queryRunner.manager.save(Order, newOrder);
+      const stripeLineItems = orderItems.map((item) => {
+        const discountedUnitPrice = discountPercentage ? item.unit_price - (item.unit_price * discountPercentage) / 100 : item.unit_price;
+
+        return {
+          price_data: {
+            currency: 'aud',
+            product_data: {
+              name: item.product.name,
+              description: item.product.description ?? '',
+            },
+            unit_amount: Math.round(discountedUnitPrice * 100), // 👈 precio ya con descuento
+          },
+          quantity: item.quantity,
+        };
+      });
+
+      const stripeSession = await this.stripeService.createCheckoutSession(stripeLineItems, savedOrder.id, createOrderDto.rewardCode);
 
       await queryRunner.commitTransaction();
 
@@ -128,7 +147,7 @@ export class OrdersService {
       };
       this.sendEmail(customer, restaurant, order, 'created'); //nodemailer
 
-      return order;
+      return { order: order, stripeSession: stripeSession.url };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -241,5 +260,20 @@ export class OrdersService {
       - Total Amount: ${order.total}`;
     const htmlTemplate = 'basico';
     await this.mailService.sendMail(customer.email, subject, textmsg, htmlTemplate);
+  }
+
+  async activateOrder(orderId: string): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, exist: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    order.status = 'pending'; // <-- Aquí definís el nuevo estado
+    order.payStatus = 'paid'; // (opcional) si usás este campo también
+
+    return this.orderRepository.save(order);
   }
 }

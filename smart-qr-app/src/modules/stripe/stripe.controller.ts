@@ -11,12 +11,12 @@ export class StripeController {
 
   constructor(private readonly stripeService: StripeService) {}
 
-  @Post('checkout-session')
-  @GetCheckoutSessionDoc()
-  async getCheckoutSession(@Body('total') total: string) {
-    const session = await this.stripeService.createCheckoutSession(total);
-    return { id: session.id, url: session.url };
-  }
+  // @Post('checkout-session')
+  // @GetCheckoutSessionDoc()
+  // async getCheckoutSession(@Body('total') total: string, items) {
+  //   const session = await this.stripeService.createCheckoutSession(total, items);
+  //   return { id: session.id, url: session.url };
+  // }
 
   @Post('subscription-session')
   @GetSubscriptionSessionDoc()

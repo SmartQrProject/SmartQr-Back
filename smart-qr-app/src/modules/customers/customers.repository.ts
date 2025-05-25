@@ -213,7 +213,8 @@ export class CustomersRepository {
       .leftJoin('orders.restaurant', 'restaurant')
       .where('customer.id = :id', { id })
       .andWhere('restaurant.slug = :slug', { slug })
-      .andWhere('orders.restaurantId = restaurant.id') // clave
+      .andWhere('orders.restaurantId = restaurant.id')
+      .andWhere('orders.status != :inactive', { inactive: 'inactive' }) // ✅ clave para excluir
       .getOne();
 
     if (!customer) {

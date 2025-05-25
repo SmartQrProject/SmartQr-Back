@@ -67,9 +67,9 @@ export class StripeService {
     // ✅ Responder de inmediato para que Stripe no reintente
     res.status(200).json({ received: true });
 
-    setTimeout(() => {
-      this.handleEvent(event);
-    }, 20000);
+    // setTimeout(() => {
+    this.handleEvent(event);
+    //}, 20000);
   }
 
   private async handleEvent(event: Stripe.Event) {
@@ -79,8 +79,8 @@ export class StripeService {
           const session = event.data.object as Stripe.Checkout.Session;
           const { slug, type, orderId, rewardCode } = session.metadata || {};
           console.log('✅ metadata :', session.metadata);
-          if (!slug || !type) {
-            console.warn('⚠️ Faltan datos en metadata.');
+          if (!type) {
+            console.warn('⚠️ Tipo de sesión no especificado en metadata.');
             break;
           }
 

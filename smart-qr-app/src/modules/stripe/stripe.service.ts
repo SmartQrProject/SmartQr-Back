@@ -1,32 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { FRONTEND_URL, STRIPE_PRICE_ID, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from 'src/config/env.loader';
 import { Request, Response } from 'express';
 import { HttpStatus } from '@nestjs/common';
 import Stripe from 'stripe';
 import { RestaurantsService } from '../restaurants/restaurants.service';
+import { OrdersService } from '../orders/orders.service';
+import { RewardCodeService } from '../reward-code/reward-code.service';
 
 @Injectable()
 export class StripeService {
   private stripe = new Stripe(STRIPE_SECRET_KEY);
-  constructor(private readonly restaurantsService: RestaurantsService) {}
+  constructor(
+    private readonly restaurantsService: RestaurantsService,
+    @Inject(forwardRef(() => OrdersService))
+    private readonly ordersService: OrdersService,
+    private readonly rewardCodeService: RewardCodeService,
+  ) {}
 
   // Para pagos únicos
-  async createCheckoutSession(total): Promise<Stripe.Checkout.Session> {
+  async createCheckoutSession(line_items: Stripe.Checkout.SessionCreateParams.LineItem[], id): Promise<Stripe.Checkout.Session> {
     return await this.stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'aud',
-            product_data: { name: 'Producto de prueba' },
-            unit_amount: Number(total) * 100,
-          },
-          quantity: 1,
-        },
-      ],
+      line_items,
       success_url: `${FRONTEND_URL}/success-orders`,
       cancel_url: `${FRONTEND_URL}/cancel-orders`,
+      metadata: {
+        type: 'order',
+        slug: id, // Cambia esto por el ID real del restaurante
+      },
     });
   }
 
@@ -45,6 +47,7 @@ export class StripeService {
       cancel_url: `${FRONTEND_URL}/cancel`,
 
       metadata: {
+        type: 'subscription',
         slug: slug, // Cambia esto por el ID real del restaurante
       },
     });
@@ -73,19 +76,35 @@ export class StripeService {
       case 'checkout.session.completed': {
         try {
           const session = event.data.object as Stripe.Checkout.Session;
-          const slug = session.metadata?.slug;
+          const { slug, type, orderId, rewardCode } = session.metadata || {};
 
-          if (!slug) {
-            console.warn('⚠️ No se encontró slug en metadata.');
+          if (!slug || !type) {
+            console.warn('⚠️ Faltan datos en metadata.');
             break;
           }
 
-          console.log('✅ Pago confirmado:', slug);
+          if (type === 'subscription') {
+            console.log('✅ Suscripción confirmada:', slug);
+            await this.restaurantsService.activatePlan(slug);
+            console.log('✅ Plan activado para restaurante:', slug);
+          }
 
-          await this.restaurantsService.activatePlan(slug);
-          console.log('✅ Plan activado para el restaurante:', slug);
+          if (type === 'order') {
+            if (!orderId) {
+              console.warn('⚠️ orderId no encontrado en metadata.');
+              break;
+            }
+            console.log('✅ Orden confirmada:', orderId);
+            await this.ordersService.activateOrder(orderId);
+            if (rewardCode) {
+              console.log('🎁 Código de recompensa aplicado:', rewardCode);
+              await this.rewardCodeService.deactivateCode(rewardCode);
+            }
+
+            console.log('✅ Orden activada:', orderId);
+          }
         } catch (err) {
-          console.error('❌ Error al procesar checkout.session.completed:', err);
+          console.error('❌ Error en checkout.session.completed:', err);
         }
         break;
       }

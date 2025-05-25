@@ -12,6 +12,7 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RewardCodeService } from '../reward-code/reward-code.service';
 import { MailService } from 'src/common/services/mail.service';
+import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
 export class OrdersService {
@@ -24,6 +25,7 @@ export class OrdersService {
     private readonly rewardCodeService: RewardCodeService,
     private dataSource: DataSource,
     private mailService: MailService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, slug: string) {
@@ -111,6 +113,19 @@ export class OrdersService {
       });
 
       const savedOrder = await queryRunner.manager.save(Order, newOrder);
+      const stripeLineItems = orderItems.map((item) => ({
+        price_data: {
+          currency: 'aud',
+          product_data: {
+            name: item.product.name,
+            description: item.product.description ?? '',
+          },
+          unit_amount: Math.round(item.unit_price * 100),
+        },
+        quantity: item.quantity,
+      }));
+
+      const stripeSession = await this.stripeService.createCheckoutSession(stripeLineItems, savedOrder.id);
 
       await queryRunner.commitTransaction();
 
@@ -128,7 +143,7 @@ export class OrdersService {
       };
       this.sendEmail(customer, restaurant, order, 'created'); //nodemailer
 
-      return order;
+      return { order: order, stripeSession: stripeSession.url };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -241,5 +256,20 @@ export class OrdersService {
       - Total Amount: ${order.total}`;
     const htmlTemplate = 'basico';
     await this.mailService.sendMail(customer.email, subject, textmsg, htmlTemplate);
+  }
+
+  async activateOrder(orderId: string): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, exist: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    order.status = 'pending'; // <-- Aquí definís el nuevo estado
+    order.payStatus = 'paid'; // (opcional) si usás este campo también
+
+    return this.orderRepository.save(order);
   }
 }

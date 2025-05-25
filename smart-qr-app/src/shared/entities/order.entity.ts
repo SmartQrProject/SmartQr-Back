@@ -34,9 +34,9 @@ export class Order {
   @IsString()
   payment_method?: string;
 
-  @Column({ default: 'none' })
-  @IsString()
-  discount_applied: string;
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @IsNumber()
+  discount_applied: number;
 
   @Column({ type: 'timestamp', nullable: true })
   @IsOptional()

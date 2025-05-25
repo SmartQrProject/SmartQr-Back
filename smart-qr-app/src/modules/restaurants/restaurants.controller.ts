@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Get, Query, HttpCode, UseGuards, Patch, Param, Req } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
-import { CreateRestaurantDoc, GetRestaurantDoc, GetRestaurantPublicDoc, PatchRestaurantBySlugDoc } from './swagger/restaurants-doc.decorator';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { CreateRestaurantDoc, GetAllRestaurantsDoc, GetRestaurantDoc, GetRestaurantPublicDoc, PatchRestaurantBySlugDoc } from './swagger/restaurants-doc.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/common/decorators/role.enum';
@@ -44,5 +44,15 @@ export class RestaurantsController {
   //@UseGuards(AuthGuard)
   async pachRestaurantBySlug(@Param('slug') slug: string, @Body() restaurantData: Partial<PatchRestaurantsDto>, @Req() req: Request): Promise<string> {
     return this.restaurantsService.patchRestaurantBySlug(slug, restaurantData, req);
+  }
+
+  @Get('all')
+  @HttpCode(200)
+  @Roles(Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @GetAllRestaurantsDoc()
+  async getAllRestaurants() {
+    return this.restaurantsService.getAllRestaurants();
   }
 }

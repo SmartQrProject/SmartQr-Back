@@ -162,8 +162,8 @@ export class RestaurantsService {
     //nodemailer
     const subject = `Restaurant data was successfully updated ${mergedRest.name}`;
     const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.\n 
-      Restaurant Name: ${mergedRest.name} 
-      Restaruant Banner: ${mergedRest.banner}`;
+    Restaurant Name: ${mergedRest.name} 
+    Restaruant Banner: ${mergedRest.banner}`;
     const htmlTemplate = 'basico';
     this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
 
@@ -176,5 +176,19 @@ export class RestaurantsService {
     if (result.affected === 0) {
       throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
     }
+  }
+
+  async deactivatePlan(slug: string) {
+    const result = await this.restaurantRepository.update({ slug }, { is_active: false });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Restaurant con slug ${slug} no encontrado.`);
+    }
+  }
+
+  getAllRestaurants() {
+    return this.restaurantRepository.find({
+      where: { exist: true },
+    });
   }
 }

@@ -58,6 +58,12 @@ export class CompleteUserDto {
   })
   role: string;
 
+  @IsString({
+    message: 'The phone must be a characters field.',
+  })
+  @Length(5, 20)
+  phone?: string;
+
   @IsNotEmpty({
     message: 'De-activation of a user.',
   })

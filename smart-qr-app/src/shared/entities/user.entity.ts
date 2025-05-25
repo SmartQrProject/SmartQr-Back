@@ -26,6 +26,11 @@ export class User {
   @IsString()
   role: string; // 'superAdmin', 'owner', 'staff'
 
+  @Column({ nullable: true, length: 20 })
+  @IsString()
+  @Length(5, 20)
+  phone?: string;
+
   @CreateDateColumn()
   created_at: Date;
 

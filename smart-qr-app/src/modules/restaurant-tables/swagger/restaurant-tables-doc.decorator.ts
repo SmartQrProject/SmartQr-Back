@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateRestaurantTableDto } from '../dto/update-restaurant-table.dto';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 
@@ -19,6 +19,7 @@ const IdParam = ApiParam({
 
 export function FindAllTablesDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     SlugParam,
     ApiOperation({
       summary: 'Get paginated restaurants table list report',
@@ -43,6 +44,7 @@ export function FindAllTablesDoc() {
 
 export function SeederTablesDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     SlugParam,
     ApiParam({
       name: 'qty',
@@ -65,6 +67,7 @@ export function SeederTablesDoc() {
 
 export function FindTableByIdDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     SlugParam,
     IdParam,
     ApiOperation({
@@ -78,6 +81,7 @@ export function FindTableByIdDoc() {
 
 export function DeleteTableDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     SlugParam,
     IdParam,
     ApiOperation({
@@ -94,6 +98,7 @@ export function DeleteTableDoc() {
 
 export function UpdateTableDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     SlugParam,
     IdParam,
     ApiOperation({ summary: 'Update a restaurant table by ID' }),

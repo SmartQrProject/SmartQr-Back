@@ -5,15 +5,13 @@ import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import { RestaurantsService } from '../restaurants/restaurants.service';
-import { MailService } from 'src/common/services/mail.service';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
 
 @Injectable()
 export class RestaurantTableRepository {
   constructor(
     @InjectRepository(RestaurantTable)
     private readonly restaurantTableRepository: Repository<RestaurantTable>,
-    private readonly restService: RestaurantsService,
-    private mailService: MailService,
   ) {}
 
   // GEA FINALIZADO Mayo 16 -------------------------------------------------
@@ -42,8 +40,7 @@ export class RestaurantTableRepository {
   }
 
   // GEA FINALIZADO Mayo 16 -------------------------------------------------
-  async seeder(slug, qty, prefix) {
-    const rest = await this.restService.getRestaurants(slug);
+  async seeder(rest, qty, prefix) {
     const cant = Number(qty);
 
     const items = Array.from({ length: cant }, (_, i) => ({
@@ -51,16 +48,7 @@ export class RestaurantTableRepository {
       restaurant: rest,
     }));
 
-    console.log(`Cantidad de registros:`, items.length);
-    console.log(items);
-
     const tablesArray = await this.restaurantTableRepository.createQueryBuilder().insert().into(RestaurantTable).values(items).orIgnore().execute();
-
-    // const subject = `Satisfactory Tables Creation for your restaurant ${rest.name}`;
-    // const textmsg = `Congratulations!!!! Your have created the following tables for the restaurant.${items}`;
-    // const htmlTemplate = 'signIn';
-    // this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
-
     return items;
   }
 

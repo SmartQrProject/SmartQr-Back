@@ -13,7 +13,6 @@ export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
     private mailService: MailService,

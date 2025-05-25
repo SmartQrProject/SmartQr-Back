@@ -11,7 +11,7 @@ export class Order {
   @IsUUID()
   id: string;
 
-  @Column({ length: 20, default: 'pending' })
+  @Column({ length: 20, default: 'inactive' })
   @IsString()
   @Length(2, 20)
   status: string;

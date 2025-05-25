@@ -176,7 +176,7 @@ export class CustomersRepository {
     // const mergeUser = this.userRepository.merge(user, putUser);
     // await this.userRepository.save(mergeUser);
     await this.customerRepository.save(customer);
-    return 'Customer bloquedao: ' + id;
+    return 'Customer blocked: ' + id;
   }
 
   // GEA FINALIZADO Mayo 14

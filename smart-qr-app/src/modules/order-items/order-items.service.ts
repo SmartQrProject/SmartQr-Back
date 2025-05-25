@@ -28,35 +28,31 @@ export class OrderItemsService {
     await queryRunner.startTransaction();
 
     try {
-      
       const restaurant = await queryRunner.manager.findOneBy(Restaurant, { slug });
       if (!restaurant) {
-        throw new NotFoundException('Restaurante no encontrado');
+        throw new NotFoundException('Restaurant not found');
       }
 
-      
       const order = await queryRunner.manager.findOneBy(Order, {
         id: createOrderItemDto.orderId,
         restaurant: { id: restaurant.id },
         exist: true,
       });
       if (!order) {
-        throw new NotFoundException('Orden no encontrada');
+        throw new NotFoundException('Order not found');
       }
 
-     
       const product = await queryRunner.manager.findOneBy(Product, {
         id: createOrderItemDto.productId,
         restaurant: { id: restaurant.id },
       });
       if (!product) {
-        throw new NotFoundException('Producto no encontrado');
+        throw new NotFoundException('Product not found');
       }
       if (!product.is_available) {
-        throw new BadRequestException('El producto no está disponible');
+        throw new BadRequestException('The product is not available');
       }
 
-     
       const orderItem = queryRunner.manager.create(OrderItem, {
         order,
         product,
@@ -67,15 +63,11 @@ export class OrderItemsService {
 
       const savedOrderItem = await queryRunner.manager.save(OrderItem, orderItem);
 
-    
       const orderItems = await queryRunner.manager.find(OrderItem, {
         where: { order: { id: order.id }, exist: true },
       });
 
-      const totalPrice = orderItems.reduce(
-        (total, item) => total + Number(item.unit_price) * item.quantity,
-        0,
-      );
+      const totalPrice = orderItems.reduce((total, item) => total + Number(item.unit_price) * item.quantity, 0);
 
       await queryRunner.manager.update(Order, order.id, {
         total_price: totalPrice,
@@ -95,7 +87,7 @@ export class OrderItemsService {
   async findAll(slug: string) {
     const restaurant = await this.restaurantRepository.findOneBy({ slug });
     if (!restaurant) {
-      throw new NotFoundException('Restaurante no encontrado');
+      throw new NotFoundException('Restaurant not found');
     }
 
     return this.orderItemRepository.find({
@@ -107,7 +99,7 @@ export class OrderItemsService {
   async findOne(slug: string, id: string) {
     const restaurant = await this.restaurantRepository.findOneBy({ slug });
     if (!restaurant) {
-      throw new NotFoundException('Restaurante no encontrado');
+      throw new NotFoundException('Restaurant not found');
     }
 
     const orderItem = await this.orderItemRepository.findOne({
@@ -116,7 +108,7 @@ export class OrderItemsService {
     });
 
     if (!orderItem) {
-      throw new NotFoundException(`Item de orden con ID ${id} no encontrado`);
+      throw new NotFoundException(`Order item with ID ${id} not found`);
     }
 
     return orderItem;
@@ -130,7 +122,7 @@ export class OrderItemsService {
     try {
       const restaurant = await queryRunner.manager.findOneBy(Restaurant, { slug });
       if (!restaurant) {
-        throw new NotFoundException('Restaurante no encontrado');
+        throw new NotFoundException('Restaurant not found');
       }
 
       const orderItem = await queryRunner.manager.findOne(OrderItem, {
@@ -139,37 +131,31 @@ export class OrderItemsService {
       });
 
       if (!orderItem) {
-        throw new NotFoundException(`Item de orden con ID ${id} no encontrado`);
+        throw new NotFoundException(`Order item with ID ${id} not found`);
       }
 
-      
       if (updateOrderItemDto.productId) {
         const product = await queryRunner.manager.findOneBy(Product, {
           id: updateOrderItemDto.productId,
           restaurant: { id: restaurant.id },
         });
         if (!product) {
-          throw new NotFoundException('Producto no encontrado');
+          throw new NotFoundException('Product not found');
         }
         if (!product.is_available) {
-          throw new BadRequestException('El producto no está disponible');
+          throw new BadRequestException('The product is not available');
         }
         orderItem.product = product;
       }
 
-      
       Object.assign(orderItem, updateOrderItemDto);
       const updatedOrderItem = await queryRunner.manager.save(OrderItem, orderItem);
 
-      
       const orderItems = await queryRunner.manager.find(OrderItem, {
         where: { order: { id: orderItem.order.id }, exist: true },
       });
 
-      const totalPrice = orderItems.reduce(
-        (total, item) => total + Number(item.unit_price) * item.quantity,
-        0,
-      );
+      const totalPrice = orderItems.reduce((total, item) => total + Number(item.unit_price) * item.quantity, 0);
 
       await queryRunner.manager.update(Order, orderItem.order.id, {
         total_price: totalPrice,
@@ -194,7 +180,7 @@ export class OrderItemsService {
     try {
       const restaurant = await queryRunner.manager.findOneBy(Restaurant, { slug });
       if (!restaurant) {
-        throw new NotFoundException('Restaurante no encontrado');
+        throw new NotFoundException('Restaurant not found');
       }
 
       const orderItem = await queryRunner.manager.findOne(OrderItem, {
@@ -203,22 +189,17 @@ export class OrderItemsService {
       });
 
       if (!orderItem) {
-        throw new NotFoundException(`Item de orden con ID ${id} no encontrado`);
+        throw new NotFoundException(`Order item with ID ${id} not found`);
       }
 
-      
       orderItem.exist = false;
       await queryRunner.manager.save(OrderItem, orderItem);
 
-      
       const orderItems = await queryRunner.manager.find(OrderItem, {
         where: { order: { id: orderItem.order.id }, exist: true },
       });
 
-      const totalPrice = orderItems.reduce(
-        (total, item) => total + Number(item.unit_price) * item.quantity,
-        0,
-      );
+      const totalPrice = orderItems.reduce((total, item) => total + Number(item.unit_price) * item.quantity, 0);
 
       await queryRunner.manager.update(Order, orderItem.order.id, {
         total_price: totalPrice,

@@ -36,17 +36,17 @@ export class OrdersService {
       const customer = await queryRunner.manager.findOneBy(Customer, {
         id: createOrderDto.customerId,
       });
-      if (!customer) throw new NotFoundException('Cliente no encontrado');
+      if (!customer) throw new NotFoundException('Customer not found');
 
       const restaurant = await queryRunner.manager.findOneBy(Restaurant, {
         slug: slug,
       });
-      if (!restaurant) throw new NotFoundException('Restaurante no encontrado');
+      if (!restaurant) throw new NotFoundException('Restaurant not found');
 
       const table = await queryRunner.manager.findOneBy(RestaurantTable, {
         code: createOrderDto.code,
       });
-      if (!table) throw new NotFoundException('Mesa no encontrada');
+      if (!table) throw new NotFoundException('Table not found');
 
       // 2. Obtener y validar productos
       const requestedProductIds = createOrderDto.products.map((prod) => prod.id);
@@ -57,7 +57,7 @@ export class OrdersService {
       for (const { id } of createOrderDto.products) {
         const product = availableProducts.find((prod) => prod.id === id);
         if (!product || !product.is_available) {
-          throw new BadRequestException(`Producto con ID ${id} no disponible`);
+          throw new BadRequestException(`Product with ID ${id} is not available`);
         }
       }
 
@@ -87,7 +87,7 @@ export class OrdersService {
         const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode);
 
         if (!rewardCode || !rewardCode.isActive || !rewardCode.exist) {
-          throw new BadRequestException('Código de recompensa inválido o ya utilizado');
+          throw new BadRequestException('Invalid or already used reward code');
         }
 
         discountPercentage = rewardCode.percentage;
@@ -205,7 +205,7 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new NotFoundException(`Orden con ID ${id} no encontrada o fue eliminada`);
+      throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
     return order;
@@ -217,7 +217,7 @@ export class OrdersService {
     });
 
     if (!existingOrder) {
-      throw new NotFoundException(`Orden con ID ${id} no encontrada`);
+      throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
     const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
@@ -228,7 +228,7 @@ export class OrdersService {
     const order = await this.orderRepository.findOne({ where: { id } });
 
     if (!order) {
-      throw new NotFoundException(`Orden con ID ${id} no encontrada`);
+      throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
     order.exist = false;

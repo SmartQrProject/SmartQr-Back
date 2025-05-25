@@ -75,7 +75,8 @@ export function CreateCategoryDoc() {
       description: 'Category name already exists',
       schema: {
         example: {
-          message: 'Ya existe una categoría con el nombre "Beverages" en este restaurante',
+          message: 'A category with the name "Beverages" already exists in this restaurant',
+
           error: 'Conflict',
           statusCode: 409,
         },

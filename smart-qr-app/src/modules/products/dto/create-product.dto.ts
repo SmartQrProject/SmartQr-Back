@@ -44,7 +44,7 @@ export class CreateProductDto {
   @IsString({ each: true })
   @ApiProperty({
     description: 'Optional product details like dietary tags or labels',
-    example: ['vegano', 'sin gluten', 'sin lactosa'],
+    example: ['vegan', 'gluten-free', 'lactose-free'],
     required: false,
     isArray: true,
     type: String,

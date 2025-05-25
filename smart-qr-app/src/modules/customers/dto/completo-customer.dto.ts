@@ -1,20 +1,5 @@
 import { pwMatch } from 'src/common/decorators/passwordMatch';
-import {
-  IsBoolean,
-  IsEmail,
-  IsEmpty,
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUrl,
-  IsUUID,
-  Length,
-  Matches,
-  Min,
-} from 'class-validator';
+import { IsBoolean, IsEmail, IsEmpty, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID, Length, Matches, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CompletoCustomerDto {
@@ -34,7 +19,7 @@ export class CompletoCustomerDto {
   phone: BigInteger;
 
   @ApiProperty({
-    description: 'Indica si el customer está activo o no',
+    description: 'Indicates whether the customer is active or not',
     example: true,
     type: Boolean,
   })
@@ -42,12 +27,10 @@ export class CompletoCustomerDto {
   exist: boolean;
 
   @IsString({
-    message:
-      'The name is mandatory and  must have between 5 and 100 characteres',
+    message: 'The name is mandatory and  must have between 5 and 100 characteres',
   })
   @Length(5, 100, {
-    message:
-      'LThe name is mandatory and  must have between 5 and 100 characteres',
+    message: 'LThe name is mandatory and  must have between 5 and 100 characteres',
   })
   @Matches(/^[A-Za-z0-9 ]+$/, {
     message: 'THis field only permits letters and numbers and spaces.',
@@ -70,16 +53,11 @@ export class CompletoCustomerDto {
 
   @IsString({ message: 'The password must be a characters field .' })
   @IsNotEmpty({ message: 'The password could not blank.' })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/,
-    {
-      message:
-        'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
-    },
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/, {
+    message: 'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
+  })
   @ApiProperty({
-    description:
-      'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
+    description: 'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
     example: 'Clave123%%',
   })
   password: string;
@@ -87,8 +65,7 @@ export class CompletoCustomerDto {
   @IsString({ message: 'The password must be a characters field .' })
   @pwMatch('password', { message: 'Passwords do not match' })
   @ApiProperty({
-    description:
-      'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
+    description: 'It should have between 8 and 15 characteres, having at least one lowercase, one uppercase, one number and one special character (!@#$%^&*).',
     example: 'Clave123%%',
   })
   confirmPassword: string;

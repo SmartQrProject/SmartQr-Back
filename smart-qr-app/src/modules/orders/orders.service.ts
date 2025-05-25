@@ -96,8 +96,6 @@ export class OrdersService {
 
         const discount = totalPrice * (discountPercentage / 100);
         totalPrice -= discount;
-
-        await this.rewardCodeService.deactivateCode(rewardCode.code);
       }
 
       // 4. Crear y guardar orden

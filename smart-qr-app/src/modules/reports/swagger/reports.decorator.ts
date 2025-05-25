@@ -144,8 +144,8 @@ export function GetSalesByCategoryDoc() {
     ApiBearerAuth(),
     ApiTags('Reports'),
     ApiOperation({
-      summary: 'Ventas por categoría',
-      description: 'Devuelve las ventas agrupadas por categoría dentro de un rango de fechas.',
+      summary: 'Sales by category',
+      description: 'Returns sales grouped by category within a date range.',
     }),
     ApiParam({
       name: 'slug',
@@ -170,15 +170,15 @@ export function GetSalesByCategoryDoc() {
       name: 'sort',
       required: false,
       enum: ['asc', 'desc'],
-      description: 'Orden por total vendido (asc = menos vendida, desc = más vendida)',
+      description: 'Order by total sold (asc = least sold, desc = most sold)',
     }),
     ApiResponse({
       status: 200,
-      description: 'Lista de categorías con totales y porcentajes',
+      description: 'List of categories with totals and percentages',
       schema: {
         example: [
           {
-            category: 'Bebidas',
+            category: 'Beverages',
             total: 230.5,
             percentage: 48.2,
             quantity: 84,
@@ -189,7 +189,7 @@ export function GetSalesByCategoryDoc() {
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized',
     }),
   );
 }
@@ -199,24 +199,24 @@ export function GetSalesFrequencyDoc() {
     ApiBearerAuth(),
     ApiTags('Reports'),
     ApiOperation({
-      summary: 'Obtener cantidad de ventas agrupadas por unidad temporal',
-      description: 'Devuelve la frecuencia de ventas por hora, día de semana, día del mes o mes del año.',
+      summary: 'Get sales count grouped by time unit',
+      description: 'Returns the frequency of sales by hour, day of the week, day of the month, or month of the year.',
     }),
     ApiParam({
       name: 'slug',
       required: true,
       example: 'test-cafe',
-      description: 'Slug del restaurante',
+      description: 'Restaurant slug',
     }),
     ApiQuery({
       name: 'group',
       enum: ['hour', 'weekday', 'monthday', 'month'],
       required: true,
-      description: 'Unidad temporal para agrupar las ventas',
+      description: 'Time unit to group sales by',
     }),
     ApiResponse({
       status: 200,
-      description: 'Frecuencia de ventas devuelta exitosamente',
+      description: 'Sales frequency returned successfully',
       schema: {
         example: [
           { label: '00', count: 5 },
@@ -227,7 +227,7 @@ export function GetSalesFrequencyDoc() {
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized',
     }),
   );
 }
@@ -237,16 +237,16 @@ export function GetCustomersReportDoc() {
     ApiBearerAuth(),
     ApiTags('Reports'),
     ApiOperation({
-      summary: 'Reporte de clientes con métricas y ordenamiento',
-      description: 'Devuelve una lista paginada de clientes con su email, órdenes, total, promedio y fechas relevantes',
+      summary: 'Customer report with metrics and sorting',
+      description: 'Returns a paginated list of customers including their email, orders, total spent, average per order, and relevant dates',
     }),
-    ApiParam({ name: 'slug', example: 'test-cafe', description: 'Slug del restaurante' }),
+    ApiParam({ name: 'slug', example: 'test-cafe', description: 'Restaurant slug' }),
     ApiQuery({ name: 'sortBy', required: false, enum: ['name', 'email', 'orders', 'totalSpent', 'averageOrder', 'createdAt', 'lastVisit', 'daysSince'] }),
     ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] }),
     ApiQuery({ name: 'page', required: false, example: '1' }),
     ApiQuery({ name: 'limit', required: false, example: '10' }),
-    ApiResponse({ status: 200, description: 'Lista de clientes con métricas' }),
-    ApiResponse({ status: 401, description: 'No autorizado' }),
+    ApiResponse({ status: 200, description: 'List of customers with metrics' }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
 
@@ -255,13 +255,13 @@ export function GetCustomerTypesDoc() {
     ApiBearerAuth(),
     ApiTags('Reports'),
     ApiOperation({
-      summary: 'Obtener cantidad y porcentaje de clientes nuevos vs recurrentes',
-      description: 'Devuelve métricas comparando clientes nuevos y recurrentes en un rango de fechas.',
+      summary: 'Get count and percentage of new vs returning customers',
+      description: 'Returns metrics comparing new and returning customers within a date range.',
     }),
     ApiParam({
       name: 'slug',
       required: true,
-      description: 'Slug del restaurante',
+      description: 'Restaurant slug',
       example: 'test-cafe',
     }),
     ApiQuery({
@@ -278,7 +278,7 @@ export function GetCustomerTypesDoc() {
     }),
     ApiResponse({
       status: 200,
-      description: 'Reporte de clientes',
+      description: 'Customer report',
       schema: {
         example: {
           newCustomers: 8,

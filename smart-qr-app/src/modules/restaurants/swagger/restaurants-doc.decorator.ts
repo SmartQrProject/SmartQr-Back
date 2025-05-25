@@ -119,7 +119,7 @@ export function GetRestaurantPublicDoc() {
                   price: '2.75',
                   image_url: 'https://example.com/images/fanta-zero.jpg',
                   is_available: true,
-                  details: ['sin gluten', 'vegano'],
+                  details: ['gluten-free', 'vegan'],
                 },
               ],
             },

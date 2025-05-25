@@ -4,7 +4,7 @@ import { ApiOperation, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger
 export function UploadImageDoc() {
   return applyDecorators(
     ApiOperation({
-      summary: 'Subir o actualizar una imagen de usuario (JPEG, PNG o WebP)(requiere autenticación)',
+      summary: 'Upload or update a user image (JPEG, PNG, or WebP) (authentication required)',
     }),
     ApiConsumes('multipart/form-data'),
     ApiBody({
@@ -20,23 +20,23 @@ export function UploadImageDoc() {
     }),
     ApiResponse({
       status: 200,
-      description: 'Imagen subida exitosamente (URL retornada)',
+      description: 'Image uploaded successfully (URL returned)',
     }),
     ApiResponse({
       status: 400,
-      description: 'Archivo requerido',
+      description: 'File required',
     }),
     ApiResponse({
       status: 401,
-      description: 'No autorizado',
+      description: 'Unauthorized',
     }),
     ApiResponse({
       status: 413,
-      description: 'El archivo debe ser menor de 200 KB',
+      description: 'The file must be smaller than 200 KB',
     }),
     ApiResponse({
       status: 415,
-      description: 'El archivo no es una imagen válida o su formato no está permitido (jpg, png, webp)',
+      description: 'The file is not a valid image or its format is not allowed (jpg, png, webp)',
     }),
   );
 }

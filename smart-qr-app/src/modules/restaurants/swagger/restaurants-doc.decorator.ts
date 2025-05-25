@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiBody, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiQuery, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CreateRestaurantsDto } from '../dto/create-restaurants.dto';
 
 export function CreateRestaurantDoc() {
@@ -174,3 +174,39 @@ export function PatchRestaurantBySlugDoc() {
     }),
   );
 }
+
+export const GetAllRestaurantsDoc = () =>
+  applyDecorators(
+    ApiOperation({
+      summary: 'Get all restaurants',
+      description: 'Returns all registered restaurants with basic info',
+    }),
+    ApiOkResponse({
+      description: 'Array of restaurants',
+      schema: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid', example: '9f07cf57-82e3-4050-8beb-ed7f011b1794' },
+            name: { type: 'string', example: 'Eli Cafe' },
+            slug: { type: 'string', example: 'eli-cafe' },
+            owner_email: { type: 'string', format: 'email', example: 'elicafe@gmail.com' },
+            is_active: { type: 'boolean', example: true },
+            created_at: { type: 'string', format: 'date-time', example: '2025-05-16T06:16:47.629Z' },
+            subscription: { type: 'string', nullable: true, example: null },
+            exist: { type: 'boolean', example: true },
+            banner: {
+              type: 'string',
+              format: 'uri',
+              example: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1748134217/banners/zj631kav9gxmqqpqxz3s.jpg',
+            },
+          },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized',
+    }),
+  );

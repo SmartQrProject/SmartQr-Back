@@ -97,8 +97,8 @@ export class ReportsService {
     const qb = this.orderRepo.createQueryBuilder('order').innerJoin('order.restaurant', 'restaurant').where('restaurant.slug = :slug', { slug }).andWhere('order.exist = true');
 
     let baseLabels: string[] = [];
-    const weekdayMap = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const monthMap = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const weekdayMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthMap = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     switch (group) {
       case 'hour':

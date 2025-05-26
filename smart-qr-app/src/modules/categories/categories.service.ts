@@ -55,7 +55,7 @@ export class CategoriesService {
     }
 
     const category = await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
-    this.sendEmail(rest, category, 'createded'); //nodemailer
+    this.sendEmail(rest, category, 'created'); //nodemailer
     return category;
   }
 

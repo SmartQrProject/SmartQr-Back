@@ -13,7 +13,6 @@ export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
     private mailService: MailService,
@@ -145,7 +144,7 @@ export class RestaurantsService {
     // Validar slug único
     const slugExists = await this.restaurantRepository.findOneBy({ slug });
 
-    if (!slugExists || !slugExists.is_active || !slugExists.exist) {
+    if (!slugExists || !slugExists.exist) {
       throw new BadRequestException(`Restaurant NOT Registered with this slug ${slug}`);
     }
 

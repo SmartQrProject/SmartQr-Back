@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatbotService } from '../chatbot/chatbot.service';
 import { CHAT_EVENTS } from './types/chat-events';
 import { UserSessionService } from './user-session/user-session.service';
+import { MessageDto } from './dto/message.dto';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -35,7 +36,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(CHAT_EVENTS.USER_MESSAGE)
-  async handleMessage(@MessageBody() message: string, @ConnectedSocket() client: Socket) {
+  async handleMessage(@MessageBody() MessageBody: MessageDto, @ConnectedSocket() client: Socket) {
+    const { message, slug } = MessageBody;
     const userId = this.sessionService.getUserId(client.id);
     if (!userId) {
       console.warn(`Socket ${client?.id ?? 'unknown'} no tiene userId asignado`);
@@ -43,7 +45,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const roomId = this.sessionService.getRoomByUserId(userId);
-    const reply = await this.chatbotService.generateReply(message); // ✅ AWAIT agregado
+    const reply = await this.chatbotService.generateReply({ message, slug });
     console.log('📤 Respuesta emitida al socket:', reply);
 
     this.server.to(roomId).emit(CHAT_EVENTS.BOT_REPLY, reply);

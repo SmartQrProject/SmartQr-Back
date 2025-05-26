@@ -9,7 +9,7 @@ export class ChatbotService {
     private readonly productService: ProductsService,
   ) {}
 
-  async generateReply(message: string): Promise<string> {
+  async generateReply({ message, slug }): Promise<string> {
     const cleaned = message
       .toLowerCase()
       .replace(/[^\w\s]/g, '')
@@ -31,7 +31,7 @@ export class ChatbotService {
       return fallback;
     }
 
-    const allProducts = await this.productService.findAll('eli-cafe', 1, 999);
+    const allProducts = await this.productService.findAll(slug, 1, 999);
     console.log('📦 Productos obtenidos:', allProducts.products.length);
 
     const allDetails: SearchEntry[] = allProducts.products.flatMap((p) =>

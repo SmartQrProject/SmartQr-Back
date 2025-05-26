@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RewardCode } from 'src/shared/entities/reward-code.entity';
 import { CreateRewardCodeDto } from './dto/create-reward-code.dto';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
 
 @Injectable()
 export class RewardCodeService {
   constructor(
     @InjectRepository(RewardCode)
     private rewardCodeRepo: Repository<RewardCode>,
+    @InjectRepository(Restaurant)
+    private restaurantRepository: Repository<Restaurant>,
   ) {}
 
   private generateCode(length = 10): string {
@@ -28,13 +31,22 @@ export class RewardCodeService {
     return code;
   }
 
-  async create(dto: CreateRewardCodeDto): Promise<{ id: string; code: string; percentage: number }> {
+  async create(dto: CreateRewardCodeDto, slug: string): Promise<{ id: string; code: string; percentage: number }> {
     const code = await this.generateUniqueCode();
+
+    const restaurant = await this.restaurantRepository.findOne({
+      where: { slug },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(`❌ Restaurant with slug '${slug}' not found`);
+    }
 
     const newReward = this.rewardCodeRepo.create({
       code,
       percentage: dto.percentage,
       isActive: true,
+      restaurant,
     });
 
     const saved = await this.rewardCodeRepo.save(newReward);
@@ -46,8 +58,14 @@ export class RewardCodeService {
     };
   }
 
-  async findAll(): Promise<RewardCode[]> {
-    return this.rewardCodeRepo.find({ where: { exist: true } });
+  async findAll(slug: string): Promise<RewardCode[]> {
+    return this.rewardCodeRepo
+      .createQueryBuilder('reward')
+      .leftJoin('reward.restaurant', 'restaurant')
+      .addSelect(['restaurant.slug']) // ⬅️ Solo selecciona el slug
+      .where('reward.exist = :exist', { exist: true })
+      .andWhere('restaurant.slug = :slug', { slug })
+      .getMany();
   }
 
   async findOne(id: string): Promise<RewardCode> {

@@ -144,7 +144,7 @@ export class RestaurantsService {
     // Validar slug único
     const slugExists = await this.restaurantRepository.findOneBy({ slug });
 
-    if (!slugExists || !slugExists.is_active || !slugExists.exist) {
+    if (!slugExists || !slugExists.exist) {
       throw new BadRequestException(`Restaurant NOT Registered with this slug ${slug}`);
     }
 

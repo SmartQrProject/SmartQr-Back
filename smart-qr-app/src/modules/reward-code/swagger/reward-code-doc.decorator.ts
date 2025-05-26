@@ -62,12 +62,6 @@ export function UpdateRewardCodeDoc() {
       type: CreateRewardCodeDto,
       description: 'Partial or full update of an existing reward code. You can send one or more fields to update.',
       examples: {
-        updateCodeOnly: {
-          summary: 'Update only the code value',
-          value: {
-            code: 'NEWCODE2025',
-          },
-        },
         updatePercentageOnly: {
           summary: 'Update only the discount percentage',
           value: {

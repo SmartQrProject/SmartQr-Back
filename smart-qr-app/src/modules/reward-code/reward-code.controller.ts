@@ -18,13 +18,13 @@ export class RewardCodeController {
   @Post()
   @CreateRewardCodeDoc()
   async create(@Param('slug') slug: string, @Body() dto: CreateRewardCodeDto) {
-    return this.rewardCodeService.create(dto);
+    return this.rewardCodeService.create(dto, slug);
   }
 
   @Get()
   @GetAllRewardCodesDoc()
   async findAll(@Param('slug') slug: string) {
-    return this.rewardCodeService.findAll();
+    return this.rewardCodeService.findAll(slug);
   }
 
   @Get(':id')

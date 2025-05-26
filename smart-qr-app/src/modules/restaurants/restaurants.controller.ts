@@ -1,8 +1,15 @@
-import { Controller, Post, Body, Get, Query, HttpCode, UseGuards, Patch, Param, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, HttpCode, UseGuards, Patch, Param, Req, Delete } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateRestaurantDoc, GetAllRestaurantsDoc, GetRestaurantDoc, GetRestaurantPublicDoc, PatchRestaurantBySlugDoc } from './swagger/restaurants-doc.decorator';
+import {
+  CreateRestaurantDoc,
+  DeleteRestaurantBySlugDoc,
+  GetAllRestaurantsDoc,
+  GetRestaurantDoc,
+  GetRestaurantPublicDoc,
+  PatchRestaurantBySlugDoc,
+} from './swagger/restaurants-doc.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/common/decorators/role.enum';
@@ -41,8 +48,7 @@ export class RestaurantsController {
   @PatchRestaurantBySlugDoc()
   @Roles(Role.Owner, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
-  //@UseGuards(AuthGuard)
-  async pachRestaurantBySlug(@Param('slug') slug: string, @Body() restaurantData: Partial<PatchRestaurantsDto>, @Req() req: Request): Promise<string> {
+  async pachtRestaurantBySlug(@Param('slug') slug: string, @Body() restaurantData: Partial<PatchRestaurantsDto>, @Req() req: Request): Promise<string> {
     return this.restaurantsService.patchRestaurantBySlug(slug, restaurantData, req);
   }
 
@@ -54,5 +60,14 @@ export class RestaurantsController {
   @GetAllRestaurantsDoc()
   async getAllRestaurants() {
     return this.restaurantsService.getAllRestaurants();
+  }
+
+  @Delete(':slug')
+  @HttpCode(200)
+  @DeleteRestaurantBySlugDoc()
+  @Roles(Role.Owner, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  async deleteRestaurantBySlug(@Param('slug') slug: string, @Req() req: Request): Promise<string> {
+    return this.restaurantsService.deleteRestaurantBySlug(slug, req);
   }
 }

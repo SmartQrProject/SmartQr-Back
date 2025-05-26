@@ -175,6 +175,37 @@ export function PatchRestaurantBySlugDoc() {
   );
 }
 
+//PatchRestaurantBySlugDoc
+export function DeleteRestaurantBySlugDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: 'Delete Name and Onwers email for a Restaurant',
+      description: 'De-activates the restaurant. You should provide SLUG to access the data',
+    }),
+
+    ApiResponse({
+      status: 200,
+      description: 'Restaurant successfully Delete',
+      schema: {
+        example: {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          name: 'Test Cafe',
+          slug: 'test-cafe',
+          owner_email: 'smartqr2@gmail.com',
+          created_at: '2024-03-20T12:34:56.789Z',
+          updated_at: '2024-03-20T12:34:56.789Z',
+          exist: true,
+          is_active: true,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid data or slug dont exist',
+    }),
+  );
+}
 export const GetAllRestaurantsDoc = () =>
   applyDecorators(
     ApiOperation({

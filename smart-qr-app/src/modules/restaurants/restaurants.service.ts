@@ -191,4 +191,34 @@ export class RestaurantsService {
       where: { exist: true },
     });
   }
+
+  async deleteRestaurantBySlug(slug, req): Promise<string> {
+    const slugExists = await this.restaurantRepository.findOneBy({ slug });
+
+    if (!slugExists || !slugExists.exist) {
+      throw new BadRequestException(`Restaurant NOT Registered with this slug ${slug}`);
+    }
+
+    if (!req.user.roles.includes('superAdmin')) {
+      if (!req.user.roles.includes('owner')) {
+        throw new NotFoundException(`You can not update data for this restaurant ${slug}.`);
+      } else if (req.user.email !== slugExists.owner_email) {
+        throw new NotFoundException(`You can not update data for this restaurant ${slug}.`);
+      }
+    }
+
+    const updatedRestaurant = { is_active: false, exist: false };
+    const mergedRest = this.restaurantRepository.merge(slugExists, updatedRestaurant);
+    await this.restaurantRepository.save(mergedRest);
+
+    //nodemailer
+    const subject = `Restaurant data was successfully deleted ${mergedRest.name}`;
+    const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.\n 
+    Restaurant Name: ${mergedRest.name} 
+    Restaruant Banner: ${mergedRest.banner}`;
+    const htmlTemplate = 'basico';
+    this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
+
+    return `Restaurante ${slug} data was deleted.`;
+  }
 }

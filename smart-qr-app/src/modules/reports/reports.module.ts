@@ -11,5 +11,6 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
   imports: [TypeOrmModule.forFeature([Order, Customer, Restaurant]), CommonModule],
   controllers: [ReportsController],
   providers: [ReportsService],
+  exports: [ReportsService],
 })
 export class ReportsModule {}

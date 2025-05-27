@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
-import { IsBoolean, IsEmail, IsString, IsUUID, Length } from 'class-validator';
+import { IsArray, IsBoolean, IsEmail, IsObject, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 import { User } from './user.entity';
 import { Order } from './order.entity';
 import { RestaurantTable } from './restaurant-table.entity';
@@ -8,6 +8,17 @@ import { Product } from './product.entity';
 import { Category } from './category.entity';
 import { RewardCode } from './reward-code.entity';
 import { Subscription } from './subscription.entity';
+
+export interface TradingHours {
+  mondayToFriday: { open: string; close: string };
+  saturday?: { open: string; close: string };
+  sunday?: { open: string; close: string };
+}
+
+export interface OrderingTimes {
+  pickup: string;
+  dinein: string;
+}
 
 @Entity('restaurants')
 export class Restaurant {
@@ -71,4 +82,32 @@ export class Restaurant {
     default: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
   })
   banner: string;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  address: string;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  phone: string;
+
+  @Column({ type: 'text', nullable: true })
+  @IsOptional()
+  description: string;
+
+  @Column('text', { array: true, nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags: string[];
+
+  @Column({ type: 'jsonb', nullable: true })
+  @IsOptional()
+  @IsObject()
+  trading_hours: TradingHours;
+
+  @Column({ type: 'jsonb', nullable: true })
+  @IsOptional()
+  @IsObject()
+  ordering_times: OrderingTimes;
 }

@@ -17,6 +17,7 @@ import { UsersModule } from './modules/users/users.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     RestaurantTablesModule,
     OrderItemsModule,
     RewardCodeModule,
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     StripeModule,
     WebSocketModule,

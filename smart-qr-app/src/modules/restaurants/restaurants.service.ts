@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { MailService } from 'src/common/services/mail.service';
 import { StripeService } from '../stripe/stripe.service';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class RestaurantsService {
@@ -171,6 +172,7 @@ export class RestaurantsService {
     return `Restaurante ${slug} data were updated.`;
   }
 
+  @OnEvent('subscription.paid')
   async activatePlan(slug: string) {
     const result = await this.restaurantRepository.update({ slug }, { is_active: true });
 

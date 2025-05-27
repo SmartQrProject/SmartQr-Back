@@ -13,6 +13,7 @@ import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RewardCodeService } from '../reward-code/reward-code.service';
 import { MailService } from 'src/common/services/mail.service';
 import { StripeService } from '../stripe/stripe.service';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class OrdersService {
@@ -294,6 +295,7 @@ export class OrdersService {
     await this.mailService.sendMail(customer.email, subject, headerText + itemsText, htmlTemplate);
   }
 
+  @OnEvent('order.paid')
   async activateOrder(orderId: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId, exist: true },

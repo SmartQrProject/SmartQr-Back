@@ -85,7 +85,6 @@ export class OrdersService {
       }
 
       // 3,5. Aplicar código de recompensa
-
       let discountPercentage = 0;
       if (createOrderDto.rewardCode) {
         const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode);
@@ -134,20 +133,16 @@ export class OrdersService {
       await queryRunner.commitTransaction();
 
       // 5. Generacion email al cliente con su Order
-      const order = {
-        orderId: savedOrder.id,
-        total: totalPrice,
-        rewardCode: createOrderDto.rewardCode ?? null,
-        discountPercentage,
-        items: orderItems.map((prod) => ({
-          productId: prod.product.id,
-          quantity: prod.quantity,
-          unit_price: prod.unit_price,
-        })),
-      };
-      this.sendEmail(customer, restaurant, order, 'created'); //nodemailer
+      const order2Email = await this.orderRepository.findOne({
+        where: { id: savedOrder.id, exist: true },
+        relations: ['items', 'restaurant'],
+      });
+      if (!order2Email) {
+        throw new NotFoundException(`Order with ID ${savedOrder.id} not found`);
+      }
+      this.sendEmail(customer, restaurant, order2Email, 'created'); //nodemailer
 
-      return { order: order, stripeSession: stripeSession.url };
+      return { order: order2Email, stripeSession: stripeSession.url };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -238,20 +233,36 @@ export class OrdersService {
       throw new NotFoundException(`Order: ${order.id} not beloging to this Slug: ${slug} `);
     }
 
+    // this.sendEmail(order.customer, rest, order, 'test'); // test nodemailer
+
     return order;
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto) {
+  async update(id: string, updateOrderDto: UpdateOrderDto, slug) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    const rest = await queryRunner.manager.findOneBy(Restaurant, {
+      slug: slug,
+    });
+    if (!rest) throw new NotFoundException(`Restaurant not found with this Slug: ${slug}`);
+
     const existingOrder = await this.orderRepository.findOne({
       where: { id },
+      relations: ['items', 'restaurant'],
     });
 
     if (!existingOrder) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
+    if (existingOrder.restaurant.id !== rest.id) {
+      throw new NotFoundException(`Order: ${existingOrder.id} not beloging to this Slug: ${slug} `);
+    }
+
     const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
-    return this.orderRepository.save(updatedOrder);
+    const returnedOrder = this.orderRepository.save(updatedOrder);
+    this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
+    return returnedOrder;
   }
 
   async remove(id: string) {
@@ -265,12 +276,21 @@ export class OrdersService {
     return this.orderRepository.save(order);
   }
 
-  async sendEmail(customer: Customer, restaurant: Restaurant, order, accion) {
-    const subject = `Your Order # ${order.orderId} was ${accion} and have been sent to preparation. `;
-    const textmsg = `Hello ${customer.name},  the following Order has been ${accion} in the Restaurant ${restaurant.name}.
-      - Total Amount: ${order.total}`;
-    const htmlTemplate = 'basico';
-    await this.mailService.sendMail(customer.email, subject, textmsg, htmlTemplate);
+  async sendEmail(customer: Customer, restaurant: Restaurant, order: Order, accion) {
+    const subject = `Your Order # ${order.id} was ${accion} and have been sent to preparation. `;
+    const headerText = `Hello ${customer.name}, <br>  the following Order has been ${accion}.<br>
+    - Restaurant    : ${restaurant.name}<br>      
+    - Total Amount  : ${order.total_price} u$d <br>
+    - Discount      : ${order.discount_applied} <br>
+    - Payment Status: ${order.payStatus} 
+    - Order   Status: ${order.status} <br><br>`;
+
+    const itemsText = order.items
+      .map((item) => `${this.formatString(item.product.name, 20)} x ${this.formatString(item.quantity, 5)} - $${this.formatString(item.unit_price, 7)}`)
+      .join('<br>');
+
+    const htmlTemplate = 'order';
+    await this.mailService.sendMail(customer.email, subject, headerText + itemsText, htmlTemplate);
   }
 
   async activateOrder(orderId: string): Promise<Order> {
@@ -286,5 +306,10 @@ export class OrdersService {
     order.payStatus = 'paid'; // (opcional) si usás este campo también
 
     return this.orderRepository.save(order);
+  }
+
+  formatString(value, lon) {
+    const str = String(value); // asegura que sea string
+    return str.slice(0, lon).padEnd(lon, ' ');
   }
 }

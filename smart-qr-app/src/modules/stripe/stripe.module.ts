@@ -8,7 +8,7 @@ import { RewardCodeModule } from '../reward-code/reward-code.module';
 
 @Module({
   controllers: [StripeController],
-  imports: [RestaurantsModule, forwardRef(() => OrdersModule), RewardCodeModule],
+  imports: [forwardRef(() => RestaurantsModule), forwardRef(() => OrdersModule), RewardCodeModule],
   providers: [StripeService],
   exports: [StripeService],
 })

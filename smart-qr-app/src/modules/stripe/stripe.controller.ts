@@ -18,12 +18,12 @@ export class StripeController {
   //   return { id: session.id, url: session.url };
   // }
 
-  @Post('subscription-session')
-  @GetSubscriptionSessionDoc()
-  async getSubscriptionSession(@Body('slug') slug: string) {
-    const session = await this.stripeService.createSubscriptionSession(slug);
-    return { id: session.id, url: session.url };
-  }
+  // @Post('subscription-session')
+  // @GetSubscriptionSessionDoc()
+  // async getSubscriptionSession(@Body('slug') slug: string) {
+  //   const session = await this.stripeService.createSubscriptionSession(slug);
+  //   return { id: session.id, url: session.url };
+  //}
 
   @Post('webhook')
   @WebhookStripeDoc()

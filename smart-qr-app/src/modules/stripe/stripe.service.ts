@@ -11,6 +11,7 @@ import { RewardCodeService } from '../reward-code/reward-code.service';
 export class StripeService {
   private stripe = new Stripe(STRIPE_SECRET_KEY);
   constructor(
+    @Inject(forwardRef(() => RestaurantsService))
     private readonly restaurantsService: RestaurantsService,
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,

@@ -5,6 +5,9 @@ import { HttpStatus } from '@nestjs/common';
 import Stripe from 'stripe';
 import { RewardCodeService } from '../reward-code/reward-code.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Subscription } from 'src/shared/entities/subscription.entity';
 
 @Injectable()
 export class StripeService {
@@ -72,8 +75,10 @@ export class StripeService {
       case 'checkout.session.completed': {
         try {
           const session = event.data.object as Stripe.Checkout.Session;
+
           const { slug, type, orderId, rewardCode } = session.metadata || {};
           console.log('✅ metadata :', session.metadata);
+
           if (!type) {
             console.warn('⚠️ Tipo de sesión no especificado en metadata.');
             break;
@@ -81,8 +86,26 @@ export class StripeService {
 
           if (type === 'subscription') {
             console.log('✅ Suscripción confirmada:', slug);
+            const stripeSubscriptionId = session.subscription as string;
 
-            this.eventEmitter.emit('subscription.paid', slug);
+            const stripeSubscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+            this.eventEmitter.emit('restaurant.paid', slug); //activa el restorant
+            this.eventEmitter.emit('subscription.paid', {
+              slug,
+              stripeSubscriptionId: stripeSubscription.id,
+              customerId: stripeSubscription.customer as string,
+              status: stripeSubscription.status,
+              plan: stripeSubscription.items.data[0]?.price.id,
+              currentPeriodEnd: new Date(
+                stripeSubscription.trial_end
+                  ? stripeSubscription.trial_end * 1000
+                  : stripeSubscription.ended_at
+                    ? stripeSubscription.ended_at * 1000
+                    : stripeSubscription.created * 1000,
+              ),
+              isTrial: stripeSubscription.trial_end != null,
+            });
 
             console.log('✅ Plan activado para restaurante:', slug);
           }

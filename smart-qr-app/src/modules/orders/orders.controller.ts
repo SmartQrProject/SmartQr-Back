@@ -37,7 +37,7 @@ export class OrdersController {
   @UseGuards(AuthGuard)
   @UpdateOrderDoc()
   async update(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(id, updateOrderDto);
+    return this.ordersService.update(id, updateOrderDto, slug);
   }
 
   @Delete(':id')

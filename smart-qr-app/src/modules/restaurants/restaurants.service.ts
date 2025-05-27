@@ -164,8 +164,7 @@ export class RestaurantsService {
     //nodemailer
     const subject = `Restaurant data was successfully updated ${mergedRest.name}`;
     const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.\n 
-    Restaurant Name: ${mergedRest.name} 
-    Restaruant Banner: ${mergedRest.banner}`;
+    Restaurant Name: ${mergedRest.name} `;
     const htmlTemplate = 'basico';
     this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
 

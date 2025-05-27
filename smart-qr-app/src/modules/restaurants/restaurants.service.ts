@@ -112,14 +112,21 @@ export class RestaurantsService {
       },
     });
 
-    if (!restaurant) throw new NotFoundException(`Restaurant with slug ${slug} not found`);
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with slug ${slug} not found`);
+    }
 
-    // Manual transformation to DTO structure
     const result = {
       name: restaurant.name,
       slug: restaurant.slug,
       is_active: restaurant.is_active,
       banner: restaurant.banner,
+      address: restaurant.address,
+      phone: restaurant.phone,
+      description: restaurant.description,
+      tags: restaurant.tags,
+      trading_hours: restaurant.trading_hours,
+      ordering_times: restaurant.ordering_times,
       categories: restaurant.categories
         .filter((c) => c.exist)
         .map((category) => ({

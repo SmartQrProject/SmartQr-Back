@@ -217,14 +217,25 @@ export class OrdersService {
     }));
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, slug) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    const rest = await queryRunner.manager.findOneBy(Restaurant, {
+      slug: slug,
+    });
+    if (!rest) throw new NotFoundException(`Restaurant not found with this Slug: ${slug}`);
+
     const order = await this.orderRepository.findOne({
       where: { id, exist: true },
-      relations: ['items'],
+      relations: ['items', 'restaurant'],
     });
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    if (order.restaurant.id !== rest.id) {
+      throw new NotFoundException(`Order: ${order.id} not beloging to this Slug: ${slug} `);
     }
 
     return order;

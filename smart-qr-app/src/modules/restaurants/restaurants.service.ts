@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
 import { User } from 'src/shared/entities/user.entity';
@@ -7,6 +7,7 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { MailService } from 'src/common/services/mail.service';
+import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
 export class RestaurantsService {
@@ -16,6 +17,7 @@ export class RestaurantsService {
     private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
     private mailService: MailService,
+    @Inject() private readonly stripeService: StripeService,
   ) {}
 
   async createRestaurants(dto: CreateRestaurantsDto) {
@@ -59,7 +61,7 @@ export class RestaurantsService {
           restaurant: newRestaurants,
         }),
       );
-
+      const stripe = await this.stripeService.createSubscriptionSession(newRestaurants.slug);
       await queryRunner.commitTransaction();
 
       //nodemailer
@@ -70,7 +72,7 @@ export class RestaurantsService {
       const htmlTemplate = 'basico';
       this.mailService.sendMail(newUser.email, subject, textmsg, htmlTemplate);
 
-      return newRestaurants;
+      return { url: stripe.url };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

@@ -88,42 +88,92 @@ export function GetRestaurantDoc() {
 
 export function GetRestaurantPublicDoc() {
   return applyDecorators(
-    ApiOperation({
-      summary: 'Get restaurant public information',
-      description: 'Retrieves restaurant public data and its categories/products using its unique slug.',
-    }),
     ApiQuery({
       name: 'slug',
-      description: 'Unique restaurant identifier',
-      example: 'test-cafe',
       required: true,
+      description: 'Unique restaurant identifier',
+      example: 'eli-cafe',
+    }),
+    ApiOperation({
+      summary: 'Get public data of a restaurant by slug',
+      description: 'Retrieves public data of a restaurant including address, contact, categories and products',
     }),
     ApiResponse({
       status: 200,
-      description: 'Public restaurant info retrieved successfully',
+      description: 'Returns public restaurant information including categories and products',
       schema: {
-        example: {
-          name: 'Test Cafe',
-          slug: 'test-cafe',
-          is_active: true,
-          banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
-          categories: [
-            {
-              name: 'Beverages',
-              sequenceNumber: 0,
-              products: [
-                {
-                  sequenceNumber: 2,
-                  name: 'Fanta Zero',
-                  description: 'Sugar-free Fanta 355ml',
-                  price: '2.75',
-                  image_url: 'https://example.com/images/fanta-zero.jpg',
-                  is_available: true,
-                  details: ['gluten-free', 'vegan'],
-                },
-              ],
+        type: 'object',
+        properties: {
+          name: { type: 'string', example: 'Smart Qr Oficial' },
+          slug: { type: 'string', example: 'test-cafe' },
+          is_active: { type: 'boolean', example: true },
+          banner: {
+            type: 'string',
+            example: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+          },
+          address: { type: 'string', nullable: true, example: '123 Main St, Sydney' },
+          phone: { type: 'string', nullable: true, example: '+61 400 000 000' },
+          description: {
+            type: 'string',
+            nullable: true,
+            example: 'Cozy cafe with specialty coffee and artisan pastries.',
+          },
+          tags: {
+            type: 'array',
+            nullable: true,
+            items: { type: 'string' },
+            example: ['coffee', 'pastries', 'breakfast'],
+          },
+          trading_hours: {
+            type: 'object',
+            nullable: true,
+            example: {
+              mondayToFriday: { open: '08:00', close: '18:00' },
+              saturday: { open: '09:00', close: '15:00' },
+              sunday: { open: '09:00', close: '14:00' },
             },
-          ],
+          },
+          ordering_times: {
+            type: 'object',
+            nullable: true,
+            example: {
+              pickup: '10-18',
+              dinein: '11-17',
+            },
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', example: 'Beverages' },
+                sequenceNumber: { type: 'number', example: 1 },
+                products: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      sequenceNumber: { type: 'number', example: 1 },
+                      id: {
+                        type: 'string',
+                        format: 'uuid',
+                        example: 'c1fa9f2c-bbd4-4f7a-bcb2-4f799ac3ea99',
+                      },
+                      name: { type: 'string', example: 'Espresso' },
+                      description: { type: 'string', example: 'Strong and bold Italian coffee' },
+                      price: { type: 'number', example: 3.5 },
+                      image_url: {
+                        type: 'string',
+                        example: 'https://example.com/image.jpg',
+                      },
+                      is_available: { type: 'boolean', example: true },
+                      details: { type: 'string', example: 'Single shot, hot' },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     }),

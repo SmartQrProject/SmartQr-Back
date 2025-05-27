@@ -2,13 +2,12 @@ import { Module, MiddlewareConsumer, NestModule, forwardRef } from '@nestjs/comm
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
 import * as express from 'express';
-import { RestaurantsModule } from '../restaurants/restaurants.module';
 import { OrdersModule } from '../orders/orders.module';
 import { RewardCodeModule } from '../reward-code/reward-code.module';
 
 @Module({
   controllers: [StripeController],
-  imports: [forwardRef(() => RestaurantsModule), forwardRef(() => OrdersModule), RewardCodeModule],
+  imports: [RewardCodeModule],
   providers: [StripeService],
   exports: [StripeService],
 })

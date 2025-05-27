@@ -3,19 +3,15 @@ import { FRONTEND_URL, STRIPE_PRICE_ID, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 import { Request, Response } from 'express';
 import { HttpStatus } from '@nestjs/common';
 import Stripe from 'stripe';
-import { RestaurantsService } from '../restaurants/restaurants.service';
-import { OrdersService } from '../orders/orders.service';
 import { RewardCodeService } from '../reward-code/reward-code.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class StripeService {
   private stripe = new Stripe(STRIPE_SECRET_KEY);
   constructor(
-    @Inject(forwardRef(() => RestaurantsService))
-    private readonly restaurantsService: RestaurantsService,
-    @Inject(forwardRef(() => OrdersService))
-    private readonly ordersService: OrdersService,
     private readonly rewardCodeService: RewardCodeService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   // Para pagos únicos
@@ -68,9 +64,7 @@ export class StripeService {
     // ✅ Responder de inmediato para que Stripe no reintente
     res.status(200).json({ received: true });
 
-    setTimeout(() => {
-      this.handleEvent(event);
-    }, 20000);
+    this.handleEvent(event);
   }
 
   private async handleEvent(event: Stripe.Event) {
@@ -87,7 +81,9 @@ export class StripeService {
 
           if (type === 'subscription') {
             console.log('✅ Suscripción confirmada:', slug);
-            await this.restaurantsService.activatePlan(slug);
+
+            this.eventEmitter.emit('subscription.paid', slug);
+
             console.log('✅ Plan activado para restaurante:', slug);
           }
 
@@ -97,7 +93,9 @@ export class StripeService {
               break;
             }
             console.log('✅ Orden confirmada:', orderId);
-            await this.ordersService.activateOrder(orderId);
+
+            this.eventEmitter.emit('order.paid', orderId);
+
             if (rewardCode) {
               console.log('🎁 Código de recompensa aplicado:', rewardCode);
               await this.rewardCodeService.deactivateCode(rewardCode);

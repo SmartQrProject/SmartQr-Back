@@ -2,7 +2,6 @@ import { Module, MiddlewareConsumer, NestModule, forwardRef } from '@nestjs/comm
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
 import * as express from 'express';
-import { OrdersModule } from '../orders/orders.module';
 import { RewardCodeModule } from '../reward-code/reward-code.module';
 
 @Module({

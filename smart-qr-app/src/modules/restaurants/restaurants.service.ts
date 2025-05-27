@@ -179,7 +179,7 @@ export class RestaurantsService {
     return `Restaurante ${slug} data were updated.`;
   }
 
-  @OnEvent('subscription.paid')
+  @OnEvent('restaurant.paid')
   async activatePlan(slug: string) {
     const result = await this.restaurantRepository.update({ slug }, { is_active: true });
 

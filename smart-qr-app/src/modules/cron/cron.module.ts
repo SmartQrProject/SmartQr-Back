@@ -1,0 +1,11 @@
+import { Module } from '@nestjs/common';
+import { ReportsCronService } from './reports-cron.service';
+import { ReportsModule } from '../reports/reports.module';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+@Module({
+  imports: [ReportsModule, TypeOrmModule.forFeature([Restaurant])],
+  providers: [ReportsCronService],
+})
+export class CronModule {}

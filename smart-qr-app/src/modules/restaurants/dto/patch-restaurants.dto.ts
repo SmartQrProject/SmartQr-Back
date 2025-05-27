@@ -1,13 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
-import { CreateRestaurantsDto } from './create-restaurants.dto';
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { CompleteRestaurantsDto } from './complete-restaurants.dto';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 
-export class PatchRestaurantsDto extends PickType(CreateRestaurantsDto, ['banner']) {
-  @IsOptional()
-  @IsString()
-  @ApiProperty({
-    description: 'Restaurant name',
-    example: 'Test Cafe',
-  })
-  name: string;
-}
+export class PatchRestaurantsDto extends PartialType(
+  PickType(CompleteRestaurantsDto, ['name', 'banner', 'address', 'phone', 'description', 'tags', 'trading_hours', 'ordering_times']),
+) {}

@@ -198,6 +198,18 @@ export function PatchRestaurantBySlugDoc() {
           value: {
             name: 'Test Cafe',
             banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+            address: 'Belgrano 870, Venado Tuerto, 2600, Santa Fe, Argentina',
+            phone: '+54 93487 424050',
+            description: 'Healthies Meals',
+            tags: ['vegan', 'specialties', 'gourmet'],
+            trading_hours: {
+              mondayToFriday: { open: '09:00', close: '18:00' },
+              saturday: { open: '10:00', close: '14:00' },
+            },
+            ordering_times: {
+              mondayToFriday: { open: '11:00', close: '22:00' },
+              saturday: { open: '11:00', close: '14:00' },
+            },
           },
         },
       },

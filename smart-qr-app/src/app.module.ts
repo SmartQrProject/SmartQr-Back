@@ -20,6 +20,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './modules/cron/cron.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CronModule } from './modules/cron/cron.module';
     CloudinaryModule,
     ReportsModule,
     CronModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [],

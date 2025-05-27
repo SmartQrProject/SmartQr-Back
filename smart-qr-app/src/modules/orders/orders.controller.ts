@@ -30,7 +30,7 @@ export class OrdersController {
   @UseGuards(AuthGuard)
   @GetOrderByIdDoc()
   async findOne(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string) {
-    return this.ordersService.findOne(id);
+    return this.ordersService.findOne(id, slug);
   }
 
   @Patch(':id')

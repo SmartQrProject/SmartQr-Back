@@ -48,7 +48,7 @@ export class RestaurantsController {
   @PatchRestaurantBySlugDoc()
   @Roles(Role.Owner, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
-  async pachtRestaurantBySlug(@Param('slug') slug: string, @Body() restaurantData: Partial<PatchRestaurantsDto>, @Req() req: Request): Promise<string> {
+  async pachtRestaurantBySlug(@Param('slug') slug: string, @Body() restaurantData: PatchRestaurantsDto, @Req() req: Request): Promise<string> {
     return this.restaurantsService.patchRestaurantBySlug(slug, restaurantData, req);
   }
 

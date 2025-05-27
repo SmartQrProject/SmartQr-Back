@@ -56,7 +56,7 @@ export class ReportsCronService {
           { depth: null },
         );
       } catch (err) {
-        console.error(`❌ Error al generar el reporte para ${slug}:`, err.message);
+        console.error(`❌ Erro r al generar el reporte para ${slug}:`, err.message);
       }
     }
   }

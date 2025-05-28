@@ -289,21 +289,30 @@ export class OrdersService {
     return this.orderRepository.save(order);
   }
 
-  async sendEmail(customer: Customer, restaurant: Restaurant, order: Order, accion) {
-    const subject = `Your Order # ${order.id} was ${accion} and have been sent to preparation. `;
-    const headerText = `Hello ${customer.name}, <br>  the following Order has been ${accion}.<br>
-    - Restaurant    : ${restaurant.name}<br>      
-    - Total Amount  : ${order.total_price} u$d <br>
-    - Discount      : ${order.discount_applied} <br>
-    - Payment Status: ${order.payStatus} 
-    - Order   Status: ${order.status} <br><br>`;
+  async sendEmail(customer: Customer, restaurant: Restaurant, order: Order, accion: string): Promise<void> {
+    try {
+      const subject = `Your Order #${order.id} was ${accion} and has been sent to preparation.`;
 
-    const itemsText = order.items
-      .map((item) => `${this.formatString(item.product.name, 20)} x ${this.formatString(item.quantity, 5)} - $${this.formatString(item.unit_price, 7)}`)
-      .join('<br>');
+      const headerText = `
+      Hello ${customer.name},<br>
+      The following Order has been ${accion}.<br><br>
+      - Restaurant    : ${restaurant.name}<br>
+      - Total Amount  : ${order.total_price} u$d<br>
+      - Discount      : ${order.discount_applied}<br>
+      - Payment Status: ${order.payStatus}<br>
+      - Order Status  : ${order.status}<br><br>
+    `;
 
-    const htmlTemplate = 'order';
-    await this.mailService.sendMail(customer.email, subject, headerText + itemsText, htmlTemplate);
+      const itemsText = order.items
+        .map((item) => `${this.formatString(item.product.name, 20)} x ${this.formatString(item.quantity, 5)} - $${this.formatString(item.unit_price, 7)}`)
+        .join('<br>');
+
+      const htmlTemplate = 'order';
+
+      await this.mailService.sendMail(customer.email, subject, headerText + itemsText, htmlTemplate);
+    } catch (error) {
+      console.error(`❌ Error sending email to ${customer.email}:`, error.message);
+    }
   }
 
   @OnEvent('order.paid')

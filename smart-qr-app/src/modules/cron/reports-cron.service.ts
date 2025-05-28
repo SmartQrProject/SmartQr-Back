@@ -16,8 +16,8 @@ export class ReportsCronService {
     private mailService: MailService,
   ) {}
 
-  //@Cron('59 23 * * *')
-  @Cron('*/1 * * * *')
+  @Cron('59 23 * * *')
+  //@Cron('*/1 * * * *')
   async reportsMail() {
     const to = dayjs().subtract(1, 'day').endOf('day');
     const from = to.subtract(6, 'day').startOf('day');

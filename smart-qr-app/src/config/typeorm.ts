@@ -13,7 +13,9 @@ const config = {
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   synchronize: true,
-  logging: false,
+  logging: true,
+  logger: 'advanced-console',
+  logNotifications: true,
   //dropSchema: true,
 };
 

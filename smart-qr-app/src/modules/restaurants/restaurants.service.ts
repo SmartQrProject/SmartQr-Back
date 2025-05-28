@@ -9,14 +9,12 @@ import { BcryptService } from 'src/common/services/bcrypt.service';
 import { MailService } from 'src/common/services/mail.service';
 import { StripeService } from '../stripe/stripe.service';
 import { OnEvent } from '@nestjs/event-emitter';
-import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
-
     private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
     private mailService: MailService,
@@ -219,23 +217,35 @@ export class RestaurantsService {
       }
     }
 
-    const updatedRestaurant = { is_active: false, exist: false };
-    const mergedRest = this.restaurantRepository.merge(slugExists, updatedRestaurant);
-    await this.restaurantRepository.save(mergedRest);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // await this.userRepository
-    //   .createQueryBuilder()
-    //   .update(User)
-    //   .set({ is_active: false, exist: false })
-    //   .where('restaurantId = :slugExists.id', { restaurantId: slugExists.id })
-    //   .execute();
+    try {
+      await queryRunner.manager.createQueryBuilder().update(Restaurant).set({ is_active: false, exist: false }).where('id = :id ', { id: slugExists.id }).execute();
 
-    //nodemailer
-    const subject = `Restaurant data was successfully deleted ${mergedRest.name}`;
-    const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.\n 
-    Restaurant Name: ${mergedRest.name} `;
-    const htmlTemplate = 'basico';
-    this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
+      // const updatedRestaurant = { is_active: false, exist: false };
+      // const mergedRest = this.restaurantRepository.merge(slugExists, updatedRestaurant);
+      // await this.restaurantRepository.save(mergedRest);
+
+      await queryRunner.manager.createQueryBuilder().update(User).set({ is_active: false, exist: false }).where('restaurantId = :id', { id: slugExists.id }).execute();
+
+      //nodemailer
+      // const subject = `Restaurant data was successfully deleted ${mergedRest.name}`;
+      // const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.\n
+      // Restaurant Name: ${mergedRest.name} `;
+      // const htmlTemplate = 'basico';
+      // this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
+
+      await queryRunner.commitTransaction();
+      console.log('Restaurante y usuarios desactivados correctamente');
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      console.error('Error al desactivar restaurante y usuarios:', err);
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
 
     return `Restaurante ${slug} data was deleted.`;
   }

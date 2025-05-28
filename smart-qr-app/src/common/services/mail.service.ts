@@ -46,7 +46,6 @@ export class MailService {
     }
 
     if (tipoEmail == 'report') {
-      console.log('pase por aqui:', reportData);
       html = this.generateHtmlReport(reportData);
     }
 

@@ -34,7 +34,7 @@ export class StripeService {
   }
 
   // Para suscripciones
-  async createSubscriptionSession(slug: string): Promise<Stripe.Checkout.Session> {
+  async createSubscriptionSession(slug: string, isTrial: boolean = false): Promise<Stripe.Checkout.Session> {
     return await this.stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -50,6 +50,12 @@ export class StripeService {
       metadata: {
         type: 'subscription',
         slug: slug, // Cambia esto por el ID real del restaurante
+      },
+      subscription_data: {
+        trial_period_days: isTrial ? 7 : undefined, // ⬅️ TRIAL SI Y SOLO SI SE SOLICITA
+        metadata: {
+          slug,
+        },
       },
     });
   }

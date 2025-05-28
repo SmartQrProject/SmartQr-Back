@@ -64,7 +64,7 @@ export class RestaurantsService {
           restaurant: newRestaurants,
         }),
       );
-      const stripe = await this.stripeService.createSubscriptionSession(newRestaurants.slug);
+      const stripe = await this.stripeService.createSubscriptionSession(newRestaurants.slug, dto.isTrial);
       await queryRunner.commitTransaction();
 
       //nodemailer

@@ -110,4 +110,10 @@ export class Restaurant {
   @IsOptional()
   @IsObject()
   ordering_times: OrderingTimes;
+
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
+  latitude?: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
+  longitude?: number;
 }

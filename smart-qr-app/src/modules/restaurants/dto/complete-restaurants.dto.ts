@@ -123,4 +123,18 @@ export class CompleteRestaurantsDto {
   @IsOptional()
   @IsBoolean()
   isTrial?: boolean;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Latitud del restaurante',
+    example: -34.603722,
+  })
+  latitude?: number;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Longitud del restaurante',
+    example: -58.381592,
+  })
+  longitude?: number;
 }

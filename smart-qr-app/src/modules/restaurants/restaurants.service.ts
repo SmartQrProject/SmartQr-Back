@@ -127,6 +127,8 @@ export class RestaurantsService {
       tags: restaurant.tags,
       trading_hours: restaurant.trading_hours,
       ordering_times: restaurant.ordering_times,
+latitude:restaurant.latitude,
+longitude: restaurant.longitude,
       categories: restaurant.categories
         .filter((c) => c.exist)
         .map((category) => ({

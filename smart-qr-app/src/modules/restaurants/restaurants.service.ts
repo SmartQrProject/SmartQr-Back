@@ -66,12 +66,7 @@ export class RestaurantsService {
       await queryRunner.commitTransaction();
 
       //nodemailer
-      const subject = `Restaurant and Owner User was successfully created ${newRestaurants.name}`;
-      const textmsg = `Hello ${newUser.name},  Your Restaurant have been updated and your profile have been created.\n 
-      Usuario: ${newUser.email} 
-      Password: ${newUser.password}`;
-      const htmlTemplate = 'basico';
-      this.mailService.sendMail(newUser.email, subject, textmsg, htmlTemplate);
+      this.sendEmail4Creation(newRestaurants, newUser, 'created');
 
       return { url: stripe.url };
     } catch (error) {
@@ -127,8 +122,8 @@ export class RestaurantsService {
       tags: restaurant.tags,
       trading_hours: restaurant.trading_hours,
       ordering_times: restaurant.ordering_times,
-latitude:restaurant.latitude,
-longitude: restaurant.longitude,
+      latitude: restaurant.latitude,
+      longitude: restaurant.longitude,
       categories: restaurant.categories
         .filter((c) => c.exist)
         .map((category) => ({
@@ -172,12 +167,7 @@ longitude: restaurant.longitude,
     await this.restaurantRepository.save(mergedRest);
 
     //nodemailer
-    const subject = `Restaurant data was successfully updated ${mergedRest.name}`;
-    const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.<br><br> 
-    Restaurant Name: ${mergedRest.name} `;
-    const htmlTemplate = 'basico';
-    this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
-
+    this.sendEmail(slugExists, 'updated');
     return `Restaurante ${slug} data were updated.`;
   }
 
@@ -219,17 +209,48 @@ longitude: restaurant.longitude,
       }
     }
 
-    const updatedRestaurant = { is_active: false, exist: false };
-    const mergedRest = this.restaurantRepository.merge(slugExists, updatedRestaurant);
-    await this.restaurantRepository.save(mergedRest);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    //nodemailer
-    const subject = `Restaurant data was successfully deleted ${mergedRest.name}`;
-    const textmsg = `Hello ${mergedRest.owner_email},  Your Restaurant profile have been updated.\n 
-    Restaurant Name: ${mergedRest.name} `;
-    const htmlTemplate = 'basico';
-    this.mailService.sendMail(mergedRest.owner_email, subject, textmsg, htmlTemplate);
+    try {
+      await queryRunner.manager.createQueryBuilder().update(Restaurant).set({ is_active: false, exist: false }).where('id = :id ', { id: slugExists.id }).execute();
+      await queryRunner.manager.createQueryBuilder().update(User).set({ is_active: false, exist: false }).where('restaurantId = :id', { id: slugExists.id }).execute();
+
+      //nodemailer
+      this.sendEmail(slugExists, 'deleted');
+
+      await queryRunner.commitTransaction();
+      console.log('Restaurante y usuarios desactivados correctamente');
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      console.error('Error al desactivar restaurante y usuarios:', err);
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
 
     return `Restaurante ${slug} data was deleted.`;
+  }
+
+  async sendEmail(rest: Restaurant, accion) {
+    const subject = `The restaurant ${rest.name} was ${accion} successfully. `;
+    const textmsg = `Hello ${rest.owner_email},  Your restaurant account have been ${accion}.
+      
+      Restaurant Name: ${rest.name}  
+      Slug: ${rest.slug}  
+      Owner:  ${rest.owner_email} `;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
+  }
+
+  async sendEmail4Creation(newRestaurants: Restaurant, newUser, accion) {
+    const subject = `Restaurant and Owner User were successfully created ${newRestaurants.name}`;
+    const textmsg = `Hello ${newUser.name},  Your Restaurant have been updated and your profile have been created.
+
+      Usuario: ${newUser.email} 
+      Password: ${newUser.password}`;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(newUser.email, subject, textmsg, htmlTemplate);
   }
 }

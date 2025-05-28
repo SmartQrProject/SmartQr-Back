@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import * as dayjs from 'dayjs';
+import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class ReportsCronService {
@@ -12,9 +13,11 @@ export class ReportsCronService {
     private readonly reportsService: ReportsService,
     @InjectRepository(Restaurant)
     private readonly restaurantRepo: Repository<Restaurant>,
+    private mailService: MailService,
   ) {}
 
   @Cron('59 23 * * *')
+  //@Cron('*/1 * * * *')
   async reportsMail() {
     const to = dayjs().subtract(1, 'day').endOf('day');
     const from = to.subtract(6, 'day').startOf('day');
@@ -29,6 +32,7 @@ export class ReportsCronService {
 
     for (const resto of restaurants) {
       const slug = resto.slug;
+      const restaurant = resto;
 
       try {
         const getSalesTotalWeek = await this.reportsService.getSalesTotal(fromStr, toStr, slug);
@@ -42,22 +46,32 @@ export class ReportsCronService {
           to: toStr,
         });
 
-        console.log(`📊 Reporte generado para: ${resto.name} (${slug})`);
-        console.dir(
-          {
-            getSalesTotalWeek,
-            getTopProductsWeek,
-            getLeastSoldProductsWeek,
-            getSalesByCategoryWeek,
-            getSalesFrequencyWeek,
-            getCustomersReport,
-            getCustomerTypesWeek,
-          },
-          { depth: null },
-        );
+        console.log(`📊 Reporte generado para: ${resto.name} (${slug}) ${restaurant.owner_email}`);
+        if (slug == 'eli-cafe') {
+          this.sendEmail(restaurant, 'Top Products Of The Week', getTopProductsWeek);
+          console.dir(
+            {
+              getSalesTotalWeek,
+              getTopProductsWeek,
+              getLeastSoldProductsWeek,
+              getSalesByCategoryWeek,
+              getSalesFrequencyWeek,
+              getCustomersReport,
+              getCustomerTypesWeek,
+            },
+            { depth: null },
+          );
+        }
       } catch (err) {
         console.error(`❌ Erro r al generar el reporte para ${slug}:`, err.message);
       }
     }
+  }
+
+  async sendEmail(resto: Restaurant, reportName, report: object) {
+    const subject = `Your daily report ${reportName} it is here. `;
+    const headerText = `Hello ${resto.name}, <br>  Check this report out.<br>`;
+    const htmlTemplate = 'report';
+    await this.mailService.sendMail('amigogabrielernesto@gmail.com', subject, headerText, htmlTemplate, report);
   }
 }

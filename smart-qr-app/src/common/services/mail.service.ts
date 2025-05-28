@@ -27,20 +27,28 @@ export class MailService {
     });
   }
 
-  async sendMail(to: string, subject: string, text: string, tipoEmail: string) {
+  async sendMail(to: string, subject: string, text: string, tipoEmail: string, reportData?: object) {
     let templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html'); // default
+    let html = '';
+
     if (tipoEmail == 'basico') {
       templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html');
+      let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+      let html = htmlTemplate.replace('{{name}}', to);
+      html = html.replace('{{text}}', text);
     }
+
     if (tipoEmail == 'order') {
       templatePath = path.join('src/common/emailTemplates/orderEmailTemplate.html');
+      let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+      let html = htmlTemplate.replace('{{name}}', to);
+      html = html.replace('{{text}}', text);
     }
 
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+    if (tipoEmail == 'report') {
+      html = this.generateHtmlReport(reportData);
+    }
 
-    // Reemplazamos la variable {{nombre}} en el HTML
-    let html = htmlTemplate.replace('{{name}}', to);
-    html = html.replace('{{text}}', text);
     try {
       const info = await this.transporter.sendMail({
         from: `"SmartQR App" <${process.env.EMAIL_USER}>`,
@@ -55,5 +63,28 @@ export class MailService {
       console.error('Error sending email:', error);
       throw error;
     }
+  }
+
+  private generateHtmlReport(reportData): string {
+    const rows = reportData.map((p) => `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`).join('');
+
+    return `
+      <html>
+        <body>
+          <h2>🔝 Productos Más Vendidos</h2>
+          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px;">Producto</th>
+                <th style="padding: 8px;">Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
   }
 }

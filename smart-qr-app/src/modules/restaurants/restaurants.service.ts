@@ -9,12 +9,14 @@ import { BcryptService } from 'src/common/services/bcrypt.service';
 import { MailService } from 'src/common/services/mail.service';
 import { StripeService } from '../stripe/stripe.service';
 import { OnEvent } from '@nestjs/event-emitter';
+import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    private userRepository: UsersRepository,
     private readonly bcryptService: BcryptService,
     private dataSource: DataSource,
     private mailService: MailService,
@@ -220,6 +222,13 @@ export class RestaurantsService {
     const updatedRestaurant = { is_active: false, exist: false };
     const mergedRest = this.restaurantRepository.merge(slugExists, updatedRestaurant);
     await this.restaurantRepository.save(mergedRest);
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ is_active: false, exist: false })
+      .where('restaurantId = :slugExists.id', { restaurantId: slugExists.id })
+      .execute();
 
     //nodemailer
     const subject = `Restaurant data was successfully deleted ${mergedRest.name}`;

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional, IsArray, IsObject } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional, IsArray, IsObject, IsBoolean } from 'class-validator';
 
 export interface TradingHours {
   mondayToFriday: { open: string; close: string };
@@ -114,4 +114,13 @@ export class CompleteRestaurantsDto {
   @IsOptional()
   @IsObject()
   ordering_times?: OrderingTimes;
+
+  @ApiPropertyOptional({
+    description: 'Indica si el restaurante debe comenzar con un periodo de prueba (trial)',
+    example: true,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isTrial?: boolean;
 }

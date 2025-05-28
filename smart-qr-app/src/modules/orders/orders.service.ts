@@ -243,28 +243,39 @@ export class OrdersService {
   async update(id: string, updateOrderDto: UpdateOrderDto, slug) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    const rest = await queryRunner.manager.findOneBy(Restaurant, {
-      slug: slug,
-    });
-    if (!rest) throw new NotFoundException(`Restaurant not found with this Slug: ${slug}`);
+    await queryRunner.startTransaction();
 
-    const existingOrder = await this.orderRepository.findOne({
-      where: { id },
-      relations: ['items', 'restaurant'],
-    });
+    try {
+      const rest = await queryRunner.manager.findOneBy(Restaurant, {
+        slug: slug,
+      });
+      if (!rest) throw new NotFoundException(`Restaurant not found with this Slug: ${slug}`);
 
-    if (!existingOrder) {
-      throw new NotFoundException(`Order with ID ${id} not found`);
+      const existingOrder = await this.orderRepository.findOne({
+        where: { id },
+        relations: ['items', 'restaurant'],
+      });
+
+      if (!existingOrder) {
+        throw new NotFoundException(`Order with ID ${id} not found`);
+      }
+
+      if (existingOrder.restaurant.id !== rest.id) {
+        throw new NotFoundException(`Order: ${existingOrder.id} not beloging to this Slug: ${slug} `);
+      }
+
+      const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
+      const returnedOrder = this.orderRepository.save(updatedOrder);
+      this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
+      await queryRunner.commitTransaction();
+
+      return returnedOrder;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    if (existingOrder.restaurant.id !== rest.id) {
-      throw new NotFoundException(`Order: ${existingOrder.id} not beloging to this Slug: ${slug} `);
-    }
-
-    const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
-    const returnedOrder = this.orderRepository.save(updatedOrder);
-    this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
-    return returnedOrder;
   }
 
   async remove(id: string) {

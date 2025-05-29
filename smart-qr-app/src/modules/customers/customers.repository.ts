@@ -207,7 +207,13 @@ export class CustomersRepository {
   async findById(id: string, slug: string): Promise<Omit<Customer, 'password'>> {
     const customer = await this.customerRepository
       .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.orders', 'orders')
+      .leftJoinAndSelect('orders.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('orders.table', 'table') // para incluir la mesa
+      .leftJoin('orders.restaurant', 'restaurant')
       .select([
+        // Campos del cliente
         'customer.id',
         'customer.auth0Id',
         'customer.email',
@@ -220,14 +226,43 @@ export class CustomersRepository {
         'customer.created_at',
         'customer.modified_at',
         'customer.exist',
+
+        // Campos de la orden
+        'orders.id',
+        'orders.status',
+        'orders.payStatus',
+        'orders.order_type',
+        'orders.total_price',
+        'orders.payment_method',
+        'orders.discount_applied',
+        'orders.served_at',
+        'orders.created_at',
+
+        // Mesa
+        'table.id',
+        'table.code',
+        'table.is_active',
+        'table.exist',
+        'table.created_at',
+
+        // Items y productos
+        'items.id',
+        'items.quantity',
+        'items.unit_price',
+        'product.id',
+        'product.name',
       ])
       .where('customer.id = :id', { id })
+      .andWhere('restaurant.slug = :slug', { slug })
+      .andWhere('orders.restaurantId = restaurant.id')
       .getOne();
 
-    console.log('customer', customer);
     if (!customer) {
       throw new NotFoundException('❌ No customer found');
     }
+
+    // Filtrar órdenes inactivas
+    customer.orders = customer.orders?.filter((o) => o.status !== 'inactive') || [];
 
     const { password, ...customerSinPass } = customer as any;
     return customerSinPass;

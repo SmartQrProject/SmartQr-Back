@@ -58,7 +58,6 @@ export class MailService {
         text,
         html,
       });
-      console.log('Email sent: ' + info.response + ' to: ' + to);
       return info;
     } catch (error) {
       console.error('Error sending email:', error);

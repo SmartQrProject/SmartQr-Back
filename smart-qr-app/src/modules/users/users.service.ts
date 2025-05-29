@@ -128,7 +128,6 @@ export class UsersService {
     usuarios: Omit<User, 'password'>[];
   }> {
     const rest = await this.restService.getRestaurants(slug);
-    console.log('rest.id: -----------------> ', rest.id);
     return this.usersRepository.getUsers(rest, page, limit);
   }
 

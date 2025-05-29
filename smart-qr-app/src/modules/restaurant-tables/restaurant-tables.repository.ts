@@ -49,9 +49,6 @@ export class RestaurantTableRepository {
       restaurant: rest,
     }));
 
-    console.log(`Cantidad de registros:`, items.length);
-    console.log(items);
-
     const tablesArray = await this.restaurantTableRepository.createQueryBuilder().insert().into(RestaurantTable).values(items).orIgnore().execute();
 
     return items;

@@ -35,7 +35,6 @@ export class UsersController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
   ) {
-    console.log('slug', slug);
     return this.usersService.getUsers(slug, page, limit);
   }
 

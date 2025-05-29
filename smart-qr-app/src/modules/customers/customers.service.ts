@@ -82,8 +82,6 @@ export class CustomersService {
   async customerLogin({ email, password }: LogInCustomerDto): Promise<object> {
     const customer = await this.customersRepository.getCustomerByEmail(email);
 
-    console.log(customer);
-    console.log(email, password);
     if (!customer || !customer.exist || customer.auth0Id || !customer.password || !(await this.bcryptService.compare(password, customer.password))) {
       throw new UnauthorizedException('Not valid Credentials');
     }

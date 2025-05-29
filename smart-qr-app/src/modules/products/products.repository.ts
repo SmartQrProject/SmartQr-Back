@@ -61,8 +61,18 @@ export class ProductsRepository {
     return await this.entityManager.transaction(async (transactionalEntityManager) => {
       const product = await this.findOneByIdAndRestaurant(id, restaurantId);
 
-      if (updateProductDto.name) {
-        await this.validateProductName(updateProductDto.name, restaurantId);
+      if (updateProductDto.name && updateProductDto.name !== product.name) {
+        const existingProduct = await this.productRepository.findOne({
+          where: {
+            name: updateProductDto.name,
+            restaurant: { id: restaurantId },
+            exist: true,
+          },
+        });
+
+        if (existingProduct && existingProduct.id !== id) {
+          throw new ConflictException(`A product with the name "${updateProductDto.name}" already exists in this restaurant`);
+        }
       }
 
       const updatedProduct = this.productRepository.merge(product, updateProductDto);

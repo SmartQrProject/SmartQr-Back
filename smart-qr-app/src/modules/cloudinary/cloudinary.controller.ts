@@ -26,8 +26,6 @@ export class CloudinaryController {
     )
     file: Express.Multer.File,
   ): Promise<string> {
-    console.log('file', file);
-    console.log('file buffer', file.buffer);
     /////////////////////////////////////////////////////////////////////////////////////////chequear
     return await this.cloudinaryService.updateImg(file);
   }

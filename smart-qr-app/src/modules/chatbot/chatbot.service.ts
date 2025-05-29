@@ -9,7 +9,7 @@ export class ChatbotService {
     private readonly productService: ProductsService,
   ) {}
 
-  async generateReply(message: string): Promise<string> {
+  async generateReply({ message, slug }): Promise<string> {
     const cleaned = message
       .toLowerCase()
       .replace(/[^\w\s]/g, '')
@@ -26,12 +26,12 @@ export class ChatbotService {
     console.log('🔎 Intenciones detectadas:', intents);
 
     if (!intents || intents.length === 0) {
-      const fallback = '👋 ¡Hola! ¿Qué estás buscando? Podés decir cosas como "sin azúcar", "vegano", "sin gluten", etc.';
+      const fallback = '👋 Hello! What are you looking for? You can say things like "sugar-free", "vegan", "gluten-free", etc.';
       console.log('📭 Respuesta final (sin intención):', fallback);
       return fallback;
     }
 
-    const allProducts = await this.productService.findAll('eli-cafe', 1, 999);
+    const allProducts = await this.productService.findAll(slug, 1, 999);
     console.log('📦 Productos obtenidos:', allProducts.products.length);
 
     const allDetails: SearchEntry[] = allProducts.products.flatMap((p) =>
@@ -46,7 +46,7 @@ export class ChatbotService {
     console.log('🤖 Matches obtenidos:', matches);
 
     if (matches.length === 0) {
-      const response = 'No encontré opciones relacionadas con tu consulta. ¿Querés reformularla?';
+      const response = 'Sorry, I couldn´t find any options matching your request. Would you like to try rephrasing it?';
       console.log('📭 Respuesta final (sin matches):', response);
       return response;
     }
@@ -54,7 +54,7 @@ export class ChatbotService {
     const foundProducts = [...new Set(matches.map((m) => m.product))];
     console.log('📋 Productos recomendados:', foundProducts);
 
-    const response = `Te puedo recomendar: ${foundProducts.join(', ')}`;
+    const response = `Here are some recommendations: ${foundProducts.join(', ')}`;
     console.log('📤 Respuesta final:', response);
     return response;
   }

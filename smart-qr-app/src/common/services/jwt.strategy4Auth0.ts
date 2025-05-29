@@ -2,29 +2,31 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
+import { AUTH0_AUDIENCE, AUTH0_ISSUER_URL, AUTH0_JWKS_URL } from 'src/config/env.loader';
 
 @Injectable()
-export class JwtStrategy4Auth0 extends PassportStrategy(Strategy) {
+export class JwtStrategy4Auth0 extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       algorithms: ['RS256'],
-      issuer: 'https://dev-yxlpehy8hq451y84.us.auth0.com',
-      audience: 'https://smartqr.api',
+      issuer: AUTH0_ISSUER_URL,
+      audience: AUTH0_AUDIENCE,
       secretOrKeyProvider: jwksRsa.passportJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
         jwksUri:
-          'https://dev-yxlpehy8hq451y84.us.auth0.com/.well-known/jwks.json',
+          AUTH0_JWKS_URL ??
+          (() => {
+            throw new Error('AUTH0_JWKS_URL is not defined');
+          })(),
       }),
     });
   }
 
   async validate(payload: any) {
-    // Este método es llamado si el token es válido
-    console.log('======>>>>>', payload);
     return { userId: payload.sub, email: payload.email };
   }
 }

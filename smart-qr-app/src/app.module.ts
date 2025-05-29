@@ -16,6 +16,11 @@ import { WebSocketModule } from './modules/websocket/websocket.module';
 import { UsersModule } from './modules/users/users.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronModule } from './modules/cron/cron.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -29,11 +34,16 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     RestaurantTablesModule,
     OrderItemsModule,
     RewardCodeModule,
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     StripeModule,
     WebSocketModule,
     ChatbotModule,
     CloudinaryModule,
+    ReportsModule,
+    CronModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [],

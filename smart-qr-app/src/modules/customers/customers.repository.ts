@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
@@ -11,6 +6,10 @@ import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/common/services/mail.service';
+import { Auth0CustomerDto } from './dto/auth0-customer.dto';
+import { plainToInstance } from 'class-transformer';
+import { CustomerResponseDto } from './dto/customer-response.dto';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
 
 @Injectable()
 export class CustomersRepository {
@@ -22,40 +21,82 @@ export class CustomersRepository {
   ) {}
 
   // ------ trabajando en este endpoint ---GEA Mayo 14-
-  async sincronizarAuth0(customer, rest): Promise<Customer> {
-    // ¿Ya existe un usuario con este sub (de Auth0)?
-    const { email, name, auth0Id, picture } = customer;
+  async sincronizarAuth0(customer: Auth0CustomerDto, rest: Restaurant) {
+    const { auth0Id, email, name, picture } = customer;
 
-    let wrkCust = await this.customerRepository.findOne({
-      where: { auth0Id: auth0Id },
+    let existing = await this.customerRepository.findOne({
+      where: { auth0Id },
+      relations: ['restaurant'],
     });
 
-    if (wrkCust) {
-      wrkCust.exist = true;
-      wrkCust.restaurant = rest;
-      this.customerRepository.merge(wrkCust, customer);
-      const wrk2Cust = await this.customerRepository.save(wrkCust);
-      return wrk2Cust;
+    if (existing) {
+      // Validación: evitar modificar el auth0Id si se intenta forzar otro distinto
+      if (existing.auth0Id !== auth0Id) {
+        throw new BadRequestException('auth0Id cannot be modified');
+      }
+
+      if (!existing.exist) existing.exist = true;
+      if (!existing.restaurant) existing.restaurant = rest;
+
+      if (email) existing.email = email;
+      if (name) existing.name = name;
+      if (picture) existing.picture = picture;
+
+      const updated = await this.customerRepository.save(existing);
+
+      return {
+        id: updated.id,
+        auth0Id: updated.auth0Id,
+        email: updated.email,
+        name: updated.name,
+        picture: updated.picture,
+        phone: updated.phone,
+        reward: updated.reward,
+        last_visit: updated.last_visit,
+        visits_count: updated.visits_count,
+        created_at: updated.created_at,
+        modified_at: updated.modified_at,
+        restaurant: {
+          name: updated.restaurant?.name,
+          slug: updated.restaurant?.slug,
+        },
+        exist: updated.exist,
+      };
     }
 
-    // Si no existe, lo creamos
     const newCustomer = this.customerRepository.create({
-      auth0Id: auth0Id,
-      email: email,
-      name: name,
-      picture: picture,
+      auth0Id,
+      email,
+      name,
+      picture,
+      exist: true,
       restaurant: rest,
     });
 
-    const wrk3Cust = await this.customerRepository.save(newCustomer);
-    return wrk3Cust;
+    const saved = await this.customerRepository.save(newCustomer);
+
+    return {
+      id: saved.id,
+      auth0Id: saved.auth0Id,
+      email: saved.email,
+      name: saved.name,
+      picture: saved.picture,
+      phone: saved.phone,
+      reward: saved.reward,
+      last_visit: saved.last_visit,
+      visits_count: saved.visits_count,
+      created_at: saved.created_at,
+      modified_at: saved.modified_at,
+      restaurant: {
+        name: saved.restaurant?.name,
+        slug: saved.restaurant?.slug,
+      },
+      exist: saved.exist,
+    };
   }
 
   // GEA 14-mayo
-  async createCustomer(
-    createCustomer,
-    rest,
-  ): Promise<Omit<Customer, 'password'>> {
+  async createCustomer(createCustomer, rest): Promise<Omit<Customer, 'password'>> {
     const hash = await this.bcryptService.hash(createCustomer.password);
     if (!hash) {
       throw new InternalServerErrorException('Problem with the bcrypt library');
@@ -67,25 +108,21 @@ export class CustomersRepository {
     const customerCreado = await this.customerRepository.save(newCustomer);
     const { password, ...customerSinPass } = customerCreado;
 
-    const subject = 'Satisfactory Account Creation in our SmartQR App';
-    const textmsg =
-      'Congratulations!!!! Your have been granted access to use the SmartQR App.';
-    const tipoEmail = 'signIn';
-    this.mailService.sendMail(
-      customerCreado.email,
-      subject,
-      textmsg,
-      tipoEmail,
-    );
+    // const subject = 'Satisfactory Account Creation in our SmartQR App';
+    // const textmsg =
+    //   'Congratulations!!!! Your have been granted access to use the SmartQR App.';
+    // const tipoEmail = 'signIn';
+    // this.mailService.sendMail(
+    //   customerCreado.email,
+    //   subject,
+    //   textmsg,
+    //   tipoEmail,
+    // );
     return customerSinPass;
   }
 
   // GEA 14-mayo
-  async updateById(
-    id,
-    updateCustomer,
-    req,
-  ): Promise<Omit<Customer, 'password'>> {
+  async updateById(id, updateCustomer, req): Promise<Omit<Customer, 'password'>> {
     const customer = await this.customerRepository.findOneBy({ id: id });
 
     if (!customer) {
@@ -103,9 +140,7 @@ export class CustomersRepository {
 
     const wrkCustomer = await this.getCustomerByEmail(updateCustomer.email);
     if (wrkCustomer && wrkCustomer.id !== id) {
-      throw new ConflictException(
-        `❌ Email already in use: ${customer.email} !!`,
-      );
+      throw new ConflictException(`❌ Email already in use: ${customer.email} !!`);
     }
 
     const hash = await this.bcryptService.hash(updateCustomer.password);
@@ -141,7 +176,7 @@ export class CustomersRepository {
     // const mergeUser = this.userRepository.merge(user, putUser);
     // await this.userRepository.save(mergeUser);
     await this.customerRepository.save(customer);
-    return 'Customer bloquedao: ' + id;
+    return 'Customer blocked: ' + id;
   }
 
   // GEA FINALIZADO Mayo 14
@@ -169,17 +204,68 @@ export class CustomersRepository {
   }
 
   // GEA FINALIZADO Mayo 14
-  async findById(id): Promise<Omit<Customer, 'password'>> {
-    const customer = await this.customerRepository.findOne({
-      where: { id },
-    });
+  async findById(id: string, slug: string): Promise<Omit<Customer, 'password'>> {
+    const customer = await this.customerRepository
+      .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.orders', 'orders')
+      .leftJoinAndSelect('orders.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('orders.table', 'table') // para incluir la mesa
+      .leftJoin('orders.restaurant', 'restaurant')
+      .select([
+        // Campos del cliente
+        'customer.id',
+        'customer.auth0Id',
+        'customer.email',
+        'customer.name',
+        'customer.picture',
+        'customer.phone',
+        'customer.reward',
+        'customer.last_visit',
+        'customer.visits_count',
+        'customer.created_at',
+        'customer.modified_at',
+        'customer.exist',
+
+        // Campos de la orden
+        'orders.id',
+        'orders.status',
+        'orders.payStatus',
+        'orders.order_type',
+        'orders.total_price',
+        'orders.payment_method',
+        'orders.discount_applied',
+        'orders.served_at',
+        'orders.created_at',
+
+        // Mesa
+        'table.id',
+        'table.code',
+        'table.is_active',
+        'table.exist',
+        'table.created_at',
+
+        // Items y productos
+        'items.id',
+        'items.quantity',
+        'items.unit_price',
+        'product.id',
+        'product.name',
+      ])
+      .where('customer.id = :id', { id })
+      .andWhere('restaurant.slug = :slug', { slug })
+      .andWhere('orders.restaurantId = restaurant.id')
+      .getOne();
 
     if (!customer) {
       throw new NotFoundException('❌ No customer found');
     }
 
-    const { password, ...customerSinPass } = customer;
-    return customer;
+    // Filtrar órdenes inactivas
+    customer.orders = customer.orders?.filter((o) => o.status !== 'inactive') || [];
+
+    const { password, ...customerSinPass } = customer as any;
+    return customerSinPass;
   }
 
   // Finalizado GEA Mayo-14

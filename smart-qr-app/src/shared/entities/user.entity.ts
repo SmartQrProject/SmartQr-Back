@@ -24,13 +24,21 @@ export class User {
 
   @Column({ length: 20 })
   @IsString()
-  role: string; // 'superadmin', 'restadmin', 'reststaff'
+  role: string; // 'superAdmin', 'owner', 'staff'
+
+  @Column({ nullable: true, length: 20 })
+  @IsString()
+  @Length(5, 20)
+  phone?: string;
 
   @CreateDateColumn()
   created_at: Date;
 
   @Column({ default: true })
   exist: boolean;
+
+  @Column({ default: true })
+  is_active: boolean;
 
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.users, {
     onDelete: 'CASCADE',

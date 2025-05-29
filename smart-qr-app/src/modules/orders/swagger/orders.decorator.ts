@@ -1,7 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
+import { OrderResponseDto } from '../dto/order-response.dto';
 
 const SlugParam = ApiParam({
   name: 'slug',
@@ -19,10 +20,30 @@ const IdParam = ApiParam({
 export function CreateOrderDoc() {
   return applyDecorators(
     SlugParam,
-    ApiOperation({ summary: 'Create a new order' }),
+    ApiOperation({ summary: 'Create a new order-only works with AUTH0 token' }),
     ApiBody({
       type: CreateOrderDto,
-      description: 'Order data including customer, table, and order items',
+      description: 'Payload required to create a new order, including optional client ID, table ID, and the list of ordered products with quantities.',
+      examples: {
+        exampleOrder: {
+          summary: 'Order with client and products',
+          value: {
+            customerId: '05f67a0f-0d2c-4119-927a-9e1047d2851d',
+            code: 'T07',
+            rewardCode: 'KDB38D35JV',
+            products: [
+              {
+                id: '1c64190d-3c81-43db-b8a3-40e4d768b42a',
+                quantity: 2,
+              },
+              {
+                id: '2cea0878-d961-4d53-af44-197022bcfead',
+                quantity: 1,
+              },
+            ],
+          },
+        },
+      },
     }),
     ApiResponse({ status: 201, description: 'Order created successfully' }),
     ApiResponse({ status: 400, description: 'Invalid data' }),
@@ -30,7 +51,13 @@ export function CreateOrderDoc() {
 }
 
 export function GetAllOrdersDoc() {
-  return applyDecorators(SlugParam, ApiOperation({ summary: 'Get all orders for the restaurant' }), ApiResponse({ status: 200, description: 'List of orders' }));
+  return applyDecorators(
+    ApiOperation({ summary: 'Get all orders for a restaurant by slug' }),
+    ApiOkResponse({
+      description: 'List of orders with basic customer and product info',
+      type: [OrderResponseDto],
+    }),
+  );
 }
 
 export function GetOrderByIdDoc() {

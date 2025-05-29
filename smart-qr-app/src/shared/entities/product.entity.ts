@@ -36,6 +36,11 @@ export class Product {
   @IsBoolean()
   is_available: boolean;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @IsOptional()
+  @IsNumber()
+  cost_price?: number;
+
   @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
   @IsOptional()
   @IsString({ each: true })

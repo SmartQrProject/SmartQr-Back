@@ -10,16 +10,8 @@ import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { MailService } from 'src/common/services/mail.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([RestaurantTable]),
-    RestaurantsModule,
-    CommonModule,
-  ],
+  imports: [TypeOrmModule.forFeature([RestaurantTable]), RestaurantsModule, CommonModule],
   providers: [RestaurantTablesService, RestaurantTableRepository, MailService],
   controllers: [RestaurantTablesController],
 })
-export class RestaurantTablesModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('users');
-  }
-}
+export class RestaurantTablesModule {}

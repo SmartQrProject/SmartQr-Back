@@ -13,33 +13,33 @@ export class IaService {
   }
 
   async extractIntents(userMessage: string): Promise<string[]> {
-    const prompt = `Estás actuando como un analizador de intenciones para un chatbot gastronómico. Tu tarea es extraer palabras clave o intenciones relacionadas con comida, salud, dieta, ingredientes o preferencias del usuario a partir de su mensaje.
+    const prompt = `You are acting as an intent analyzer for a food-related chatbot. Your task is to extract keywords or intents related to food, health, diet, ingredients, or user preferences from their message.
 
-Tenés que devolver una lista en formato JSON con conceptos clave detectados. Detectá la intención incluso si el usuario usa:
+You must return a JSON-formatted list containing the detected key concepts. Detect intent even if the user uses:
 
-- Lenguaje informal o coloquial
-- Errores de escritura menores
-- Idiomas mixtos (ej: 'sugar free', 'sin azúcar')
-- Expresiones equivalentes o sinónimos
+- Informal or colloquial language
+- Minor spelling errors
+- Mixed languages (e.g., 'sugar free', 'sin azúcar')
+- Equivalent expressions or synonyms
 
-📌 Ejemplos de equivalencias esperadas:
+📌 Examples of expected equivalences:
 
-- "sin azúcar", "sugar free", "bajo en azúcar", "no azúcar" → "sin azúcar"
-- "sin gluten", "gluten free", "celíaco", "libre de gluten" → "sin gluten"
-- "vegano", "vegan", "sin productos animales" → "vegano"
-- "vegetariano", "vegetarian", "no carne" → "vegetariano"
-- "sin lactosa", "lactose free", "intolerancia a la lactosa" → "sin lactosa"
-- "saludable", "light", "fitness", "comida sana" → "saludable"
-- "keto", "cetogénico", "pocos carbohidratos" → "keto"
-- "proteico", "con proteínas", "alto en proteínas" → "proteico"
+- "sin azúcar", "sugar free", "low sugar", "no sugar" → "sin azúcar"
+- "sin gluten", "gluten free", "celiac", "gluten-free" → "sin gluten"
+- "vegano", "vegan", "no animal products" → "vegano"
+- "vegetariano", "vegetarian", "no meat" → "vegetariano"
+- "sin lactosa", "lactose free", "lactose intolerant" → "sin lactosa"
+- "saludable", "light", "fitness", "healthy food" → "saludable"
+- "keto", "ketogenic", "low carb" → "keto"
+- "proteico", "high in protein", "with protein", "protein-rich" → "proteico"
 
-📤 Si no detectás ninguna intención relacionada con preferencias alimenticias, ingredientes o dieta, devolvé un array vacío: []
+📤 If no intent related to dietary preferences, ingredients, or diet is detected, return an empty array: []
 
-🧾 Mensaje del usuario:
+🧾 User message:
 "${userMessage}"
 
-Respondé solo con el array en formato JSON, sin explicaciones ni texto adicional.
-    `;
+Respond only with the array in JSON format, without any additional explanation or text.
+`;
 
     try {
       const completion = await this.openai.chat.completions.create({
@@ -56,7 +56,7 @@ Respondé solo con el array en formato JSON, sin explicaciones ni texto adiciona
       console.error('❌ Error en extractIntents:', error);
 
       if (error.code === 'insufficient_quota') {
-        const fallback = ['🧠 El sistema está temporalmente fuera de servicio por límite de uso. Intentá más tarde.'];
+        const fallback = ['🧠 The system is temporarily out of service due to usage limits. Please try again later.'];
         console.log('⚠️ Intents fallback por límite:', fallback);
         return fallback;
       }
@@ -69,7 +69,7 @@ Respondé solo con el array en formato JSON, sin explicaciones ni texto adiciona
 
   async matchWithAI(userMessage: string, allDetails: { product: string; detail: string }[]): Promise<{ product: string; detail: string }[]> {
     const prompt = `
-Tengo los siguientes detalles de productos:
+I have the following product details:
 
 ${JSON.stringify(
   allDetails.map((d, i) => ({ id: i, ...d })),
@@ -77,11 +77,11 @@ ${JSON.stringify(
   2,
 )}
 
-Y este mensaje del usuario:
+And this message from the user:
 
 "${userMessage}"
 
-Decime los IDs de los detalles que están relacionados con la intención del usuario. Si el mensaje no tiene relación con comida, dieta o ingredientes, devolvé []. Respondé solo con un array de IDs.
+Tell me the IDs of the details that are related to the user's intent. If the message is not related to food, diet, or ingredients, return []. Respond only with an array of IDs.
 `;
 
     try {

@@ -14,8 +14,7 @@ export class UsersRepository {
     private readonly bcryptService: BcryptService,
   ) {}
 
-  // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
-  async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<string> {
+  async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<User> {
     const user = await this.userRepository.findOneBy({
       id: id,
       restaurant: { id: rest.id },
@@ -25,11 +24,6 @@ export class UsersRepository {
       throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
     }
 
-    // if (!req.user.roles.includes('superAdmin') && req.user.id !== id) {
-    //   throw new NotFoundException(
-    //     `You can not update User data for a different user.`,
-    //   );
-    // }
     if (updateUser.password) {
       const hash = await this.bcryptService.hash(updateUser.password);
       if (!hash) {
@@ -40,12 +34,11 @@ export class UsersRepository {
 
     const { confirmPassword, ...putUser } = updateUser;
     const mergeUser = this.userRepository.merge(user, putUser);
-    await this.userRepository.save(mergeUser);
-    return id + ' was updated';
+    const updatedUser = await this.userRepository.save(mergeUser);
+    return updatedUser;
   }
 
-  // GEA FINALIZADO Mayo 14------ trabajando en este endpoint ---GEA Mayo 12-
-  async deleteById(id: string): Promise<string> {
+  async deleteById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['restaurant'],
@@ -56,11 +49,11 @@ export class UsersRepository {
     }
 
     user.exist = false;
-    await this.userRepository.save(user);
-    return 'Usuario bloquedao: ' + id;
+    user.is_active = false;
+    const deletedUser = await this.userRepository.save(user);
+    return deletedUser;
   }
 
-  // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
   async getUsers(
     rest,
     page: number,
@@ -87,9 +80,38 @@ export class UsersRepository {
     return { page, limit, usuarios: usuariosSinClave };
   }
 
+  async getActiveStaff(
+    rest,
+    page: number,
+    limit: number,
+  ): Promise<{
+    page: number;
+    limit: number;
+    usuarios: Omit<User, 'password'>[];
+  }> {
+    const skip = (page - 1) * limit;
+    const [usuarios, total] = await this.userRepository.findAndCount({
+      skip,
+      take: limit,
+      where: {
+        role: 'staff',
+        exist: true,
+        restaurant: { id: rest.id },
+      },
+      order: { name: 'ASC' },
+    });
+
+    if (!usuarios) {
+      throw new NotFoundException('❌ No users found');
+    }
+
+    const usuariosSinClave = usuarios.map(({ password, ...resto }) => resto);
+
+    return { page, limit, usuarios: usuariosSinClave };
+  }
+
   // Finalizado GEA Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
   async createUser(rest, userToCreate): Promise<Omit<User, 'password'>> {
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', userToCreate, rest);
     const hash = await this.bcryptService.hash(userToCreate.password);
     if (!hash) {
       throw new InternalServerErrorException('Problem with the bcrypt library');
@@ -106,7 +128,7 @@ export class UsersRepository {
   // Finalizado GEA Mayo-13---- trabajando en este endpoint ---GEA Mayo 12-
   async getUserByEmail(email: string): Promise<User | null> {
     const usuario = await this.userRepository.findOne({
-      where: { email },
+      where: { email: email, exist: true },
       relations: ['restaurant'],
     });
 
@@ -116,7 +138,7 @@ export class UsersRepository {
   // Finalizado GEA Mayo-13---- trabajando en este endpoint ---GEA Mayo 12-
   async getUserById(id: string): Promise<User | null> {
     const usuario = await this.userRepository.findOne({
-      where: { id },
+      where: { id: id, exist: true },
       relations: ['restaurant'],
     });
 

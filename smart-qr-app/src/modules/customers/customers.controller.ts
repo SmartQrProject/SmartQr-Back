@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Get, Req, Post, Body, Patch, Param, Delete, Request, HttpCode, Query, DefaultValuePipe, ParseIntPipe, Put, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, UseGuards, Get, Req, Post, Body, Patch, Param, Delete, HttpCode, Query, DefaultValuePipe, ParseIntPipe, Put, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from 'src/modules/customers/dto/create-customer.dto';
@@ -6,23 +6,34 @@ import { UpdateCustomerDto } from 'src/modules/customers/dto/update-customer.dto
 import { Customer } from 'src/shared/entities/customer.entity';
 import { Auth0CustomerDto } from './dto/auth0-customer.dto';
 import { LogInCustomerDto } from './dto/login-customer.dto';
-import { CreateCustomerDoc, DeleteCustomerDoc, GetAllCustomersDoc, GetCustomerByIdDoc, SignInCustomerDoc, SyncAuth0Doc, UpdateCustomerDoc } from './swagger/customers.decorator';
+import {
+  CreateCustomerDoc,
+  DeleteCustomerDoc,
+  GetAllCustomersDoc,
+  GetCustomerByIdDoc,
+  SignInCustomerDoc,
+  SyncAuth0Doc,
+  UpdateCustomerDoc,
+} from './swagger/customers-doc.decorator';
+import { CustomerResponseDto } from './dto/customer-response.dto';
+import { JwtAuth0Guard } from 'src/common/guards/jwt-auth0.guard';
 
-@ApiTags('CRUD EndPoints para Customers. SignUP, SignIn, etc')
+@ApiTags('CRUD EndPoints para Customers (restaurant customers). SignUP, SignIn, etc')
+@ApiBearerAuth()
 @Controller(':slug/customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
-  // listo 14-Mayo GEA
   @Post('sincronizar')
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuth0Guard)
   @SyncAuth0Doc()
-  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string, @Req() req): Promise<Customer> {
+  async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string): Promise<CustomerResponseDto> {
     return this.customersService.sincronizarAuth0(customer, slug);
   }
 
   // listo 14-Mayo GEA
   @Post('signup')
+  @UseGuards(JwtAuth0Guard)
   @CreateCustomerDoc()
   async create(@Body() createCustomerDto: CreateCustomerDto, @Param('slug') slug: string) {
     return this.customersService.create(createCustomerDto, slug);
@@ -33,6 +44,7 @@ export class CustomersController {
   @HttpCode(200)
   // @Roles(Role.Admin)
   // @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(JwtAuth0Guard)
   @GetAllCustomersDoc()
   async getAllCustomers(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -44,16 +56,18 @@ export class CustomersController {
 
   // listo 14-Mayo GEA
   @Get(':id')
+  @UseGuards(JwtAuth0Guard)
   @HttpCode(200)
   // @Roles(Role.Admin)
   // @UseGuards(AuthGuard, RolesGuard)
   @GetCustomerByIdDoc()
   async findById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string) {
-    return this.customersService.findOne(id);
+    return this.customersService.findOne(id, slug);
   }
 
   // listo 14-Mayo GEA
   @Put(':id')
+  @UseGuards(JwtAuth0Guard)
   @HttpCode(200)
   //@ApiBearerAuth()
   @UpdateCustomerDoc()
@@ -75,6 +89,7 @@ export class CustomersController {
 
   //  FINALIZADO GEA MAyo-14
   @Post('signin')
+  @UseGuards(JwtAuth0Guard)
   @HttpCode(201)
   @SignInCustomerDoc()
   async customerLogin(@Param('slug') slug: string, @Body() customer: LogInCustomerDto): Promise<object> {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
@@ -11,21 +11,13 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RewardCodeModule } from '../reward-code/reward-code.module';
 import { CommonModule } from 'src/common/common.module';
+import { MailService } from 'src/common/services/mail.service';
+import { StripeModule } from '../stripe/stripe.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Order,
-      OrderItem,
-      Customer,
-      Product,
-      Restaurant,
-      RestaurantTable,
-    ]),
-    RewardCodeModule,
-    CommonModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, Customer, Product, Restaurant, RestaurantTable]), RewardCodeModule, CommonModule, forwardRef(() => StripeModule)],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [OrdersService, MailService],
+  exports: [OrdersService],
 })
 export class OrdersModule {}

@@ -6,6 +6,7 @@ import { SignInUserDto } from './dto/signIn-user.dto';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { JwtService } from 'src/common/services/jwt.service';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { MailService } from 'src/common/services/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -14,9 +15,9 @@ export class UsersService {
     private readonly restService: RestaurantsService,
     private readonly bcryptService: BcryptService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
-  // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
   async userLogin(/*slug,*/ { email, password }: SignInUserDto): Promise<object> {
     /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
@@ -24,6 +25,7 @@ export class UsersService {
     if (
       !user ||
       !user.exist ||
+      !user.is_active ||
       /*!rest ||
       user.restaurant.id !== rest.id ||*/
       !(await this.bcryptService.compare(password, user.password))
@@ -40,23 +42,19 @@ export class UsersService {
       restaurant: user.restaurant,
     };
 
-    console.log('payload en signin:', jwtPayLoad);
-
     const access_token = this.jwtService.generateToken(jwtPayLoad);
-    console.log('token:', access_token);
 
     return { success: 'Logged Succesfully with token', access_token };
   }
 
-  // FINALIZDO GEA MAYO-14------ trabajando en este endpoint ---GEA Mayo 12-
-  async modifyUserById(id, slug, user, req): Promise<string> {
+  async modifyUserById(id, slug, user, req): Promise<User> {
     const usuario = await this.usersRepository.getUserById(id);
 
     if (!usuario || !usuario.exist) {
       throw new NotFoundException(`❌ No users found  with id ${id} or is blocked !!`);
     }
 
-    const rest = await this.restService.getRestaurants(slug);
+    const rest: Restaurant = await this.restService.getRestaurants(slug);
     if (!rest) {
       throw new NotFoundException(`❌ restaurant ${slug} found !!`);
     }
@@ -67,7 +65,7 @@ export class UsersService {
 
     if (user.email) {
       const usuario = await this.usersRepository.getUserByEmail(user.email);
-      if (usuario && usuario.id !== user.id) {
+      if (usuario && usuario.id !== id) {
         throw new ConflictException(`❌ Email already in use: ${user.email} !!`);
       }
     }
@@ -84,11 +82,12 @@ export class UsersService {
       }
     }
 
-    return this.usersRepository.patchById(id, rest, user, req);
+    const updatedUser = this.usersRepository.patchById(id, rest, user, req);
+    this.sendEmail(rest, usuario, 'updated'); //nodemailer
+    return updatedUser;
   }
 
-  // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
-  async deleteUserById(id, slug, req): Promise<string> {
+  async deleteUserById(id, slug, req): Promise<User> {
     const usuario = await this.usersRepository.getUserById(id);
 
     if (!usuario || !usuario.exist) {
@@ -113,10 +112,12 @@ export class UsersService {
         throw new NotFoundException(`You can not in-activate this User .`);
       }
     }
-    return this.usersRepository.deleteById(id);
+
+    const userDeleted = this.usersRepository.deleteById(id);
+    this.sendEmail(rest, usuario, 'deleted'); //nodemailer
+    return userDeleted;
   }
 
-  // FINALIZDO GEA MAYO-13------ trabajando en este endpoint ---GEA Mayo 12-
   async getUsers(
     slug,
     page,
@@ -127,11 +128,22 @@ export class UsersService {
     usuarios: Omit<User, 'password'>[];
   }> {
     const rest = await this.restService.getRestaurants(slug);
-    console.log('rest.id: -----------------> ', rest.id);
     return this.usersRepository.getUsers(rest, page, limit);
   }
 
-  // Finalizado Mayo-13------ trabajando en este endpoint ---GEA Mayo 12-
+  async getActiveStaff(
+    slug,
+    page,
+    limit,
+  ): Promise<{
+    page: number;
+    limit: number;
+    usuarios: Omit<User, 'password'>[];
+  }> {
+    const rest = await this.restService.getRestaurants(slug);
+    return this.usersRepository.getActiveStaff(rest, page, limit);
+  }
+
   async userSignUp(slug, newUser): Promise<Omit<User, 'password'>> {
     const rest = await this.restService.getRestaurants(slug);
     const user = await this.usersRepository.getUserByEmail(newUser.email);
@@ -144,7 +156,18 @@ export class UsersService {
       throw new ConflictException('❌ Passwords are not equals!!!');
     }
 
-    console.log('YYYYYYYYYYYYYYYYYY ---------------nuevo usuario: ', newUser, ' restaurant: ', rest);
-    return await this.usersRepository.createUser(rest, newUser);
+    const userCreated = await this.usersRepository.createUser(rest, newUser);
+    this.sendEmail(rest, userCreated, 'created'); //nodemailer
+    return userCreated;
+  }
+
+  async sendEmail(rest, user, accion) {
+    const subject = `The user ${user.name} was ${accion} successfully. `;
+    const textmsg = `Hello ${rest.owner_email},  A user for your restaurant have been ${accion}.
+    
+      Restaurant Name: ${rest.name} 
+      User:  ${user.name} -  ${user.email} `;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
   }
 }

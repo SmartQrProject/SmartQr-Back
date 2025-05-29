@@ -73,13 +73,30 @@ export class MailService {
     const topCategor = reportData.getSalesByCategoryWeek;
     const salesFrequ = reportData.getSalesFrequencyWeek;
     const customersT = reportData.getCustomerTypesWeek;
+    const customersR = reportData.getCustomersReport;
 
-    const rows1 = topProduct.map((p) => `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`).join('');
-    const rows2 = leastSoldP.map((p) => `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`).join('');
+    const rows1 = topProduct.map((p) => `<tr><td>${p.name}</td><td style="text-align: right;">${p.quantity}</td></tr>`).join('');
+    const rows2 = leastSoldP.map((p) => `<tr><td>${p.name}</td><td style="text-align: right;">${p.quantity}</td></tr>`).join('');
     const rows3 = topCategor
-      .map((p) => `<tr><td>${p.category}</td><td>${p.total.toFixed(2)}</td><td>${p.percentage.toFixed(1)}</td><td>${p.quantity}</td><td>${p.average_price.toFixed(2)}</td></tr>`)
+      .map(
+        (p) =>
+          `<tr><td>${p.category}</td><td style="text-align: right;">${p.total.toFixed(2)}</td><td style="text-align: right;">${p.percentage.toFixed(1)}%</td><td style="text-align: right;">${p.quantity}</td><td style="text-align: right;">${p.average_price.toFixed(2)}</td></tr>`,
+      )
       .join('');
-    const rows4 = salesFrequ.map((p) => `<tr><td>${p.label}</td><td>${p.count}</td></tr>`).join('');
+
+    const rows4 = salesFrequ.map((p) => `<tr><td>${p.label}</td><td style="text-align: right;">${p.count}</td></tr>`).join('');
+    const rows5 = customersR.data
+      .map(
+        (p) =>
+          `<tr>
+                <td>${p.email}</td><td>${p.name}</td><td style="text-align: right;">${p.orders}</td>
+                <td style="text-align: right;">${p.totalSpent.toFixed(2)}</td>
+                <td style="text-align: right;">${p.averageOrder.toFixed(2)}</td>
+                <td style="text-align: right;">${p.daysSince}</td>
+            </tr>`,
+      )
+      .join('');
+
     return `
       <html>
         <body>
@@ -88,12 +105,22 @@ export class MailService {
             <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
               🔝  Week Summary
             </h2>
-            <p style="font-size: 20px; color: #333; margin-top: 10px;">
-              <strong style="color: #2c3e50;"> Total Sales U$s    :${salesTotal.toFixed(2)}</strong> USD
-              <strong style="color: #2c3e50;"> New Customer       :${customersT.newCustomers}</strong>
-              <strong style="color: #2c3e50;"> % of New Customers :${customersT.newPercentage.toFixed(1)}</strong>
-              <strong style="color: #2c3e50;"> Returning Customers:${customersT.returningCustomers}</strong>
-              <strong style="color: #2c3e50;"> % of Returning Cust:${customersT.returningPercentage.toFixed(1)}</strong>
+            <p style="font-size: 14px; color: #333; margin-top: 10px;">
+            <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px;">Concept</th>
+                <th style="padding: 8px;">Indicator</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Sales U$s</td><td style="text-align: right;">${salesTotal.toFixed(2)}$</td></tr>
+              <tr><td>New Customers</td><td style="text-align: right;">${customersT.newCustomers}</td></tr>
+              <tr><td>% of New Customers</td><td style="text-align: right;">${customersT.newPercentage.toFixed(1)}%</td></tr>
+              <tr><td>Returning Customers</td><td style="text-align: right;">${customersT.returningCustomers}</td></tr>
+              <tr><td>% of Returning Cust</td><td style="text-align: right;">${customersT.returningPercentage.toFixed(1)}%</td></tr>
+            </tbody>
+          </table>
             </p>
           </div>
 
@@ -140,7 +167,7 @@ export class MailService {
                 <th style="padding: 8px;">Total U$D</th>
                 <th style="padding: 8px;">Percentage</th>
                 <th style="padding: 8px;">Quantity</th>
-                <th style="padding: 8px;">Avge Price</th>
+                <th style="padding: 8px;">Avge Price U$D</th>
               </tr>
             </thead>
             <tbody>
@@ -161,6 +188,26 @@ export class MailService {
             </thead>
             <tbody>
               ${rows4}
+            </tbody>
+          </table>
+
+          <!-- reporte de clientes -->
+          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
+            🔝 Customers of the Week
+          </h2>
+          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px;">Customer Email</th>
+                <th style="padding: 8px;">Customer Name</th>
+                <th style="padding: 8px;">Total # Orders</th>
+                <th style="padding: 8px;">Total Spent U$S</th>
+                <th style="padding: 8px;">Average Spent U$S</th>
+                <th style="padding: 8px;">Days from Last Visit</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows5}
             </tbody>
           </table>
 

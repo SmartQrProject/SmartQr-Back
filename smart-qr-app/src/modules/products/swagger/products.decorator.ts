@@ -3,6 +3,8 @@ import { ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 
+// 🔁 Reutilizables
+
 const SlugParam = ApiParam({
   name: 'slug',
   description: 'Unique restaurant identifier',
@@ -17,6 +19,74 @@ const IdParam = ApiParam({
   required: true,
 });
 
+const PaginationQueries = applyDecorators(
+  ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination',
+    example: 1,
+  }),
+  ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  }),
+);
+
+const Unauthorized = ApiResponse({
+  status: 401,
+  description: 'Unauthorized',
+  schema: {
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  },
+});
+
+const NotFound = (desc = 'Resource not found') =>
+  ApiResponse({
+    status: 404,
+    description: desc,
+    schema: {
+      example: {
+        statusCode: 404,
+        message: desc,
+        error: 'Not Found',
+      },
+    },
+  });
+
+const BadRequest = ApiResponse({
+  status: 400,
+  description: 'Invalid data provided',
+  schema: {
+    example: {
+      statusCode: 400,
+      message: ['Some fields are invalid or missing'],
+      error: 'Bad Request',
+    },
+  },
+});
+
+const Conflict = ApiResponse({
+  status: 409,
+  description: 'Product name already exists in restaurant',
+  schema: {
+    example: {
+      statusCode: 409,
+      message: 'A product with this name already exists in this restaurant',
+      error: 'Conflict',
+    },
+  },
+});
+
+// ✅ Decoradores
+
 export function CreateProductDoc() {
   return applyDecorators(
     SlugParam,
@@ -26,7 +96,7 @@ export function CreateProductDoc() {
     }),
     ApiBody({
       type: CreateProductDto,
-      description: 'Creates a new product by sending the data in JSON format, including the URL of the already uploaded image',
+      description: 'Creates a product with the required info including image URL and category',
       examples: {
         beverage: {
           summary: 'Create a beverage product',
@@ -34,20 +104,20 @@ export function CreateProductDoc() {
             name: 'Coca Cola',
             price: 2.5,
             description: 'Regular Coca Cola 355ml',
-            image_url: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/coca-cola.jpg',
+            image_url: 'https://example.com/coca-cola.jpg',
             categoryId: 'd8737e33-4d0d-49eb-ad10-b2a1d3489666',
             is_available: true,
             sequenceNumber: 10,
-            details: ['gluten-free', 'vegan', 'decaffeinated'],
+            details: ['gluten-free', 'vegan'],
           },
         },
       },
     }),
     ApiResponse({ status: 201, description: 'Product created successfully' }),
-    ApiResponse({ status: 400, description: 'Invalid data provided' }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'Restaurant or category not found' }),
-    ApiResponse({ status: 409, description: 'Product name already exists in restaurant' }),
+    BadRequest,
+    Unauthorized,
+    NotFound('Restaurant or category not found'),
+    Conflict,
   );
 }
 
@@ -56,25 +126,12 @@ export function GetAllProductsDoc() {
     SlugParam,
     ApiOperation({
       summary: 'Get all products for the restaurant',
-      description: 'Retrieves all products for a specific restaurant using its slug. Products are returned paginated and ordered by their sequence number.',
+      description: 'Retrieves all products for a specific restaurant, paginated and ordered.',
     }),
-    ApiQuery({
-      name: 'page',
-      required: false,
-      type: Number,
-      description: 'Page number for pagination',
-      example: 1,
-    }),
-    ApiQuery({
-      name: 'limit',
-      required: false,
-      type: Number,
-      description: 'Number of items per page',
-      example: 10,
-    }),
+    PaginationQueries,
     ApiResponse({ status: 200, description: 'List of all products retrieved' }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'Restaurant not found' }),
+    Unauthorized,
+    NotFound('Restaurant not found'),
   );
 }
 
@@ -84,11 +141,11 @@ export function GetProductByIdDoc() {
     IdParam,
     ApiOperation({
       summary: 'Get a product by ID',
-      description: 'Retrieves a specific product from a restaurant using the restaurant slug and product ID',
+      description: 'Retrieves a specific product from a restaurant using its ID.',
     }),
-    ApiResponse({ status: 200, description: 'Product found successfully' }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'Product or restaurant not found' }),
+    ApiResponse({ status: 200, description: 'Product retrieved successfully' }),
+    Unauthorized,
+    NotFound('Product not found'),
   );
 }
 
@@ -96,30 +153,16 @@ export function UpdateProductDoc() {
   return applyDecorators(
     SlugParam,
     IdParam,
-    ApiOperation({
-      summary: 'Update a product',
-      description: 'Updates an existing product in the restaurant menu with the provided data',
-    }),
+    ApiOperation({ summary: 'Update a product' }),
     ApiBody({
       type: UpdateProductDto,
-      examples: {
-        product: {
-          summary: "Example of updating a product's details",
-          value: {
-            name: 'Coca Cola Zero',
-            price: 2.75,
-            description: 'Sugar-free Coca Cola 355ml',
-            image_url: 'https://example.com/images/coca-cola-zero.jpg',
-            sequenceNumber: 2,
-            categoryId: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
-          },
-        },
-      },
+      description: 'Fields required to update an existing product',
     }),
     ApiResponse({ status: 200, description: 'Product updated successfully' }),
-    ApiResponse({ status: 400, description: 'Invalid data provided' }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'Product or restaurant not found' }),
+    BadRequest,
+    Unauthorized,
+    NotFound('Product not found'),
+    Conflict,
   );
 }
 
@@ -127,93 +170,37 @@ export function DeleteProductDoc() {
   return applyDecorators(
     SlugParam,
     IdParam,
-    ApiOperation({
-      summary: 'Delete a product',
-      description: 'Removes a product from the restaurant menu. This action cannot be undone.',
-    }),
+    ApiOperation({ summary: 'Delete a product' }),
     ApiResponse({
       status: 200,
       description: 'Product deleted successfully',
       schema: {
         example: {
-          message: 'Product Coca Cola has been deleted successfully',
+          message: 'Product deleted successfully',
         },
       },
     }),
-    ApiResponse({ status: 401, description: 'Unauthorized' }),
-    ApiResponse({ status: 404, description: 'Product or restaurant not found' }),
+    Unauthorized,
+    NotFound('Product not found'),
   );
 }
 
 export function UpdateProductSequencesDoc() {
   return applyDecorators(
     SlugParam,
-    ApiOperation({
-      summary: 'Update sequence numbers for multiple products',
-      description: 'Updates the display order of multiple products at once. Useful for drag and drop reordering.',
-    }),
+    ApiOperation({ summary: 'Update product order/sequence' }),
     ApiBody({
+      description: 'List of products with new sequence numbers',
       schema: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-            sequenceNumber: { type: 'number', example: 1 },
-          },
-        },
-      },
-      examples: {
-        products: {
-          summary: 'Example of updating sequence numbers for multiple products',
-          value: [
-            { id: '123e4567-e89b-12d3-a456-426614174000', sequenceNumber: 1 },
-            { id: '456abcde-f123-12d3-a456-426614174000', sequenceNumber: 2 },
-          ],
-        },
+        example: [
+          { id: '97ed9278-5451-4363-8bbc-c4280bfd0f02', sequenceNumber: 1 },
+          { id: 'fa781c32-86e5-4c11-874e-71f21c0f2e29', sequenceNumber: 2 },
+        ],
       },
     }),
-    ApiResponse({
-      status: 200,
-      description: 'The sequence numbers have been updated successfully',
-      schema: {
-        example: {
-          message: 'Product sequences have been updated successfully',
-        },
-      },
-    }),
-    ApiResponse({
-      status: 400,
-      description: 'Sequence update failed',
-      schema: {
-        example: {
-          message: 'Failed to update product sequences. Please ensure all product IDs are valid and try again.',
-          error: 'Sequence Update Failed',
-          statusCode: 400,
-        },
-      },
-    }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-      schema: {
-        example: {
-          message: 'Unauthorized user',
-          error: 'Unauthorized',
-          statusCode: 401,
-        },
-      },
-    }),
-    ApiResponse({
-      status: 404,
-      description: 'One or more products not found',
-      schema: {
-        example: {
-          message: 'Some products were not found or do not belong to this restaurant',
-          error: 'Not Found',
-          statusCode: 404,
-        },
-      },
-    }),
+    ApiResponse({ status: 200, description: 'Product sequences updated successfully' }),
+    BadRequest,
+    Unauthorized,
+    NotFound('Restaurant or product not found'),
   );
 }

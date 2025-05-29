@@ -3,38 +3,45 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody, ApiParam }
 import { SignInUserDto } from '../dto/signIn-user.dto';
 import { PutUserDto } from '../dto/put-user.dto';
 
+const SlugParam = ApiParam({
+  name: 'slug',
+  description: 'Unique restaurant identifier',
+  example: 'test-cafe',
+  required: true,
+});
+
+const IdParam = ApiParam({
+  name: 'id',
+  description: 'User ID',
+  example: '20966491-1959-40ce-96f9-5c391d79fb1f',
+  required: true,
+});
+
+const PageQuery = ApiQuery({ name: 'page', description: 'Page number', example: 1, required: false, type: Number });
+const LimitQuery = ApiQuery({ name: 'limit', description: 'Items per page', example: 5, required: false, type: Number });
+const ApiUnauthorized = ApiResponse({
+  status: 401,
+  description: 'Unauthorized',
+  schema: {
+    example: { message: 'Unauthorized user', error: 'Unauthorized', statusCode: 401 },
+  },
+});
+const ApiNotFound = ApiResponse({
+  status: 404,
+  description: 'Restaurant not found',
+  schema: {
+    example: { message: 'Restaurant with slug test-cafe not found', error: 'Not Found', statusCode: 404 },
+  },
+});
+
 export function ModifyUserByIdDoc() {
-  return applyDecorators(
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Modify users data' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Unique restaurant identifier',
-      example: 'test-cafe',
-      required: true,
-    }),
-    ApiParam({
-      name: 'id',
-      description: 'User ID',
-      example: '20966491-1959-40ce-96f9-5c391d79fb1f',
-      required: true,
-    }),
-    ApiBody({ type: PutUserDto }),
-  );
+  return applyDecorators(ApiBearerAuth(), ApiOperation({ summary: 'Modify users data' }), SlugParam, IdParam, ApiBody({ type: PutUserDto }));
 }
 
 export function CreateUserDoc() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Users App creation' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Unique restaurant identifier',
-      example: 'test-cafe',
-      required: true,
-    }),
-  );
+  return applyDecorators(ApiOperation({ summary: 'Users App creation' }), SlugParam);
 }
-//
+
 export function GetAllUsersDoc() {
   return applyDecorators(
     ApiBearerAuth(),
@@ -42,26 +49,9 @@ export function GetAllUsersDoc() {
       summary: 'Get paginated users list',
       description: 'Retrieves a paginated list of users for a specific restaurant. Requires authentication.',
     }),
-    ApiQuery({
-      name: 'slug',
-      description: 'Unique restaurant identifier',
-      example: 'test-cafe',
-      required: true,
-    }),
-    ApiQuery({
-      name: 'page',
-      description: 'Page number',
-      example: 1,
-      required: false,
-      type: Number,
-    }),
-    ApiQuery({
-      name: 'limit',
-      description: 'Items per page',
-      example: 5,
-      required: false,
-      type: Number,
-    }),
+    ApiQuery({ name: 'slug', description: 'Unique restaurant identifier', example: 'test-cafe', required: true }),
+    PageQuery,
+    LimitQuery,
     ApiResponse({
       status: 200,
       description: 'Users found successfully',
@@ -88,32 +78,11 @@ export function GetAllUsersDoc() {
         },
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-      schema: {
-        example: {
-          message: 'Unauthorized user',
-          error: 'Unauthorized',
-          statusCode: 401,
-        },
-      },
-    }),
-    ApiResponse({
-      status: 404,
-      description: 'Restaurant not found',
-      schema: {
-        example: {
-          message: 'Restaurant with slug test-cafe not found',
-          error: 'Not Found',
-          statusCode: 404,
-        },
-      },
-    }),
+    ApiUnauthorized,
+    ApiNotFound,
   );
 }
 
-//
 export function GetActiveStaff() {
   return applyDecorators(
     ApiBearerAuth(),
@@ -121,26 +90,9 @@ export function GetActiveStaff() {
       summary: 'Get paginated staff only active users list for an specific restaurant',
       description: 'Retrieves a paginated staff active users list of users for a specific restaurant. Requires authentication.',
     }),
-    ApiQuery({
-      name: 'slug',
-      description: 'Unique restaurant identifier',
-      example: 'test-cafe',
-      required: true,
-    }),
-    ApiQuery({
-      name: 'page',
-      description: 'Page number',
-      example: 1,
-      required: false,
-      type: Number,
-    }),
-    ApiQuery({
-      name: 'limit',
-      description: 'Items per page',
-      example: 5,
-      required: false,
-      type: Number,
-    }),
+    ApiQuery({ name: 'slug', description: 'Unique restaurant identifier', example: 'test-cafe', required: true }),
+    PageQuery,
+    LimitQuery,
     ApiResponse({
       status: 200,
       description: 'Users found successfully',
@@ -167,49 +119,13 @@ export function GetActiveStaff() {
         },
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-      schema: {
-        example: {
-          message: 'Unauthorized user',
-          error: 'Unauthorized',
-          statusCode: 401,
-        },
-      },
-    }),
-    ApiResponse({
-      status: 404,
-      description: 'Restaurant not found',
-      schema: {
-        example: {
-          message: 'Restaurant with slug test-cafe not found',
-          error: 'Not Found',
-          statusCode: 404,
-        },
-      },
-    }),
+    ApiUnauthorized,
+    ApiNotFound,
   );
 }
 
-//
 export function DeleteUserByIdDoc() {
-  return applyDecorators(
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'De-activation of a user record' }),
-    ApiParam({
-      name: 'slug',
-      description: 'Unique restaurant identifier',
-      example: 'test-cafe',
-      required: true,
-    }),
-    ApiParam({
-      name: 'id',
-      description: 'User ID',
-      example: '20966491-1959-40ce-96f9-5c391d79fb1f',
-      required: true,
-    }),
-  );
+  return applyDecorators(ApiBearerAuth(), ApiOperation({ summary: 'De-activation of a user record' }), SlugParam, IdParam);
 }
 
 export function UserLoginDoc() {
@@ -223,33 +139,19 @@ export function UserLoginDoc() {
       description: 'User credentials',
       examples: {
         testCafeOwner: {
-          value: {
-            email: 'smartqr2@gmail.com',
-            password: '!Example123',
-          },
+          value: { email: 'smartqr2@gmail.com', password: '!Example123' },
           summary: 'Test Cafe owner credentials',
         },
-
         testCafeStaff: {
-          value: {
-            email: 'amigop@gmail.com',
-            password: 'Clave123$$',
-          },
+          value: { email: 'amigop@gmail.com', password: 'Clave123$$' },
           summary: 'Test Cafe staff credentials',
         },
-
         testSuperAdmin: {
-          value: {
-            email: 'info@smart-qr.tech',
-            password: 'HardPass123%%',
-          },
+          value: { email: 'info@smart-qr.tech', password: 'HardPass123%%' },
           summary: 'SUPERADMIN',
         },
         testAmigoRestoOwner: {
-          value: {
-            email: 'amigogabrielernesto@yahoo.com',
-            password: 'Clave123%%',
-          },
+          value: { email: 'amigogabrielernesto@yahoo.com', password: 'Clave123%%' },
           summary: 'AmigoResto Owner credentials',
         },
       },
@@ -279,11 +181,7 @@ export function UserLoginDoc() {
       status: 401,
       description: 'Invalid credentials',
       schema: {
-        example: {
-          message: 'Invalid email or password',
-          error: 'Unauthorized',
-          statusCode: 401,
-        },
+        example: { message: 'Invalid email or password', error: 'Unauthorized', statusCode: 401 },
       },
     }),
   );

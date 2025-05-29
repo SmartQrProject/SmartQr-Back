@@ -2,7 +2,6 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CreateRewardCodeDto } from '../dto/create-reward-code.dto';
 
-// Param for identifying the restaurant
 const SlugParam = ApiParam({
   name: 'slug',
   description: 'Unique restaurant identifier',
@@ -10,13 +9,14 @@ const SlugParam = ApiParam({
   required: true,
 });
 
-// Param for identifying the reward code
 const IdParam = ApiParam({
   name: 'id',
   description: 'Reward Code ID',
   example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
   required: true,
 });
+
+const ApiNotFound = ApiResponse({ status: 404, description: 'Reward code not found' });
 
 export function CreateRewardCodeDoc() {
   return applyDecorators(
@@ -44,13 +44,7 @@ export function GetAllRewardCodesDoc() {
 }
 
 export function GetRewardCodeByIdDoc() {
-  return applyDecorators(
-    SlugParam,
-    IdParam,
-    ApiOperation({ summary: 'Get reward code by ID' }),
-    ApiResponse({ status: 200, description: 'Reward code found' }),
-    ApiResponse({ status: 404, description: 'Reward code not found' }),
-  );
+  return applyDecorators(SlugParam, IdParam, ApiOperation({ summary: 'Get reward code by ID' }), ApiResponse({ status: 200, description: 'Reward code found' }), ApiNotFound);
 }
 
 export function UpdateRewardCodeDoc() {
@@ -64,21 +58,16 @@ export function UpdateRewardCodeDoc() {
       examples: {
         updatePercentageOnly: {
           summary: 'Update only the discount percentage',
-          value: {
-            percentage: 20,
-          },
+          value: { percentage: 20 },
         },
         fullUpdate: {
           summary: 'Update code and percentage',
-          value: {
-            code: 'SUMMER20',
-            percentage: 20,
-          },
+          value: { code: 'SUMMER20', percentage: 20 },
         },
       },
     }),
     ApiResponse({ status: 200, description: 'Reward code updated successfully' }),
-    ApiResponse({ status: 404, description: 'Reward code not found' }),
+    ApiNotFound,
   );
 }
 
@@ -88,15 +77,10 @@ export function DeleteRewardCodeDoc() {
     IdParam,
     ApiOperation({ summary: 'Delete reward code by ID' }),
     ApiResponse({ status: 200, description: 'Reward code deleted successfully' }),
-    ApiResponse({ status: 404, description: 'Reward code not found' }),
+    ApiNotFound,
   );
 }
 
 export function GetRewardCodeByCodeDoc() {
-  return applyDecorators(
-    SlugParam,
-    ApiOperation({ summary: 'Get reward code by ID' }),
-    ApiResponse({ status: 200, description: 'Reward code found' }),
-    ApiResponse({ status: 404, description: 'Reward code not found' }),
-  );
+  return applyDecorators(SlugParam, ApiOperation({ summary: 'Get reward code by ID' }), ApiResponse({ status: 200, description: 'Reward code found' }), ApiNotFound);
 }

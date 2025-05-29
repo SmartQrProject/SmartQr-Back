@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+// Reutilizables
 export function CustomerSlugParam() {
   return ApiParam({
     name: 'slug',
@@ -19,6 +20,14 @@ export function CustomerIdParam() {
   });
 }
 
+export function CustomerNotFoundResponse() {
+  return ApiResponse({
+    status: 404,
+    description: 'No customers defined in the database',
+  });
+}
+
+// Endpoints
 export function SyncAuth0Doc() {
   return applyDecorators(ApiOperation({ summary: 'Create or Update data coming from Auth0' }), CustomerSlugParam());
 }
@@ -32,19 +41,16 @@ export function SignInCustomerDoc() {
 }
 
 export function GetAllCustomersDoc() {
-  return applyDecorators(
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Paginated report with Customer created in the DB' }),
-    ApiResponse({ status: 404, description: 'No customers defined in the database' }),
-    CustomerSlugParam(),
-  );
+  return applyDecorators(ApiBearerAuth(), ApiOperation({ summary: 'Paginated report with Customer created in the DB' }), CustomerNotFoundResponse(), CustomerSlugParam());
 }
 
 export function GetCustomerByIdDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'Get data from one Customer by his ID and retrieve the Orders history of this customer' }),
-    ApiResponse({ status: 404, description: 'No Customers defined in the database' }),
+    ApiOperation({
+      summary: 'Get data from one Customer by his ID and retrieve the Orders history of this customer',
+    }),
+    CustomerNotFoundResponse(),
     CustomerSlugParam(),
     CustomerIdParam(),
   );

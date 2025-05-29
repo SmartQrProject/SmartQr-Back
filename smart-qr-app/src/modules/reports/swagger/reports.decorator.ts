@@ -1,95 +1,87 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+const ApiSlugParam = ApiParam({
+  name: 'slug',
+  required: true,
+  description: 'Restaurant slug (unique identifier)',
+  example: 'test-cafe',
+});
+
+const ApiDateFromQuery = ApiQuery({
+  name: 'from',
+  required: true,
+  type: String,
+  example: '2025-05-01',
+  description: 'Start date (inclusive) in YYYY-MM-DD format',
+});
+
+const ApiDateToQuery = ApiQuery({
+  name: 'to',
+  required: true,
+  type: String,
+  example: '2025-05-20',
+  description: 'End date (inclusive) in YYYY-MM-DD format',
+});
+
+const ApiUnauthorizedResponse = ApiResponse({
+  status: 401,
+  description: 'Unauthorized access',
+  schema: {
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  },
+});
+
+const ApiRestaurantNotFoundResponse = ApiResponse({
+  status: 404,
+  description: 'Restaurant not found',
+  schema: {
+    example: {
+      statusCode: 404,
+      message: 'Restaurant with slug test-cafe not found',
+      error: 'Not Found',
+    },
+  },
+});
+
+const BaseDecorators = [ApiBearerAuth(), ApiTags('Reports')];
+
 export function GetSalesReportDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get total sales within a date range',
       description: 'Returns the total sales amount for a given restaurant and date range.',
     }),
-    ApiParam({
-      name: 'slug',
-      description: 'Restaurant slug (unique identifier)',
-      example: 'test-cafe',
-    }),
-    ApiQuery({
-      name: 'from',
-      required: true,
-      type: String,
-      example: '2025-05-01',
-      description: 'Start date (inclusive) in YYYY-MM-DD format',
-    }),
-    ApiQuery({
-      name: 'to',
-      required: true,
-      type: String,
-      example: '2025-05-20',
-      description: 'End date (inclusive) in YYYY-MM-DD format',
-    }),
+    ApiSlugParam,
+    ApiDateFromQuery,
+    ApiDateToQuery,
     ApiResponse({
       status: 200,
       description: 'Sales total calculated successfully',
       schema: {
-        example: {
-          total: 1784.5,
-        },
+        example: { total: 1784.5 },
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized access',
-      schema: {
-        example: {
-          message: 'Unauthorized user',
-          error: 'Unauthorized',
-          statusCode: 401,
-        },
-      },
-    }),
-    ApiResponse({
-      status: 404,
-      description: 'Restaurant not found',
-      schema: {
-        example: {
-          message: 'Restaurant with slug test-cafe not found',
-          error: 'Not Found',
-          statusCode: 404,
-        },
-      },
-    }),
+    ApiUnauthorizedResponse,
+    ApiRestaurantNotFoundResponse,
   );
 }
 
 export function GetTopProductsDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get top selling products',
       description: 'Returns the top 10 most or least sold products in a restaurant within a given date range.',
     }),
-    ApiParam({
-      name: 'slug',
-      required: true,
-      description: 'Restaurant slug (unique identifier)',
-      example: 'test-cafe',
-    }),
-    ApiQuery({
-      name: 'from',
-      required: true,
-      type: String,
-      example: '2025-05-01',
-      description: 'Start date in YYYY-MM-DD format (inclusive)',
-    }),
-    ApiQuery({
-      name: 'to',
-      required: true,
-      type: String,
-      example: '2025-05-20',
-      description: 'End date in YYYY-MM-DD format (inclusive)',
-    }),
+    ApiSlugParam,
+    ApiDateFromQuery,
+    ApiDateToQuery,
     ApiQuery({
       name: 'sort',
       required: false,
@@ -103,69 +95,26 @@ export function GetTopProductsDoc() {
       description: 'Array of top sold products',
       schema: {
         example: [
-          {
-            name: 'Café Latte',
-            quantity: 120,
-          },
-          {
-            name: 'Té Verde',
-            quantity: 85,
-          },
+          { name: 'Café Latte', quantity: 120 },
+          { name: 'Té Verde', quantity: 85 },
         ],
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized access',
-      schema: {
-        example: {
-          statusCode: 401,
-          message: 'Unauthorized',
-          error: 'Unauthorized',
-        },
-      },
-    }),
-    ApiResponse({
-      status: 404,
-      description: 'Restaurant not found',
-      schema: {
-        example: {
-          statusCode: 404,
-          message: 'Restaurant with slug test-cafe not found',
-          error: 'Not Found',
-        },
-      },
-    }),
+    ApiUnauthorizedResponse,
+    ApiRestaurantNotFoundResponse,
   );
 }
 
 export function GetSalesByCategoryDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Sales by category',
       description: 'Returns sales grouped by category within a date range.',
     }),
-    ApiParam({
-      name: 'slug',
-      required: true,
-      example: 'test-cafe',
-    }),
-    ApiQuery({
-      name: 'from',
-      required: true,
-      type: String,
-      example: '2025-05-01',
-      description: 'Fecha de inicio (YYYY-MM-DD)',
-    }),
-    ApiQuery({
-      name: 'to',
-      required: true,
-      type: String,
-      example: '2025-05-20',
-      description: 'Fecha de fin (YYYY-MM-DD)',
-    }),
+    ApiSlugParam,
+    ApiDateFromQuery,
+    ApiDateToQuery,
     ApiQuery({
       name: 'sort',
       required: false,
@@ -187,27 +136,18 @@ export function GetSalesByCategoryDoc() {
         ],
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-    }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
 
 export function GetSalesFrequencyDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get sales count grouped by time unit',
       description: 'Returns the frequency of sales by hour, day of the week, day of the month, or month of the year.',
     }),
-    ApiParam({
-      name: 'slug',
-      required: true,
-      example: 'test-cafe',
-      description: 'Restaurant slug',
-    }),
+    ApiSlugParam,
     ApiQuery({
       name: 'group',
       enum: ['hour', 'weekday', 'monthday', 'month'],
@@ -225,22 +165,18 @@ export function GetSalesFrequencyDoc() {
         ],
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-    }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
 
 export function GetCustomersReportDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Customer report with metrics and sorting',
       description: 'Returns a paginated list of customers including their email, orders, total spent, average per order, and relevant dates',
     }),
-    ApiParam({ name: 'slug', example: 'test-cafe', description: 'Restaurant slug' }),
+    ApiSlugParam,
     ApiQuery({ name: 'sortBy', required: false, enum: ['name', 'email', 'orders', 'totalSpent', 'averageOrder', 'createdAt', 'lastVisit', 'daysSince'] }),
     ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] }),
     ApiQuery({ name: 'page', required: false, example: '1' }),
@@ -252,30 +188,14 @@ export function GetCustomersReportDoc() {
 
 export function GetCustomerTypesDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get count and percentage of new vs returning customers',
       description: 'Returns metrics comparing new and returning customers within a date range.',
     }),
-    ApiParam({
-      name: 'slug',
-      required: true,
-      description: 'Restaurant slug',
-      example: 'test-cafe',
-    }),
-    ApiQuery({
-      name: 'from',
-      required: true,
-      type: String,
-      example: '2025-05-01',
-    }),
-    ApiQuery({
-      name: 'to',
-      required: true,
-      type: String,
-      example: '2025-05-20',
-    }),
+    ApiSlugParam,
+    ApiDateFromQuery,
+    ApiDateToQuery,
     ApiResponse({
       status: 200,
       description: 'Customer report',
@@ -293,8 +213,7 @@ export function GetCustomerTypesDoc() {
 
 export function GetSubscriptionStatsDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get subscription distribution and conversion stats',
       description: 'Returns the number of active subscriptions by type (monthly, free_trial) and how many converted from a trial to paid.',
@@ -310,24 +229,13 @@ export function GetSubscriptionStatsDoc() {
         },
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-      schema: {
-        example: {
-          statusCode: 401,
-          message: 'Unauthorized',
-          error: 'Unauthorized',
-        },
-      },
-    }),
+    ApiUnauthorizedResponse,
   );
 }
 
 export function GetMonthlyRestaurantsStatsDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Monthly new and canceled restaurants',
       description: 'Returns how many restaurants were created and canceled per month.',
@@ -342,17 +250,13 @@ export function GetMonthlyRestaurantsStatsDoc() {
         ],
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-    }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
 
 export function GetRestaurantCustomerReachDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get unique customer count per restaurant',
       description: 'Returns how many distinct customers have placed orders in each restaurant.',
@@ -362,30 +266,18 @@ export function GetRestaurantCustomerReachDoc() {
       description: 'List of restaurants with customer reach',
       schema: {
         example: [
-          {
-            restaurantId: 'abc-123',
-            restaurantName: 'Pasta Paradise',
-            customers: 120,
-          },
-          {
-            restaurantId: 'xyz-456',
-            restaurantName: 'Sushi Street',
-            customers: 85,
-          },
+          { restaurantId: 'abc-123', restaurantName: 'Pasta Paradise', customers: 120 },
+          { restaurantId: 'xyz-456', restaurantName: 'Sushi Street', customers: 85 },
         ],
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-    }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
   );
 }
 
 export function GetRestaurantOwnerContactsDoc() {
   return applyDecorators(
-    ApiBearerAuth(),
-    ApiTags('Reports'),
+    ...BaseDecorators,
     ApiOperation({
       summary: 'Get restaurant owners contact info',
       description: 'Returns the name, email, phone and address of restaurant owners.',

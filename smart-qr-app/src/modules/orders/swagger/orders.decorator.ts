@@ -4,6 +4,7 @@ import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { OrderResponseDto } from '../dto/order-response.dto';
 
+// 🔁 Reutilizables
 const SlugParam = ApiParam({
   name: 'slug',
   description: 'Unique restaurant identifier',
@@ -16,6 +17,11 @@ const IdParam = ApiParam({
   description: 'Order ID',
   example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
 });
+
+const NotFoundOrder = ApiResponse({ status: 404, description: 'Order not found' });
+const Order200 = ApiResponse({ status: 200, description: 'Order found' });
+
+// ✅ Decoradores
 
 export function CreateOrderDoc() {
   return applyDecorators(
@@ -32,14 +38,8 @@ export function CreateOrderDoc() {
             code: 'T07',
             rewardCode: 'KDB38D35JV',
             products: [
-              {
-                id: '1c64190d-3c81-43db-b8a3-40e4d768b42a',
-                quantity: 2,
-              },
-              {
-                id: '2cea0878-d961-4d53-af44-197022bcfead',
-                quantity: 1,
-              },
+              { id: '1c64190d-3c81-43db-b8a3-40e4d768b42a', quantity: 2 },
+              { id: '2cea0878-d961-4d53-af44-197022bcfead', quantity: 1 },
             ],
           },
         },
@@ -61,13 +61,7 @@ export function GetAllOrdersDoc() {
 }
 
 export function GetOrderByIdDoc() {
-  return applyDecorators(
-    SlugParam,
-    IdParam,
-    ApiOperation({ summary: 'Get order by ID' }),
-    ApiResponse({ status: 200, description: 'Order found' }),
-    ApiResponse({ status: 404, description: 'Order not found' }),
-  );
+  return applyDecorators(SlugParam, IdParam, ApiOperation({ summary: 'Get order by ID' }), Order200, NotFoundOrder);
 }
 
 export function UpdateOrderDoc() {
@@ -77,16 +71,10 @@ export function UpdateOrderDoc() {
     ApiOperation({ summary: 'Update an order' }),
     ApiBody({ type: UpdateOrderDto }),
     ApiResponse({ status: 200, description: 'Order updated successfully' }),
-    ApiResponse({ status: 404, description: 'Order not found' }),
+    NotFoundOrder,
   );
 }
 
 export function DeleteOrderDoc() {
-  return applyDecorators(
-    SlugParam,
-    IdParam,
-    ApiOperation({ summary: 'Delete an order' }),
-    ApiResponse({ status: 200, description: 'Order deleted successfully' }),
-    ApiResponse({ status: 404, description: 'Order not found' }),
-  );
+  return applyDecorators(SlugParam, IdParam, ApiOperation({ summary: 'Delete an order' }), ApiResponse({ status: 200, description: 'Order deleted successfully' }), NotFoundOrder);
 }

@@ -3,7 +3,7 @@ import { StripeService } from './stripe.service';
 import Stripe from 'stripe';
 import { Request, Response } from 'express';
 import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from 'src/config/env.loader';
-import { GetCheckoutSessionDoc, GetSubscriptionSessionDoc, WebhookStripeDoc } from './swagger/stripe-doc.decorator';
+import { WebhookStripeDoc } from './swagger/stripe-doc.decorator';
 
 @Controller('stripe')
 export class StripeController {

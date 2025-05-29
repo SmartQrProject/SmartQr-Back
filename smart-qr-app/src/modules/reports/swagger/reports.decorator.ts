@@ -290,3 +290,128 @@ export function GetCustomerTypesDoc() {
     }),
   );
 }
+
+export function GetSubscriptionStatsDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Get subscription distribution and conversion stats',
+      description: 'Returns the number of active subscriptions by type (monthly, free_trial) and how many converted from a trial to paid.',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Subscription statistics fetched successfully',
+      schema: {
+        example: {
+          monthly: 120,
+          free_trial: 40,
+          convertedFromTrial: 30,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized',
+      schema: {
+        example: {
+          statusCode: 401,
+          message: 'Unauthorized',
+          error: 'Unauthorized',
+        },
+      },
+    }),
+  );
+}
+
+export function GetMonthlyRestaurantsStatsDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Monthly new and canceled restaurants',
+      description: 'Returns how many restaurants were created and canceled per month.',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Monthly statistics',
+      schema: {
+        example: [
+          { month: '2025-01', newRestaurants: 12, canceledRestaurants: 3 },
+          { month: '2025-02', newRestaurants: 8, canceledRestaurants: 1 },
+        ],
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized',
+    }),
+  );
+}
+
+export function GetRestaurantCustomerReachDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Get unique customer count per restaurant',
+      description: 'Returns how many distinct customers have placed orders in each restaurant.',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'List of restaurants with customer reach',
+      schema: {
+        example: [
+          {
+            restaurantId: 'abc-123',
+            restaurantName: 'Pasta Paradise',
+            customers: 120,
+          },
+          {
+            restaurantId: 'xyz-456',
+            restaurantName: 'Sushi Street',
+            customers: 85,
+          },
+        ],
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized',
+    }),
+  );
+}
+
+export function GetRestaurantOwnerContactsDoc() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiTags('Reports'),
+    ApiOperation({
+      summary: 'Get restaurant owners contact info',
+      description: 'Returns the name, email, phone and address of restaurant owners.',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'List of owner contacts',
+      schema: {
+        example: [
+          {
+            restaurantName: 'Burger Bay',
+            ownerName: 'Alex Johnson',
+            ownerEmail: 'alex@example.com',
+            address: '123 Main St, Sydney',
+            phone: '+61 412 345 678',
+          },
+          {
+            restaurantName: 'Taco Town',
+            ownerName: 'Lucia Perez',
+            ownerEmail: 'lucia@example.com',
+            address: null,
+            phone: null,
+          },
+        ],
+      },
+    }),
+    ApiResponse({ status: 401, description: 'Unauthorized' }),
+  );
+}

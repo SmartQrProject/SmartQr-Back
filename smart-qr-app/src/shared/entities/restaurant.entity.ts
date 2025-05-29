@@ -116,4 +116,8 @@ export class Restaurant {
 
   @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
   longitude?: number;
+
+  @Column({ default: false })
+  @IsBoolean()
+  wasTrial: boolean;
 }

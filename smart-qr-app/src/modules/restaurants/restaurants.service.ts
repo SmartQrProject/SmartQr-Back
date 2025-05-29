@@ -50,6 +50,7 @@ export class RestaurantsService {
           name: dto.name,
           slug: sanitizedSlug,
           owner_email: dto.owner_email,
+          wasTrial: dto.isTrial,
         }),
       );
 

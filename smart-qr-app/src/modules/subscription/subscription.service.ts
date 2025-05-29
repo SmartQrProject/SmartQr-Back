@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -110,5 +110,30 @@ export class SubscriptionService {
     subscription.cancelAtPeriodEnd = data.cancelAtPeriodEnd;
 
     await this.subscriptionRepo.save(subscription);
+  }
+
+  async getByRestaurantSlug(slug: string) {
+    const subscription = await this.subscriptionRepo.findOne({
+      where: {
+        restaurant: { slug },
+      },
+      relations: ['restaurant'],
+    });
+
+    if (!subscription) return null;
+
+    return {
+      subscriptionId: subscription.id,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      customerStripeId: subscription.customerId,
+      status: subscription.status,
+      planStripeId: subscription.plan,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      createdAt: subscription.createdAt,
+      isTrial: subscription.isTrial,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      restaurantName: subscription.restaurant?.name,
+      ownerEmail: subscription.restaurant?.owner_email,
+    };
   }
 }

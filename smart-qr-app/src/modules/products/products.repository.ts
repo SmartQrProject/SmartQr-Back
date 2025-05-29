@@ -75,6 +75,22 @@ export class ProductsRepository {
         }
       }
 
+      if (updateProductDto.categoryId) {
+        const category = await this.categoryRepository.findOne({
+          where: {
+            id: updateProductDto.categoryId,
+            restaurant: { id: restaurantId },
+            exist: true,
+          },
+        });
+
+        if (!category) {
+          throw new BadRequestException('The new category does not exist or does not belong to this restaurant');
+        }
+
+        product.category = category;
+      }
+
       const updatedProduct = this.productRepository.merge(product, updateProductDto);
       return await transactionalEntityManager.save(Product, updatedProduct);
     });

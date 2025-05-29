@@ -49,10 +49,10 @@ export class StripeService {
 
       metadata: {
         type: 'subscription',
-        slug: slug, // Cambia esto por el ID real del restaurante
+        slug: slug,
       },
       subscription_data: {
-        trial_period_days: isTrial ? 7 : undefined, // ⬅️ TRIAL SI Y SOLO SI SE SOLICITA
+        trial_period_days: isTrial ? 14 : undefined,
         metadata: {
           slug,
         },
@@ -139,12 +139,32 @@ export class StripeService {
       }
 
       case 'customer.subscription.created': {
-        const session = event.data.object as Stripe.Subscription;
         console.log('📦 Suscripción creada');
+
         break;
       }
 
       case 'customer.subscription.updated':
+        const stripeSub = event.data.object as Stripe.Subscription;
+        const slug = stripeSub.metadata?.slug;
+
+        if (!slug) {
+          console.warn('❌ No slug in subscription metadata.');
+          break;
+        }
+
+        console.log('🔁 Suscripción actualizada para:', slug);
+
+        this.eventEmitter.emit('subscription.updated', {
+          slug,
+          stripeSubscriptionId: stripeSub.id,
+          customerId: stripeSub.customer as string,
+          status: stripeSub.status,
+          plan: stripeSub.items.data[0]?.price.id,
+          currentPeriodEnd: new Date((stripeSub as any).current_period_end * 1000),
+          isTrial: stripeSub.trial_end != null,
+          cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
+        });
         console.log('🔁 Suscripción actualizada');
         break;
 
@@ -167,6 +187,17 @@ export class StripeService {
       default:
         console.log(`📌 Evento recibido (no manejado): ${event.type}`);
         break;
+    }
+  }
+
+  async cancelStripeSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
+    try {
+      return await this.stripe.subscriptions.update(stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+    } catch (error) {
+      console.error('❌ Error cancelling Stripe subscription:', error);
+      throw new Error('Failed to cancel subscription.');
     }
   }
 }

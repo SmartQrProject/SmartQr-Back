@@ -6,9 +6,10 @@ import { Order } from 'src/shared/entities/order.entity';
 import { CommonModule } from 'src/common/common.module';
 import { Customer } from 'src/shared/entities/customer.entity';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { Subscription } from 'src/shared/entities/subscription.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, Customer, Restaurant]), CommonModule],
+  imports: [TypeOrmModule.forFeature([Order, Customer, Restaurant, Subscription]), CommonModule],
   controllers: [ReportsController],
   providers: [ReportsService],
   exports: [ReportsService],

@@ -2,7 +2,18 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { GetSalesDto } from './dto/get-sales.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { GetCustomersReportDoc, GetCustomerTypesDoc, GetSalesByCategoryDoc, GetSalesFrequencyDoc, GetSalesReportDoc, GetTopProductsDoc } from './swagger/reports.decorator';
+import {
+  GetCustomersReportDoc,
+  GetCustomerTypesDoc,
+  GetMonthlyRestaurantsStatsDoc,
+  GetRestaurantCustomerReachDoc,
+  GetRestaurantOwnerContactsDoc,
+  GetSalesByCategoryDoc,
+  GetSalesFrequencyDoc,
+  GetSalesReportDoc,
+  GetSubscriptionStatsDoc,
+  GetTopProductsDoc,
+} from './swagger/reports.decorator';
 import { GetTopProductsDto } from './dto/get-top-products.dto';
 import { GetSalesByCategoryDto } from './dto/get-sales-by-category.dto';
 import { GetSalesFrequencyDto } from './dto/get-sales-frequency.dto';
@@ -55,5 +66,29 @@ export class ReportsController {
   @GetCustomerTypesDoc()
   async getCustomerTypes(@Param('slug') slug: string, @Query() query: GetCustomerTypesDto) {
     return this.reportsService.getCustomerTypes(slug, query);
+  }
+
+  @Get('admin/subscriptions')
+  @GetSubscriptionStatsDoc()
+  async getSubscriptionStats() {
+    return this.reportsService.getSubscriptionStats();
+  }
+
+  @Get('admin/restaurants')
+  @GetMonthlyRestaurantsStatsDoc()
+  async getMonthlyRestaurantStats() {
+    return this.reportsService.getMonthlyRestaurantStats();
+  }
+
+  @Get('admin/customers')
+  @GetRestaurantCustomerReachDoc()
+  async getRestaurantReach() {
+    return this.reportsService.getRestaurantCustomerReach();
+  }
+
+  @Get('admin/owners')
+  @GetRestaurantOwnerContactsDoc()
+  async getOwnerContacts() {
+    return this.reportsService.getRestaurantOwnerContacts();
   }
 }

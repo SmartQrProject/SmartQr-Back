@@ -7,6 +7,7 @@ import { Customer } from 'src/shared/entities/customer.entity';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import * as dayjs from 'dayjs';
 import { GetCustomerTypesDto } from './dto/get-customer-types.dto';
+import { Subscription } from 'src/shared/entities/subscription.entity';
 
 @Injectable()
 export class ReportsService {
@@ -18,6 +19,8 @@ export class ReportsService {
 
     @InjectRepository(Restaurant)
     private readonly restaurantRepo: Repository<Restaurant>,
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepo: Repository<Subscription>,
   ) {}
 
   async getSalesTotal(start: string, end: string, slug: string): Promise<number> {
@@ -273,5 +276,116 @@ export class ReportsService {
       newPercentage: parseFloat(newPercentage.toFixed(2)),
       returningPercentage: parseFloat(returningPercentage.toFixed(2)),
     };
+  }
+
+  async getSubscriptionStats() {
+    const subscriptions = await this.subscriptionRepo.find({
+      where: { exist: true },
+      relations: ['restaurant'],
+    });
+
+    let monthly = 0;
+    let free_trial = 0;
+    let convertedFromTrial = 0;
+
+    for (const sub of subscriptions) {
+      if (sub.status === 'trialing') {
+        free_trial++;
+      } else if (sub.status === 'active') {
+        monthly++;
+
+        if (sub.restaurant?.wasTrial) {
+          convertedFromTrial++;
+        }
+      }
+    }
+
+    return {
+      monthly,
+      free_trial,
+      convertedFromTrial,
+    };
+  }
+
+  async getMonthlyRestaurantStats() {
+    const restaurants = await this.restaurantRepo.find({
+      where: { exist: true },
+      select: ['created_at', 'is_active'],
+    });
+
+    // Paso 1: Agrupar los datos existentes
+    const statsMap = new Map<string, { newRestaurants: number; canceledRestaurants: number }>();
+
+    for (const restaurant of restaurants) {
+      const month = dayjs(restaurant.created_at).format('YYYY-MM');
+
+      if (!statsMap.has(month)) {
+        statsMap.set(month, { newRestaurants: 0, canceledRestaurants: 0 });
+      }
+
+      const stats = statsMap.get(month)!;
+      if (restaurant.is_active) {
+        stats.newRestaurants++;
+      } else {
+        stats.canceledRestaurants++;
+      }
+    }
+
+    // Paso 2: Crear los 12 meses del año actual
+    const currentYear = dayjs().year();
+    const allMonths = Array.from({ length: 12 }, (_, i) => dayjs(`${currentYear}-${(i + 1).toString().padStart(2, '0')}`).format('YYYY-MM'));
+
+    // Paso 3: Combinar con ceros donde falte data
+    const results = allMonths.map((month) => {
+      const data = statsMap.get(month) || { newRestaurants: 0, canceledRestaurants: 0 };
+      return {
+        month,
+        ...data,
+      };
+    });
+
+    return results;
+  }
+
+  async getRestaurantCustomerReach() {
+    const result = await this.restaurantRepo
+      .createQueryBuilder('restaurant')
+      .leftJoin('restaurant.orders', 'order', 'order.exist = true')
+      .leftJoin('order.customer', 'customer')
+      .select('restaurant.id', 'restaurantId')
+      .addSelect('restaurant.name', 'restaurantName')
+      .addSelect('COUNT(DISTINCT customer.id)', 'customers')
+      .where('restaurant.exist = true')
+      .groupBy('restaurant.id')
+      .addGroupBy('restaurant.name')
+      .orderBy('customers', 'DESC') // 👈 orden descendente
+      .getRawMany();
+
+    return result.map((r) => ({
+      restaurantId: r.restaurantId,
+      restaurantName: r.restaurantName,
+      customers: Number(r.customers),
+    }));
+  }
+
+  async getRestaurantOwnerContacts() {
+    const result = await this.restaurantRepo
+      .createQueryBuilder('restaurant')
+      .leftJoin('restaurant.users', 'user', 'user.role = :role', { role: 'owner' })
+      .select('restaurant.name', 'restaurantName')
+      .addSelect('restaurant.address', 'address')
+      .addSelect('restaurant.phone', 'phone')
+      .addSelect('restaurant.owner_email', 'ownerEmail')
+      .addSelect('user.name', 'ownerName')
+      .where('restaurant.exist = true')
+      .getRawMany();
+
+    return result.map((r) => ({
+      restaurantName: r.restaurantName,
+      ownerName: r.ownerName || null,
+      ownerEmail: r.ownerEmail,
+      address: r.address || null,
+      phone: r.phone || null,
+    }));
   }
 }

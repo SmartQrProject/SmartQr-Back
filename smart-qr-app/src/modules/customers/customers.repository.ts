@@ -207,16 +207,24 @@ export class CustomersRepository {
   async findById(id: string, slug: string): Promise<Omit<Customer, 'password'>> {
     const customer = await this.customerRepository
       .createQueryBuilder('customer')
-      .leftJoinAndSelect('customer.orders', 'orders')
-      .leftJoinAndSelect('orders.items', 'items')
-      .leftJoinAndSelect('items.product', 'product')
-      .leftJoin('orders.restaurant', 'restaurant')
+      .select([
+        'customer.id',
+        'customer.auth0Id',
+        'customer.email',
+        'customer.name',
+        'customer.picture',
+        'customer.phone',
+        'customer.reward',
+        'customer.last_visit',
+        'customer.visits_count',
+        'customer.created_at',
+        'customer.modified_at',
+        'customer.exist',
+      ])
       .where('customer.id = :id', { id })
-      .andWhere('restaurant.slug = :slug', { slug })
-      .andWhere('orders.restaurantId = restaurant.id')
-      .andWhere('orders.status != :inactive', { inactive: 'inactive' }) // ✅ clave para excluir
       .getOne();
 
+    console.log('customer', customer);
     if (!customer) {
       throw new NotFoundException('❌ No customer found');
     }

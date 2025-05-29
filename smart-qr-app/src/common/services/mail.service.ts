@@ -3,6 +3,7 @@ import * as nodemailer from 'nodemailer';
 import { EMAIL_PASS, EMAIL_SERVICE, EMAIL_USER } from 'src/config/env.loader';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ReportsDto } from '../../modules/cron/dto/reportes.dto';
 
 // const mailService = EMAIL_SERVICE;
 // const mailHost = EMAIL_HOST;
@@ -27,7 +28,7 @@ export class MailService {
     });
   }
 
-  async sendMail(to: string, subject: string, text: string, tipoEmail: string, reportData?: object) {
+  async sendMail(to: string, subject: string, text: string, tipoEmail: string, reportData?: ReportsDto) {
     let templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html'); // default
     let html = '';
 
@@ -45,7 +46,7 @@ export class MailService {
       html = html.replace('{{text}}', text);
     }
 
-    if (tipoEmail == 'report') {
+    if (tipoEmail == 'report' && reportData) {
       html = this.generateHtmlReport(reportData);
     }
 
@@ -65,13 +66,41 @@ export class MailService {
     }
   }
 
-  private generateHtmlReport(reportData): string {
-    const rows = reportData.map((p) => `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`).join('');
+  private generateHtmlReport(reportData: ReportsDto): string {
+    const salesTotal = reportData.getSalesTotalWeek;
+    const topProduct = reportData.getTopProductsWeek;
+    const leastSoldP = reportData.getLeastSoldProductsWeek;
+    const topCategor = reportData.getSalesByCategoryWeek;
+    const salesFrequ = reportData.getSalesFrequencyWeek;
+    const customersT = reportData.getCustomerTypesWeek;
 
+    const rows1 = topProduct.map((p) => `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`).join('');
+    const rows2 = leastSoldP.map((p) => `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`).join('');
+    const rows3 = topCategor
+      .map((p) => `<tr><td>${p.category}</td><td>${p.total.toFixed(2)}</td><td>${p.percentage.toFixed(1)}</td><td>${p.quantity}</td><td>${p.average_price.toFixed(2)}</td></tr>`)
+      .join('');
+    const rows4 = salesFrequ.map((p) => `<tr><td>${p.label}</td><td>${p.count}</td></tr>`).join('');
     return `
       <html>
         <body>
-          <h2>🔝 Productos Más Vendidos</h2>
+          <!-- reporte sales Total -->
+          <div style="font-family: Arial, sans-serif; margin-bottom: 30px;">
+            <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
+              🔝  Week Summary
+            </h2>
+            <p style="font-size: 20px; color: #333; margin-top: 10px;">
+              <strong style="color: #2c3e50;"> Total Sales U$s    :${salesTotal.toFixed(2)}</strong> USD
+              <strong style="color: #2c3e50;"> New Customer       :${customersT.newCustomers}</strong>
+              <strong style="color: #2c3e50;"> % of New Customers :${customersT.newPercentage.toFixed(1)}</strong>
+              <strong style="color: #2c3e50;"> Returning Customers:${customersT.returningCustomers}</strong>
+              <strong style="color: #2c3e50;"> % of Returning Cust:${customersT.returningPercentage.toFixed(1)}</strong>
+            </p>
+          </div>
+
+          <!-- reporte productos mas vendidos -->
+          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
+            🔝 Most Sold Products in the week
+          </h2>
           <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
             <thead>
               <tr style="background-color: #f2f2f2;">
@@ -80,9 +109,61 @@ export class MailService {
               </tr>
             </thead>
             <tbody>
-              ${rows}
+              ${rows1}
             </tbody>
           </table>
+
+          <!-- reporte productos menos vendidos -->
+          <h2 style="color: #e74c3c; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
+            ⬇️ Lowest-selling Products in the week
+          </h2>
+          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px;">Product</th>
+                <th style="padding: 8px;">Quantities</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows2}
+            </tbody>
+          </table>
+
+          <!-- categorias mas vendidas productos mas vendidos -->
+          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
+            🔝 Categories with Most Incomes in the week
+          </h2>
+          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px;">Category</th>
+                <th style="padding: 8px;">Total U$D</th>
+                <th style="padding: 8px;">Percentage</th>
+                <th style="padding: 8px;">Quantity</th>
+                <th style="padding: 8px;">Avge Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows3}
+            </tbody>
+          </table>
+
+          <!-- reporte Dias de la semana con mas ventas -->
+          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
+            🔝 Distribution of the Sales Qties by day
+          </h2>
+          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px;">Week Day</th>
+                <th style="padding: 8px;">Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows4}
+            </tbody>
+          </table>
+
         </body>
       </html>
     `;

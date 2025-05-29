@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import * as dayjs from 'dayjs';
 import { MailService } from 'src/common/services/mail.service';
+import { ReportsDto } from '../../modules/cron/dto/reportes.dto';
+import { todo } from 'node:test';
 
 @Injectable()
 export class ReportsCronService {
@@ -16,8 +18,8 @@ export class ReportsCronService {
     private mailService: MailService,
   ) {}
 
-  @Cron('59 23 * * *')
-  //@Cron('*/1 * * * *')
+  //@Cron('59 23 * * *')
+  @Cron('*/1 * * * *')
   async reportsMail() {
     const to = dayjs().subtract(1, 'day').endOf('day');
     const from = to.subtract(6, 'day').startOf('day');
@@ -26,13 +28,12 @@ export class ReportsCronService {
     const toStr = to.toISOString();
 
     const restaurants = await this.restaurantRepo.find({
-      where: { is_active: true },
-      select: ['slug', 'name'],
+      where: { is_active: true, slug: 'eli-cafe' },
+      select: ['slug', 'name', 'owner_email'],
     });
 
     for (const resto of restaurants) {
       const slug = resto.slug;
-      const restaurant = resto;
 
       try {
         const getSalesTotalWeek = await this.reportsService.getSalesTotal(fromStr, toStr, slug);
@@ -46,32 +47,36 @@ export class ReportsCronService {
           to: toStr,
         });
 
-        console.log(`📊 Reporte generado para: ${resto.name} (${slug}) ${restaurant.owner_email}`);
+        console.log(`📊 Reporte generado para: ${resto.name} (${slug}) ${resto.owner_email}`);
         if (slug == 'eli-cafe') {
-          this.sendEmail(restaurant, 'Top Products Of The Week', getTopProductsWeek);
-          console.dir(
-            {
-              getSalesTotalWeek,
-              getTopProductsWeek,
-              getLeastSoldProductsWeek,
-              getSalesByCategoryWeek,
-              getSalesFrequencyWeek,
-              getCustomersReport,
-              getCustomerTypesWeek,
-            },
-            { depth: null },
-          );
+          // console.dir(
+          //   {
+          //     getSalesTotalWeek,
+          //     getTopProductsWeek,
+          //     getLeastSoldProductsWeek,
+          //     getSalesByCategoryWeek,
+          //     getSalesFrequencyWeek,
+          //     getCustomersReport,
+          //     getCustomerTypesWeek,
+          //   },
+          //   { depth: null },
+          // );
+          const todoLosReportes: ReportsDto = {
+            getSalesTotalWeek,
+            getTopProductsWeek,
+            getLeastSoldProductsWeek,
+            getSalesByCategoryWeek,
+            getSalesFrequencyWeek,
+            getCustomersReport,
+            getCustomerTypesWeek,
+          };
+          const subject = `Your daily summary of Bussiness Performance in ${resto.name}`;
+          const headerText = `Hello ${resto.owner_email}`;
+          await this.mailService.sendMail('amigogabrielernesto@gmail.com', subject, headerText, 'report', todoLosReportes);
         }
       } catch (err) {
         console.error(`❌ Erro r al generar el reporte para ${slug}:`, err.message);
       }
     }
-  }
-
-  async sendEmail(resto: Restaurant, reportName, report: object) {
-    const subject = `Your daily report ${reportName} it is here. `;
-    const headerText = `Hello ${resto.name}, <br>  Check this report out.<br>`;
-    const htmlTemplate = 'report';
-    await this.mailService.sendMail('amigogabrielernesto@gmail.com', subject, headerText, htmlTemplate, report);
   }
 }

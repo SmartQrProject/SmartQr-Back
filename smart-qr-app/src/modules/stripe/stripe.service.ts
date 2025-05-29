@@ -35,7 +35,7 @@ export class StripeService {
 
   // Para suscripciones
   async createSubscriptionSession(slug: string, isTrial: boolean = false): Promise<Stripe.Checkout.Session> {
-    return await this.stripe.checkout.sessions.create({
+    const payload: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [
@@ -46,7 +46,6 @@ export class StripeService {
       ],
       success_url: `${FRONTEND_URL}/success`,
       cancel_url: `${FRONTEND_URL}/cancel`,
-
       metadata: {
         type: 'subscription',
         slug: slug,
@@ -57,7 +56,15 @@ export class StripeService {
           slug,
         },
       },
-    });
+    };
+
+    console.log('📤 Enviando a Stripe - Create Subscription Payload:', JSON.stringify(payload, null, 2));
+
+    const session = await this.stripe.checkout.sessions.create(payload);
+
+    console.log('📥 Respuesta de Stripe - Subscription Session creada:', JSON.stringify(session, null, 2));
+
+    return session;
   }
 
   async handleWebhook(req: Request, res: Response, signature: string) {
@@ -70,7 +77,8 @@ export class StripeService {
       return res.status(HttpStatus.BAD_REQUEST).send(`Webhook error: ${err.message}`);
     }
 
-    // ✅ Responder de inmediato para que Stripe no reintente
+    console.log('📥 Webhook recibido:', JSON.stringify(event, null, 2));
+
     res.status(200).json({ received: true });
 
     this.handleEvent(event);
@@ -145,27 +153,44 @@ export class StripeService {
       }
 
       case 'customer.subscription.updated':
-        const stripeSub = event.data.object as Stripe.Subscription;
-        const slug = stripeSub.metadata?.slug;
+        try {
+          const stripeSub = event.data.object as Stripe.Subscription;
 
-        if (!slug) {
-          console.warn('❌ No slug in subscription metadata.');
-          break;
+          console.log('📦 Evento customer.subscription.updated recibido');
+          console.log('📄 Datos de la suscripción:', JSON.stringify(stripeSub, null, 2));
+
+          const slug = stripeSub.metadata?.slug;
+
+          if (!slug) {
+            console.warn('❌ No slug in subscription metadata.');
+            break;
+          }
+
+          const currentPeriodEndTimestamp = (stripeSub as any).current_period_end;
+
+          const currentPeriodEnd = typeof currentPeriodEndTimestamp === 'number' ? new Date(currentPeriodEndTimestamp * 1000) : new Date(); // fallback si no viene bien
+
+          if (isNaN(currentPeriodEnd.getTime())) {
+            console.warn('⚠️ currentPeriodEnd es inválido, se usará la fecha actual');
+          }
+
+          const payload = {
+            slug,
+            stripeSubscriptionId: stripeSub.id,
+            customerId: stripeSub.customer as string,
+            status: stripeSub.status,
+            plan: stripeSub.items.data[0]?.price.id,
+            currentPeriodEnd,
+            isTrial: stripeSub.trial_end != null,
+            cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
+          };
+
+          console.log('📤 Emitiendo subscription.updated con payload:', payload);
+
+          this.eventEmitter.emit('subscription.updated', payload);
+        } catch (err) {
+          console.error('❌ Error en customer.subscription.updated:', err);
         }
-
-        console.log('🔁 Suscripción actualizada para:', slug);
-
-        this.eventEmitter.emit('subscription.updated', {
-          slug,
-          stripeSubscriptionId: stripeSub.id,
-          customerId: stripeSub.customer as string,
-          status: stripeSub.status,
-          plan: stripeSub.items.data[0]?.price.id,
-          currentPeriodEnd: new Date((stripeSub as any).current_period_end * 1000),
-          isTrial: stripeSub.trial_end != null,
-          cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
-        });
-        console.log('🔁 Suscripción actualizada');
         break;
 
       case 'customer.subscription.deleted':
@@ -192,9 +217,15 @@ export class StripeService {
 
   async cancelStripeSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
     try {
-      return await this.stripe.subscriptions.update(stripeSubscriptionId, {
+      console.log('📤 Enviando a Stripe - Cancel Subscription:', stripeSubscriptionId);
+
+      const updated = await this.stripe.subscriptions.update(stripeSubscriptionId, {
         cancel_at_period_end: true,
       });
+
+      console.log('📥 Respuesta de Stripe - Subscription cancelada (al final del periodo):', JSON.stringify(updated, null, 2));
+
+      return updated;
     } catch (error) {
       console.error('❌ Error cancelling Stripe subscription:', error);
       throw new Error('Failed to cancel subscription.');

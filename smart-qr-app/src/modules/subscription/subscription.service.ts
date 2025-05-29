@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subscription } from 'src/shared/entities/subscription.entity';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { StripeService } from '../stripe/stripe.service';
 
 interface SubscriptionPaidEvent {
   slug: string;
@@ -23,6 +24,7 @@ export class SubscriptionService {
 
     @InjectRepository(Restaurant)
     private readonly restaurantRepo: Repository<Restaurant>,
+    private readonly stripeService: StripeService,
   ) {}
 
   @OnEvent('subscription.paid')
@@ -65,5 +67,48 @@ export class SubscriptionService {
       await this.subscriptionRepo.save(newSub);
       console.log('✅ Nueva suscripción registrada');
     }
+  }
+
+  async cancelSubscription(slug: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepo.findOne({
+      where: { restaurant: { slug } },
+      relations: ['restaurant'],
+    });
+
+    if (!subscription || !subscription.stripeSubscriptionId) {
+      throw new Error('Subscription not found.');
+    }
+
+    await this.stripeService.cancelStripeSubscription(subscription.stripeSubscriptionId);
+
+    return subscription;
+  }
+
+  @OnEvent('subscription.updated')
+  async updateFromStripe(data: {
+    slug: string;
+    stripeSubscriptionId: string;
+    customerId: string;
+    status: string;
+    plan: string;
+    currentPeriodEnd: Date;
+    isTrial: boolean;
+    cancelAtPeriodEnd: boolean;
+  }) {
+    const subscription = await this.subscriptionRepo.findOne({
+      where: { restaurant: { slug: data.slug } },
+      relations: ['restaurant'],
+    });
+
+    if (!subscription) return;
+
+    subscription.status = data.status;
+    subscription.customerId = data.customerId;
+    subscription.plan = data.plan;
+    subscription.currentPeriodEnd = data.currentPeriodEnd;
+    subscription.isTrial = data.isTrial;
+    subscription.cancelAtPeriodEnd = data.cancelAtPeriodEnd;
+
+    await this.subscriptionRepo.save(subscription);
   }
 }

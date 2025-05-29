@@ -32,4 +32,7 @@ export class Subscription {
 
   @Column({ default: false })
   isTrial: boolean;
+
+  @Column({ default: false })
+  cancelAtPeriodEnd: boolean;
 }

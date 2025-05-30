@@ -137,4 +137,27 @@ export class CompleteRestaurantsDto {
     example: -58.381592,
   })
   longitude?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Bollean Activo o Desactivado',
+    example: true,
+  })
+  is_active?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Bollean para borrado Logico',
+    example: true,
+  })
+  exist?: boolean;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Subscripcion Stripe',
+    example: 't3b6dc820-ef13-4c35-9d50-b824f05b8535',
+  })
+  subscriptionId?: boolean;
 }

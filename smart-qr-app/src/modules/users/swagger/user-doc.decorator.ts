@@ -245,6 +245,13 @@ export function UserLoginDoc() {
           },
           summary: 'SUPERADMIN',
         },
+        SuperAdminNuevo: {
+          value: {
+            email: 'amigoee@gmail.com',
+            password: 'Clave123%%',
+          },
+          summary: 'SUPERADMIN Nuevo',
+        },
         testAmigoRestoOwner: {
           value: {
             email: 'amigogabrielernesto@yahoo.com',

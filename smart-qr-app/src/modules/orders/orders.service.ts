@@ -294,18 +294,20 @@ export class OrdersService {
       const subject = `Your Order #${order.id} was ${accion} and has been sent to preparation.`;
 
       const headerText = `
-      Hello ${customer.name},<br>
-      The following Order has been ${accion}.<br><br>
-      - Restaurant    : ${restaurant.name}<br>
-      - Total Amount  : ${order.total_price} u$d<br>
-      - Discount      : ${order.discount_applied}<br>
-      - Payment Status: ${order.payStatus}<br>
-      - Order Status  : ${order.status}<br><br>
+      Hello ${customer.name},
+      
+      The following Order has been ${accion}.
+      - Restaurant    : ${restaurant.name}
+      - Total Amount  : ${order.total_price} u$d
+      - Discount      : ${order.discount_applied}
+      - Payment Status: ${order.payStatus}
+      - Order Status  : ${order.status}
+
     `;
 
       const itemsText = order.items
-        .map((item) => `${this.formatString(item.product.name, 20)} x ${this.formatString(item.quantity, 5)} - $${this.formatString(item.unit_price, 7)}`)
-        .join('<br>');
+        .map((item) => `${this.formatString(item.product.name, 20)}  x ${this.formatString(item.quantity, 5)} = ${this.formatString(item.unit_price, 7)}$`)
+        .join('\n');
 
       const htmlTemplate = 'order';
 

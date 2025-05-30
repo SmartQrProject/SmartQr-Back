@@ -62,6 +62,7 @@ export class UsersRepository {
     page: number;
     limit: number;
     usuarios: Omit<User, 'password'>[];
+    total: number;
   }> {
     const skip = (page - 1) * limit;
     const [usuarios, total] = await this.userRepository.findAndCount({
@@ -77,7 +78,7 @@ export class UsersRepository {
 
     const usuariosSinClave = usuarios.map(({ password, ...resto }) => resto);
 
-    return { page, limit, usuarios: usuariosSinClave };
+    return { page, limit, usuarios: usuariosSinClave, total: total };
   }
 
   async getActiveStaff(

@@ -11,7 +11,6 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @ApiTags()
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
 @Controller('cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}

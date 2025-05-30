@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional, IsArray, IsObject, IsBoolean } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional, IsArray, IsObject, IsBoolean, Length } from 'class-validator';
 
 export interface TradingHours {
   mondayToFriday: { open: string; close: string };
@@ -15,6 +15,7 @@ export interface OrderingTimes {
 export class CompleteRestaurantsDto {
   @IsNotEmpty({ message: 'Restaurant name is required' })
   @IsString()
+  @Length(1, 100)
   @ApiProperty({
     description: 'Restaurant name',
     example: 'Test Cafe',
@@ -137,4 +138,27 @@ export class CompleteRestaurantsDto {
     example: -58.381592,
   })
   longitude?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Bollean Activo o Desactivado',
+    example: true,
+  })
+  is_active?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Bollean para borrado Logico',
+    example: true,
+  })
+  exist?: boolean;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Subscripcion Stripe',
+    example: 't3b6dc820-ef13-4c35-9d50-b824f05b8535',
+  })
+  subscriptionId?: boolean;
 }

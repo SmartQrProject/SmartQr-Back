@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional, IsArray, IsObject, IsBoolean } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsUrl, IsOptional, IsArray, IsObject, IsBoolean, Length } from 'class-validator';
 
 export interface TradingHours {
   mondayToFriday: { open: string; close: string };
@@ -15,6 +15,7 @@ export interface OrderingTimes {
 export class CompleteRestaurantsDto {
   @IsNotEmpty({ message: 'Restaurant name is required' })
   @IsString()
+  @Length(1, 100)
   @ApiProperty({
     description: 'Restaurant name',
     example: 'Test Cafe',

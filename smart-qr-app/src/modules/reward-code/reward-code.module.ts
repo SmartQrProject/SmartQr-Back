@@ -4,9 +4,10 @@ import { RewardCode } from 'src/shared/entities/reward-code.entity';
 import { RewardCodeService } from './reward-code.service';
 import { RewardCodeController } from './reward-code.controller';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RewardCode, Restaurant])],
+  imports: [TypeOrmModule.forFeature([RewardCode, Restaurant]), CommonModule],
   providers: [RewardCodeService],
   controllers: [RewardCodeController],
   exports: [RewardCodeService],

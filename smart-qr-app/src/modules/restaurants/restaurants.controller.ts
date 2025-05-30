@@ -30,7 +30,8 @@ export class RestaurantsController {
 
   @Get()
   @HttpCode(200)
-  @UseGuards(AuthGuard)
+  @Roles(Role.Owner, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @GetRestaurantDoc()
   async getRestaurants(@Query('slug') slug: string) {
     return this.restaurantsService.getRestaurants(slug);
@@ -65,7 +66,7 @@ export class RestaurantsController {
   @Delete(':slug')
   @HttpCode(200)
   @DeleteRestaurantBySlugDoc()
-  @Roles(Role.Owner, Role.SuperAdmin)
+  @Roles(Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   async deleteRestaurantBySlug(@Param('slug') slug: string, @Req() req: Request): Promise<string> {
     return this.restaurantsService.deleteRestaurantBySlug(slug, req);

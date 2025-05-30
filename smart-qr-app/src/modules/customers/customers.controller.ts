@@ -18,7 +18,7 @@ import {
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { JwtAuth0Guard } from 'src/common/guards/jwt-auth0.guard';
 
-@ApiTags('CRUD EndPoints para Customers (restaurant customers). SignUP, SignIn, etc')
+@ApiTags('Customers')
 @ApiBearerAuth()
 @Controller(':slug/customers')
 export class CustomersController {
@@ -32,34 +32,31 @@ export class CustomersController {
   }
 
   // listo 14-Mayo GEA
-  @Post('signup')
-  @UseGuards(JwtAuth0Guard)
-  @CreateCustomerDoc()
-  async create(@Body() createCustomerDto: CreateCustomerDto, @Param('slug') slug: string) {
-    return this.customersService.create(createCustomerDto, slug);
-  }
+  // @Post('signup')
+  // @UseGuards(JwtAuth0Guard)
+  // @CreateCustomerDoc()
+  // async create(@Body() createCustomerDto: CreateCustomerDto, @Param('slug') slug: string) {
+  //   return this.customersService.create(createCustomerDto, slug);
+  // }
 
   // listo 14-Mayo GEA
-  @Get()
-  @HttpCode(200)
-  // @Roles(Role.Admin)
-  // @UseGuards(AuthGuard, RolesGuard)
-  @UseGuards(JwtAuth0Guard)
-  @GetAllCustomersDoc()
-  async getAllCustomers(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
-    @Param('slug') slug: string,
-  ) {
-    return this.customersService.getAllCustomers(page, limit);
-  }
+  // @Get()
+  // @HttpCode(200)
+  // // @Roles(Role.owner)
+  // // @UseGuards(AuthGuard, RolesGuard)
+  // @GetAllCustomersDoc()
+  // async getAllCustomers(
+  //   @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  //   @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+  //   @Param('slug') slug: string,
+  // ) {
+  //   return this.customersService.getAllCustomers(page, limit);
+  // }
 
   // listo 14-Mayo GEA
   @Get(':id')
   @UseGuards(JwtAuth0Guard)
   @HttpCode(200)
-  // @Roles(Role.Admin)
-  // @UseGuards(AuthGuard, RolesGuard)
   @GetCustomerByIdDoc()
   async findById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.customersService.findOne(id, slug);
@@ -69,7 +66,6 @@ export class CustomersController {
   @Put(':id')
   @UseGuards(JwtAuth0Guard)
   @HttpCode(200)
-  //@ApiBearerAuth()
   @UpdateCustomerDoc()
   async modifyCustomersById(
     @Param('slug') slug: string,
@@ -81,20 +77,22 @@ export class CustomersController {
   }
 
   // listo 14-Mayo GEA
-  @Delete(':id')
-  @DeleteCustomerDoc()
-  async remove(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request): Promise<string> {
-    return this.customersService.removeById(id, req);
-  }
+  // @Delete(':id')
+  // // // @Roles(Role.owner)
+  // // // @UseGuards(AuthGuard, RolesGuard)
+  // @DeleteCustomerDoc()
+  // async remove(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request): Promise<string> {
+  //   return this.customersService.removeById(id, req);
+  // }
 
   //  FINALIZADO GEA MAyo-14
-  @Post('signin')
-  @UseGuards(JwtAuth0Guard)
-  @HttpCode(201)
-  @SignInCustomerDoc()
-  async customerLogin(@Param('slug') slug: string, @Body() customer: LogInCustomerDto): Promise<object> {
-    return this.customersService.customerLogin(customer);
-  }
+  // @Post('signin')
+  // @UseGuards(JwtAuth0Guard)
+  // @HttpCode(201)
+  // @SignInCustomerDoc()
+  // async customerLogin(@Param('slug') slug: string, @Body() customer: LogInCustomerDto): Promise<object> {
+  //   return this.customersService.customerLogin(customer);
+  // }
 
   // @Patch(':id')
   // @ApiBearerAuth()

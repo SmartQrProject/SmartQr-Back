@@ -16,7 +16,7 @@ export class RestaurantTablesController {
   // --------------------- Reporte de todos las mesas de un restaurant
   @Get()
   @HttpCode(200)
-  @Roles(Role.Owner, Role.SuperAdmin, Role.Staff)
+  @Roles(Role.Owner, Role.Staff)
   @UseGuards(AuthGuard, RolesGuard)
   @FindAllTablesDoc()
   findAll(
@@ -30,7 +30,7 @@ export class RestaurantTablesController {
 
   //------------------------------ Trabajando en este EP mayo 16
   @Post('seeder/:qty/:prefix')
-  @Roles(Role.Owner, Role.SuperAdmin)
+  @Roles(Role.Owner, Role.Staff)
   @UseGuards(AuthGuard, RolesGuard)
   @SeederTablesDoc()
   seeder(@Param('slug') slug: string, @Param('qty') qty: string, @Param('prefix') prefix: string, @Req() req: Request) {
@@ -38,17 +38,17 @@ export class RestaurantTablesController {
   }
 
   //-------------GET BY ID ----------------- Trabajando en este EP mayo 16
-  @Get(':id')
-  @Roles(Role.Owner, Role.SuperAdmin, Role.Staff)
-  @UseGuards(AuthGuard, RolesGuard)
-  @FindTableByIdDoc()
-  findOneById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request) {
-    return this.restaurantTablesService.findOneById(slug, id, req);
-  }
+  // @Get(':id')
+  // @Roles(Role.Owner,  Role.Staff)
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @FindTableByIdDoc()
+  // findOneById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request) {
+  //   return this.restaurantTablesService.findOneById(slug, id, req);
+  // }
 
   //===========DELETE BY ID======================================================
   @Delete(':id')
-  @Roles(Role.Owner, Role.SuperAdmin)
+  @Roles(Role.Owner, Role.Staff)
   @UseGuards(AuthGuard, RolesGuard)
   @DeleteTableDoc()
   deleteById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Req() req: Request): Promise<RestaurantTable> {
@@ -57,7 +57,7 @@ export class RestaurantTablesController {
 
   //---------------Patch by ID----------------------------------
   @Patch(':id')
-  @Roles(Role.Owner, Role.SuperAdmin, Role.Staff)
+  @Roles(Role.Owner, Role.Staff)
   @UseGuards(AuthGuard, RolesGuard)
   @UpdateTableDoc()
   update(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() updateRestaurantTable: UpdateRestaurantTableDto, @Req() req: Request) {

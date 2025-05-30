@@ -16,7 +16,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @Roles(Role.Owner, Role.SuperAdmin)
+  @Roles(Role.Owner)
   @UseGuards(AuthGuard, RolesGuard)
   @CreateCategoryDoc()
   async create(@Param('slug') slug: string, @Body() createCategoryDto: CreateCategoryDto, @Req() req: Request): Promise<Category> {
@@ -24,6 +24,8 @@ export class CategoriesController {
   }
 
   @Get()
+  @Roles(Role.Owner)
+  @UseGuards(AuthGuard, RolesGuard)
   @GetAllCategoriesDoc()
   async findAll(
     @Param('slug') slug: string,
@@ -38,22 +40,24 @@ export class CategoriesController {
     return await this.categoriesService.findAll(slug, page, limit);
   }
 
-  @Patch('sequence')
-  @Roles(Role.Owner, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
-  @UpdateCategorySequenceDoc()
-  async updateSequences(@Param('slug') slug: string, @Body() categories: { id: string; sequenceNumber: number }[]): Promise<{ message: string }> {
-    return await this.categoriesService.updateSequences(categories, slug);
-  }
+  // @Patch('sequence')
+  // @Roles(Role.Owner)
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @UpdateCategorySequenceDoc()
+  // async updateSequences(@Param('slug') slug: string, @Body() categories: { id: string; sequenceNumber: number }[]): Promise<{ message: string }> {
+  //   return await this.categoriesService.updateSequences(categories, slug);
+  // }
 
-  @Get(':id')
-  @GetCategoryByIdDoc()
-  async findOne(@Param('id') id: string, @Param('slug') slug: string): Promise<Category> {
-    return await this.categoriesService.findOne(id, slug);
-  }
+  // @Get(':id')
+  // @Roles(Role.Owner)
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @GetCategoryByIdDoc()
+  // async findOne(@Param('id') id: string, @Param('slug') slug: string): Promise<Category> {
+  //   return await this.categoriesService.findOne(id, slug);
+  // }
 
   @Patch(':id')
-  @Roles(Role.Owner, Role.SuperAdmin)
+  @Roles(Role.Owner)
   @UseGuards(AuthGuard, RolesGuard)
   @UpdateCategoryDoc()
   async update(@Param('id') id: string, @Param('slug') slug: string, @Body() updateCategoryDto: UpdateCategoryDto, @Req() req: Request): Promise<Category> {
@@ -61,7 +65,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @Roles(Role.Owner, Role.SuperAdmin)
+  @Roles(Role.Owner)
   @UseGuards(AuthGuard, RolesGuard)
   @DeleteCategoryDoc()
   async remove(@Param('id') id: string, @Param('slug') slug: string, @Req() req: Request): Promise<{ message: string }> {

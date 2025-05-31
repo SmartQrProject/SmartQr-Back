@@ -34,6 +34,7 @@ export class CompleteUserDto {
 
   @IsString({ message: 'The password must be a characters field .' })
   @IsNotEmpty({ message: 'The password could not blank.' })
+  @Length(8, 15, { message: 'password (8–15 characters, must include uppercase, lowercase, number, and a special character)' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/, {
     message: 'Password must be 8–15 characters and include uppercase, lowercase, number, and special character (@$!%*?&)',
   })

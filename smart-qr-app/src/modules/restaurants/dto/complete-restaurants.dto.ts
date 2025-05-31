@@ -81,7 +81,7 @@ export class CompleteRestaurantsDto {
   @Length(8, 15, {
     message: 'Password must be between 8 and 15 characters',
   })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,15}$/, {
     message: 'Password must be 8–15 characters and include uppercase, lowercase, number, and special character (@$!%*?&)',
   })
   @ApiProperty({

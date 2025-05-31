@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
+
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { RestaurantTableRepository } from './restaurant-tables.repository';
@@ -14,7 +14,7 @@ export class RestaurantTablesService {
     private mailService: MailService,
   ) {}
 
-  create(createRestaurantTableDto: CreateRestaurantTableDto) {
+  create(createRestaurantTableDto) {
     return 'This action adds a new restaurantTable';
   }
 

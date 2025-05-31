@@ -63,4 +63,8 @@ export class Customer {
 
   @Column({ default: true })
   exist: boolean;
+
+  @Column({ default: true })
+  @IsBoolean()
+  isActive: boolean;
 }

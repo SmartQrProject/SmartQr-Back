@@ -1,9 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrderDto } from './create-order.dto';
-import { IsOptional, IsString } from 'class-validator';
+import { PickType } from '@nestjs/swagger';
+import { BaseOrderDto } from './base-order.dto';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {
-  @IsOptional()
-  @IsString()
-  status?: 'pending' | 'in-process' | 'ready' | 'completed';
-}
+export class UpdateOrderDto extends PickType(BaseOrderDto, ['status'] as const) {}

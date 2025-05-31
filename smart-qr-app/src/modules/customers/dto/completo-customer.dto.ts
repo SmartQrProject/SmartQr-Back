@@ -24,7 +24,7 @@ export class CompletoCustomerDto {
     type: Boolean,
   })
   @IsBoolean()
-  exist: boolean;
+  isActive: boolean;
 
   @IsString({
     message: 'The name is mandatory and  must have between 5 and 100 characteres',

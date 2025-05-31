@@ -59,7 +59,7 @@ export class RestaurantsService {
           email: dto.owner_email,
           password: await this.bcryptService.hash(dto.owner_pass),
           role: 'owner',
-          name: 'owner ' + dto.name,
+          name: dto.owner_name,
           restaurant: newRestaurants,
         }),
       );

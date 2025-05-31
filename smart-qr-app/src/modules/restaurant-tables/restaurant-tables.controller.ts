@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query, DefaultValuePipe, ParseIntPipe, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common';
 import { RestaurantTablesService } from './restaurant-tables.service';
-import { CreateRestaurantTableDto } from './dto/create-restaurant-table.dto';
 import { UpdateRestaurantTableDto } from './dto/update-restaurant-table.dto';
 import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 import { FindAllTablesDoc, SeederTablesDoc, FindTableByIdDoc, DeleteTableDoc, UpdateTableDoc } from './swagger/restaurant-tables-doc.decorator';

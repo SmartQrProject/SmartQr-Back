@@ -22,7 +22,7 @@ export class User {
   @Length(6, 100)
   password: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'staff' })
   @IsString()
   role: string; // 'superAdmin', 'owner', 'staff'
 

@@ -9,6 +9,7 @@ import { BcryptService } from 'src/common/services/bcrypt.service';
 import { MailService } from 'src/common/services/mail.service';
 import { StripeService } from '../stripe/stripe.service';
 import { OnEvent } from '@nestjs/event-emitter';
+import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 
 @Injectable()
 export class RestaurantsService {
@@ -54,6 +55,13 @@ export class RestaurantsService {
         }),
       );
 
+      const counterTable = await queryRunner.manager.save(
+        queryRunner.manager.create(RestaurantTable, {
+          code: 'counter',
+
+          restaurant: newRestaurants,
+        }),
+      );
       const newUser = await queryRunner.manager.save(
         queryRunner.manager.create(User, {
           email: dto.owner_email,

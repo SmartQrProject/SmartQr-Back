@@ -36,7 +36,8 @@ export class RestaurantTableRepository {
       throw new NotFoundException(`❌ No Tables found for this restaurant ${rest}`);
     }
 
-    return { page, limit, restaurantTables: tables };
+    const tablesFinal = tables.filter((t) => t.code !== 'counter');
+    return { page, limit, restaurantTables: tablesFinal };
   }
 
   // GEA FINALIZADO Mayo 16 -------------------------------------------------

@@ -7,9 +7,10 @@ import { User } from '../../shared/entities/user.entity';
 import { Restaurant } from '../../shared/entities/restaurant.entity';
 import { MailService } from 'src/common/services/mail.service';
 import { StripeModule } from '../stripe/stripe.module';
+import { RestaurantTable } from 'src/shared/entities/restaurant-table.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Restaurant, User]), CommonModule, forwardRef(() => StripeModule)],
+  imports: [TypeOrmModule.forFeature([Restaurant, User, RestaurantTable]), CommonModule, forwardRef(() => StripeModule)],
   controllers: [RestaurantsController],
   providers: [RestaurantsService, MailService],
   exports: [RestaurantsService],

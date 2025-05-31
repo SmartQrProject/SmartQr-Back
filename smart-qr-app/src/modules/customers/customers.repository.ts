@@ -31,55 +31,24 @@ export class CustomersRepository {
 
     if (existing) {
       // Validación: evitar modificar el auth0Id si se intenta forzar otro distinto
-      if (existing.auth0Id !== auth0Id) {
-        throw new BadRequestException('auth0Id cannot be modified');
-      }
-
-      if (!existing.exist) existing.exist = true;
-      if (!existing.restaurant) existing.restaurant = rest;
-
-      if (email) existing.email = email;
-      if (name) existing.name = name;
-      if (picture) existing.picture = picture;
-
-      const updated = await this.customerRepository.save(existing);
-
-      // console.log('Customer updated:', {
-      //   id: updated.id,
-      //   auth0Id: updated.auth0Id,
-      //   email: updated.email,
-      //   name: updated.name,
-      //   picture: updated.picture,
-      //   phone: updated.phone,
-      //   reward: updated.reward,
-      //   last_visit: updated.last_visit,
-      //   visits_count: updated.visits_count,
-      //   created_at: updated.created_at,
-      //   modified_at: updated.modified_at,
-      //   restaurant: {
-      //     name: updated.restaurant?.name,
-      //     slug: updated.restaurant?.slug,
-      //   },
-      //   exist: updated.exist,
-      // });
 
       return {
-        id: updated.id,
-        auth0Id: updated.auth0Id,
-        email: updated.email,
-        name: updated.name,
-        picture: updated.picture,
-        phone: updated.phone,
-        reward: updated.reward,
-        last_visit: updated.last_visit,
-        visits_count: updated.visits_count,
-        created_at: updated.created_at,
-        modified_at: updated.modified_at,
+        id: existing.id,
+        auth0Id: existing.auth0Id,
+        email: existing.email,
+        name: existing.name,
+        picture: existing.picture,
+        phone: existing.phone,
+        reward: existing.reward,
+        last_visit: existing.last_visit,
+        visits_count: existing.visits_count,
+        created_at: existing.created_at,
+        modified_at: existing.modified_at,
         restaurant: {
-          name: updated.restaurant?.name,
-          slug: updated.restaurant?.slug,
+          name: existing.restaurant?.name,
+          slug: existing.restaurant?.slug,
         },
-        exist: updated.exist,
+        exist: existing.exist,
       };
     }
 

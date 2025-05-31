@@ -3,12 +3,12 @@ import { CompletoCustomerDto } from './completo-customer.dto';
 
 export class UpdateCustomerDto extends PartialType(
   PickType(CompletoCustomerDto, [
-    //'name',
+    'name',
     //'email', // marcar como unique en la entity
     'phone',
-    'password',
+    //'password',
     // 'confirmPassword',
-    // 'picture',
+    'picture',
     // 'reward',
     // 'isActive',
   ]),

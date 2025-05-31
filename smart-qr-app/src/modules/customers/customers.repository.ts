@@ -117,26 +117,10 @@ export class CustomersRepository {
       throw new NotFoundException(`❌ No customer found with id ${id} !!`);
     }
 
-    // Solo se permite cambiar phone y/o password
-    const updates: Partial<Customer> = {};
-
-    if (updateCustomer.phone !== undefined) {
-      updates.phone = updateCustomer.phone;
-    }
-
-    if (updateCustomer.password) {
-      const hash = await this.bcryptService.hash(updateCustomer.password);
-      if (!hash) {
-        throw new InternalServerErrorException('Problem with the bcrypt library');
-      }
-      updates.password = hash;
-    }
-
-    const merged = this.customerRepository.merge(customer, updates);
+    const merged = this.customerRepository.merge(customer, updateCustomer);
     await this.customerRepository.save(merged);
 
     const { password, ...sanitized } = merged;
-
     return sanitized;
   }
 

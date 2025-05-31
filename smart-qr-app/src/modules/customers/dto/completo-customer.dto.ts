@@ -45,6 +45,9 @@ export class CompletoCustomerDto {
   @Length(6, 40, {
     message: 'The phone number must be between 6 and 40 characters',
   })
+  @Matches(/^\+?[()\-\d\s]{6,40}$/, {
+    message: 'Phone number format is invalid. It may include +, digits, spaces, parentheses, and hyphens.',
+  })
   @IsString()
   @ApiPropertyOptional({
     description: 'Phone number +countryCode Area Code, Number',

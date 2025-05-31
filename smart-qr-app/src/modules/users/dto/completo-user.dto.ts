@@ -2,6 +2,7 @@ import { pwMatch } from 'src/common/decorators/passwordMatch';
 import { Role } from 'src/common/decorators/role.enum';
 import { IsBoolean, IsEmail, IsEmpty, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CompleteUserDto {
   @IsNotEmpty({ message: 'Staff name is required' })
@@ -66,10 +67,14 @@ export class CompleteUserDto {
   // role: string;/////////////////////////////////////////////
 
   @IsOptional()
+  @Transform(({ value }) => String(value))
   @Length(6, 40, {
     message: 'The phone number must be between 6 and 40 characters',
   })
   @IsString()
+  @Matches(/^\+?[()\-\d\s]{6,40}$/, {
+    message: 'Phone number format is invalid. It may include +, digits, spaces, parentheses, and hyphens.',
+  })
   @ApiPropertyOptional({
     description: 'Phone number +countryCode Area Code, Number',
     example: '+54 93487 424050',

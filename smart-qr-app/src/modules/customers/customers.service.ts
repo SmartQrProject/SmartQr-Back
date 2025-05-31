@@ -20,7 +20,7 @@ export class CustomersService {
     private mailService: MailService,
   ) {}
 
-  async sincronizarAuth0(customer, slug): Promise<CustomerResponseDto> {
+  async sincronizarAuth0(customer, slug) /*: Promise<CustomerResponseDto> */ {
     const rest = await this.restaurantService.getRestaurants(slug);
     return await this.customersRepository.sincronizarAuth0(customer, rest);
   }
@@ -71,7 +71,7 @@ export class CustomersService {
 
   // FINALIZDO GEA MAYO-14
   update(id, updateCustomer: UpdateCustomerDto, req) {
-    return this.customersRepository.updateById(id, updateCustomer, req);
+    return this.customersRepository.updateById(id, updateCustomer);
   }
 
   // FINALIZDO GEA MAYO-14
@@ -102,10 +102,7 @@ export class CustomersService {
   }
 
   // FINALIZDO GEA MAYO-14-----
-  async updateById(id, customer, req): Promise<Omit<Customer, 'password'>> {
-    if (customer.password !== customer.confirmPassword) {
-      throw new ConflictException('Passwords are not equals!!!');
-    }
-    return this.customersRepository.updateById(id, customer, req);
+  async updateById(id, customer): Promise<Omit<Customer, 'password'>> {
+    return this.customersRepository.updateById(id, customer);
   }
 }

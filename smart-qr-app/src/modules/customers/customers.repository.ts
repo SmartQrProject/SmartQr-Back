@@ -21,7 +21,7 @@ export class CustomersRepository {
   ) {}
 
   // ------ trabajando en este endpoint ---GEA Mayo 14-
-  async sincronizarAuth0(customer: Auth0CustomerDto, rest: Restaurant) {
+  async sincronizarAuth0(customer /*: Auth0CustomerDto*/, rest: Restaurant) {
     const { auth0Id, email, name, picture } = customer;
 
     let existing = await this.customerRepository.findOne({
@@ -43,6 +43,25 @@ export class CustomersRepository {
       if (picture) existing.picture = picture;
 
       const updated = await this.customerRepository.save(existing);
+
+      // console.log('Customer updated:', {
+      //   id: updated.id,
+      //   auth0Id: updated.auth0Id,
+      //   email: updated.email,
+      //   name: updated.name,
+      //   picture: updated.picture,
+      //   phone: updated.phone,
+      //   reward: updated.reward,
+      //   last_visit: updated.last_visit,
+      //   visits_count: updated.visits_count,
+      //   created_at: updated.created_at,
+      //   modified_at: updated.modified_at,
+      //   restaurant: {
+      //     name: updated.restaurant?.name,
+      //     slug: updated.restaurant?.slug,
+      //   },
+      //   exist: updated.exist,
+      // });
 
       return {
         id: updated.id,
@@ -122,38 +141,34 @@ export class CustomersRepository {
   }
 
   // GEA 14-mayo
-  async updateById(id, updateCustomer, req): Promise<Omit<Customer, 'password'>> {
-    const customer = await this.customerRepository.findOneBy({ id: id });
+  async updateById(id: string, updateCustomer: UpdateCustomerDto): Promise<Omit<Customer, 'password'>> {
+    const customer = await this.customerRepository.findOneBy({ id });
 
     if (!customer) {
-      throw new NotFoundException(`❌ No customer found  with id ${id}  !!`);
+      throw new NotFoundException(`❌ No customer found with id ${id} !!`);
     }
 
-    // console.log('req.user', req.user);
-    // console.log('req.customer', req.customer);
+    // Solo se permite cambiar phone y/o password
+    const updates: Partial<Customer> = {};
 
-    // if (!req.user?.roles?.includes('superAdmin') && req.customer.id !== id) {
-    //   throw new NotFoundException(
-    //     `You can not update Customer data for a different user.`,
-    //   );
-    // }
-
-    const wrkCustomer = await this.getCustomerByEmail(updateCustomer.email);
-    if (wrkCustomer && wrkCustomer.id !== id) {
-      throw new ConflictException(`❌ Email already in use: ${customer.email} !!`);
+    if (updateCustomer.phone !== undefined) {
+      updates.phone = updateCustomer.phone;
     }
 
-    const hash = await this.bcryptService.hash(updateCustomer.password);
-    if (!hash) {
-      throw new InternalServerErrorException('Problem with the bcrypt library');
+    if (updateCustomer.password) {
+      const hash = await this.bcryptService.hash(updateCustomer.password);
+      if (!hash) {
+        throw new InternalServerErrorException('Problem with the bcrypt library');
+      }
+      updates.password = hash;
     }
 
-    updateCustomer.password = hash;
-    const { confirmPassword, ...putCustomer } = updateCustomer;
-    const mergeCustomer = this.customerRepository.merge(customer, putCustomer);
-    await this.customerRepository.save(mergeCustomer);
-    const { password, ...sinPassword } = mergeCustomer;
-    return sinPassword;
+    const merged = this.customerRepository.merge(customer, updates);
+    await this.customerRepository.save(merged);
+
+    const { password, ...sanitized } = merged;
+
+    return sanitized;
   }
 
   // GEA FINALIZADO Mayo 13------ trabajando en este endpoint ---GEA Mayo 12-
@@ -208,61 +223,21 @@ export class CustomersRepository {
     const customer = await this.customerRepository
       .createQueryBuilder('customer')
       .leftJoinAndSelect('customer.orders', 'orders')
+      .leftJoinAndSelect('orders.restaurant', 'restaurant')
       .leftJoinAndSelect('orders.items', 'items')
       .leftJoinAndSelect('items.product', 'product')
-      .leftJoinAndSelect('orders.table', 'table') // para incluir la mesa
-      .leftJoin('orders.restaurant', 'restaurant')
-      .select([
-        // Campos del cliente
-        'customer.id',
-        'customer.auth0Id',
-        'customer.email',
-        'customer.name',
-        'customer.picture',
-        'customer.phone',
-        'customer.reward',
-        'customer.last_visit',
-        'customer.visits_count',
-        'customer.created_at',
-        'customer.modified_at',
-        'customer.exist',
-
-        // Campos de la orden
-        'orders.id',
-        'orders.status',
-        'orders.payStatus',
-        'orders.order_type',
-        'orders.total_price',
-        'orders.payment_method',
-        'orders.discount_applied',
-        'orders.served_at',
-        'orders.created_at',
-
-        // Mesa
-        'table.id',
-        'table.code',
-        'table.is_active',
-        'table.exist',
-        'table.created_at',
-
-        // Items y productos
-        'items.id',
-        'items.quantity',
-        'items.unit_price',
-        'product.id',
-        'product.name',
-      ])
+      .leftJoinAndSelect('orders.table', 'table')
       .where('customer.id = :id', { id })
-      .andWhere('restaurant.slug = :slug', { slug })
-      .andWhere('orders.restaurantId = restaurant.id')
+      .setParameter('id', id)
+      .setParameter('slug', slug)
       .getOne();
 
     if (!customer) {
       throw new NotFoundException('❌ No customer found');
     }
 
-    // Filtrar órdenes inactivas
-    customer.orders = customer.orders?.filter((o) => o.status !== 'inactive') || [];
+    // 🔍 Filtrar solo órdenes activas y del restaurante correcto
+    customer.orders = (customer.orders || []).filter((order) => order.status !== 'inactive' && order.restaurant?.slug === slug);
 
     const { password, ...customerSinPass } = customer as any;
     return customerSinPass;

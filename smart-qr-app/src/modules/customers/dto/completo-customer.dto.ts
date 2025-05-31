@@ -1,22 +1,56 @@
 import { pwMatch } from 'src/common/decorators/passwordMatch';
-import { IsBoolean, IsEmail, IsEmpty, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID, Length, Matches, Min } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsEmail, IsEmpty, IsIn, IsInt, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID, Length, Matches, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CompletoCustomerDto {
-  @IsEmail({}, { message: 'The email must have a valid format.' })
-  @IsNotEmpty({ message: 'The email is mandatory.' })
+  @IsNotEmpty({ message: 'Customer name is required' })
+  @IsString({ message: 'Name must be a string.' })
+  @Length(3, 100, {
+    message: 'Name must be between 3 and 100 characters.',
+  })
   @ApiProperty({
-    description: 'The email must have a valid format',
-    example: 'amigoe@example.com',
+    description: 'Full name of the customer (from Auth0)',
+    example: 'Elena Amigo',
+  })
+  name: string;
+
+  @IsEmail({}, { message: 'Email must be valid.' })
+  @IsNotEmpty({ message: 'Email is required.' })
+  @ApiProperty({
+    description: 'Customer email (from Auth0)',
+    example: 'elena.amigo@example.com',
   })
   email: string;
 
-  @IsNumber()
+  @IsNotEmpty({ message: 'customer authId is required' })
   @ApiProperty({
-    description: 'The phone # is mandatory and  must have only numbers',
-    example: '3487424050',
+    description: 'Auth0 UserID, optional',
+    example: 'auth0|6824dcf5c10f3f55f3e1f026',
   })
-  phone: BigInteger;
+  auth0Id: string;
+
+  @ApiProperty({
+    description: 'URL del avatar del usuario',
+    example: 'https://example.com/avatar.jpg',
+    type: String,
+    required: false,
+  })
+  @IsNotEmpty({ message: 'The picture url is mandatory.' })
+  @IsUrl()
+  picture: string;
+
+  @IsOptional()
+  @Transform(({ value }) => String(value))
+  @Length(6, 40, {
+    message: 'The phone number must be between 6 and 40 characters',
+  })
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Phone number +countryCode Area Code, Number',
+    example: '+54 93487 424050',
+  })
+  phone?: string;
 
   @ApiProperty({
     description: 'Indicates whether the customer is active or not',
@@ -25,31 +59,6 @@ export class CompletoCustomerDto {
   })
   @IsBoolean()
   isActive: boolean;
-
-  @IsString({
-    message: 'The name is mandatory and  must have between 5 and 100 characteres',
-  })
-  @Length(5, 100, {
-    message: 'LThe name is mandatory and  must have between 5 and 100 characteres',
-  })
-  @Matches(/^[A-Za-z0-9 ]+$/, {
-    message: 'THis field only permits letters and numbers and spaces.',
-  })
-  @ApiProperty({
-    description: 'The name must have between 5 and 100 characteres',
-    example: 'Elena Amigo',
-  })
-  name: string;
-
-  @ApiProperty({
-    description: 'URL del avatar del usuario',
-    example: 'https://example.com/avatar.jpg',
-    type: String,
-    required: false,
-  })
-  @IsOptional()
-  @IsUrl()
-  picture?: string;
 
   @IsString({ message: 'The password must be a characters field .' })
   @IsNotEmpty({ message: 'The password could not blank.' })
@@ -69,13 +78,6 @@ export class CompletoCustomerDto {
     example: 'Clave123%%',
   })
   confirmPassword: string;
-
-  @IsOptional()
-  @ApiProperty({
-    description: 'Auth0 UserID, optional',
-    example: 'auth0|6824dcf5c10f3f55f3e1f026',
-  })
-  auth0Id: string;
 
   @ApiProperty({ description: 'RewardID', example: 0, type: Number })
   @IsInt()

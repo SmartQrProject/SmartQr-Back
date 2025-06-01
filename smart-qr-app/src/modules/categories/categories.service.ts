@@ -27,7 +27,14 @@ export class CategoriesService {
       }
     }
     const category = await this.categoriesRepository.createCategory(createCategoryDto, rest.id);
-    this.sendEmail(rest, category, 'added'); //nodemailer
+    
+    try {
+      await this.sendEmail(rest, category, 'added'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return category;
   }
 

@@ -28,10 +28,7 @@ export class CategoriesService {
       }
     }
     const category = await this.categoriesRepository.createCategory(createCategoryDto, rest.id);
-    console.log('SMTP_HOST:', SMTP_HOST);
-    console.log('SMTP_PORT:', SMTP_PORT);
-    console.log('SMTP_USER:', SMTP_USER);
-    console.log('SMTP_PASS:', SMTP_PASS);
+
     try {
       await this.sendEmail(rest, category, 'added'); //nodemailer
     } catch (error) {

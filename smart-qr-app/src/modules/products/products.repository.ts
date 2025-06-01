@@ -48,7 +48,7 @@ export class ProductsRepository {
 
       const product = this.productRepository.create({
         ...createProductDto,
-        image_url: createProductDto.image_url || 'https://via.placeholder.com/150',
+        image_url: createProductDto.image_url || 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1748740615/liybeefobbdjn7ll2sco.png',
         restaurant: { id: restaurantId },
         category: { id: createProductDto.categoryId },
       });

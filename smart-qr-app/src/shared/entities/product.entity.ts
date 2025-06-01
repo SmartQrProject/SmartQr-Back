@@ -28,7 +28,7 @@ export class Product {
   @IsDecimal()
   price: number;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, default: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1748740615/liybeefobbdjn7ll2sco.png' })
   @IsString()
   @IsOptional()
   image_url: string;

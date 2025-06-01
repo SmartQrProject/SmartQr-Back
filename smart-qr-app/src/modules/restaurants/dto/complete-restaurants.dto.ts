@@ -16,6 +16,7 @@ import {
   IsLatitude,
   IsLongitude,
 } from 'class-validator';
+import { EachLength } from './EachLength';
 
 export interface TradingHours {
   mondayToFriday: { open: string; close: string };
@@ -147,6 +148,7 @@ export class CompleteRestaurantsDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(10)
   @IsString({ each: true })
+  @EachLength(3, 20, { message: 'Each tag must be between 3 and 20 characters' })
   tags?: string[];
 
   @ApiPropertyOptional({

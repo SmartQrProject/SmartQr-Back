@@ -24,17 +24,17 @@ import { EachLength } from './EachLength';
 import { TradingHoursDto } from './trading-hours.dto';
 
 export class OrderingTimesDto {
-  @ApiProperty({ example: 660, description: 'Pickup time in minutes (e.g., 11:00 AM = 660)' })
+  @IsOptional()
   @IsInt()
-  @Min(0, { message: 'Pickup must be at least 0 minutes' })
+  @Min(1, { message: 'Pickup must be at least 0 minutes' })
   @Max(1440, { message: 'Pickup must be at most 1440 minutes' })
-  pickup: number;
+  pickup?: number;
 
-  @ApiProperty({ example: 1320, description: 'Dine-in time in minutes (e.g., 10:00 PM = 1320)' })
+  @IsOptional()
   @IsInt()
-  @Min(0, { message: 'Dine-in must be at least 0 minutes' })
+  @Min(1, { message: 'Dine-in must be at least 0 minutes' })
   @Max(1440, { message: 'Dine-in must be at most 1440 minutes' })
-  dinein: number;
+  dinein?: number;
 }
 
 export class CompleteRestaurantsDto {

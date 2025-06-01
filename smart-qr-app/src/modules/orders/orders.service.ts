@@ -142,7 +142,13 @@ export class OrdersService {
       if (!order2Email) {
         throw new NotFoundException(`Order with ID ${savedOrder.id} not found`);
       }
-      this.sendEmail(customer, restaurant, order2Email, 'created'); //nodemailer
+      
+      try {
+        await this.sendEmail(customer, restaurant, order2Email, 'created'); //nodemailer
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
+        // Continue execution even if email fails
+      }
 
       return { order: order2Email, stripeSession: stripeSession.url };
     } catch (error) {
@@ -266,7 +272,14 @@ export class OrdersService {
 
       const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
       const returnedOrder = this.orderRepository.save(updatedOrder);
-      this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
+      
+      try {
+        await this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
+        // Continue execution even if email fails
+      }
+      
       await queryRunner.commitTransaction();
 
       return returnedOrder;

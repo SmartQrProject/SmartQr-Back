@@ -93,7 +93,14 @@ export class RestaurantTablesService {
     }
 
     const deletedTable = this.restTableRepository.deleteById(rest, id);
-    this.sendEmail(rest, deletedTable, 'updated');
+    
+    try {
+      await this.sendEmail(rest, deletedTable, 'updated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return deletedTable;
   }
   //====================================================================
@@ -111,7 +118,14 @@ export class RestaurantTablesService {
     }
 
     const updatedTable = this.restTableRepository.updateById(rest, id, updateRestaurantTable);
-    this.sendEmail(rest, updatedTable, 'updated');
+    
+    try {
+      await this.sendEmail(rest, updatedTable, 'updated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return updatedTable;
   }
 

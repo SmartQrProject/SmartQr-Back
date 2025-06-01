@@ -62,7 +62,14 @@ export class CategoriesService {
     }
 
     const category = await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
-    this.sendEmail(rest, category, 'created'); //nodemailer
+    
+    try {
+      await this.sendEmail(rest, category, 'created'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return category;
   }
 
@@ -79,7 +86,14 @@ export class CategoriesService {
       }
     }
     await this.categoriesRepository.softDeleteCategory(id, rest.id);
-    this.sendEmail(rest, category, 'un-activated'); //nodemailer
+    
+    try {
+      await this.sendEmail(rest, category, 'un-activated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return { message: `Category ${category.name} has been deleted successfully` };
   }
 

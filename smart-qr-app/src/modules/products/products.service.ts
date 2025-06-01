@@ -18,8 +18,14 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto, slug: string): Promise<Product> {
     const rest = await this.restService.getRestaurants(slug);
     const producto = await this.productsRepository.createProduct(createProductDto, rest.id);
-    //nodemailer
-    this.sendEmail(rest, producto, 'added');
+    
+    try {
+      await this.sendEmail(rest, producto, 'added'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return producto;
   }
 
@@ -38,8 +44,14 @@ export class ProductsService {
   async update(id: string, updateProductDto: UpdateProductDto, slug: string): Promise<Product> {
     const rest = await this.restService.getRestaurants(slug);
     const producto = await this.productsRepository.updateProduct(id, updateProductDto, rest.id);
-    //nodemailer
-    this.sendEmail(rest, producto, 'updated');
+    
+    try {
+      await this.sendEmail(rest, producto, 'updated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return producto;
   }
 
@@ -47,8 +59,14 @@ export class ProductsService {
     const rest = await this.restService.getRestaurants(slug);
     const producto = await this.productsRepository.findOneByIdAndRestaurant(id, rest.id);
     await this.productsRepository.softDeleteProduct(id, rest.id);
-    //nodemailer
-    this.sendEmail(rest, producto, 'in-activated');
+    
+    try {
+      await this.sendEmail(rest, producto, 'in-activated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return { message: `Product ${producto.name} has been deleted successfully` };
   }
 

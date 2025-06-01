@@ -40,3 +40,8 @@ export const EMAIL_USER = process.env.EMAIL_USER;
 export const EMAIL_PASS = process.env.EMAIL_PASS;
 
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+export const SMTP_HOST = process.env.SMTP_HOST;
+export const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465', 10);
+export const SMTP_USER = process.env.SMTP_USER;
+export const SMTP_PASS = process.env.SMTP_PASS!;

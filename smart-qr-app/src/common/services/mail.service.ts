@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { EMAIL_PASS, EMAIL_SERVICE, EMAIL_USER } from 'src/config/env.loader';
+import { EMAIL_PASS, EMAIL_SERVICE, EMAIL_USER, SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_USER } from 'src/config/env.loader';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ReportsDto } from '../../modules/cron/dto/reportes.dto';
@@ -16,14 +16,12 @@ export class MailService {
   private transporter: nodemailer.Transporter;
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      tls: { rejectUnauthorized: false },
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: true,
       auth: {
-        user: 'amigogabrielernesto@gmail.com',
-        pass: 'mulp eoxz ebin kcuz',
+        user: SMTP_USER,
+        pass: SMTP_PASS,
       },
     });
   }
@@ -52,7 +50,7 @@ export class MailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"SmartQR App" <${process.env.EMAIL_USER}>`,
+        from: `"SmartQR App" <${SMTP_USER}>`,
         to,
         subject,
         text,

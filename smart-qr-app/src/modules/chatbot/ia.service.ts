@@ -13,33 +13,32 @@ export class IaService {
   }
 
   async extractIntents(userMessage: string): Promise<string[]> {
-    const prompt = `You are acting as an intent analyzer for a food-related chatbot. Your task is to extract keywords or intents related to food, health, diet, ingredients, or user preferences from their message.
+    const prompt = `You are an expert intent and keyword extractor for a food-related chatbot. Your task is to analyze the user's message and extract all relevant **dietary intents or food-related preferences**, using semantic understanding.
 
-You must return a JSON-formatted list containing the detected key concepts. Detect intent even if the user uses:
+Return a JSON array of **standardized key intents or concepts**, such as diet types, ingredient exclusions, nutritional goals, or health preferences.
 
-- Informal or colloquial language
-- Minor spelling errors
-- Mixed languages (e.g., 'sugar free', 'sin azúcar')
-- Equivalent expressions or synonyms
+✅ Your output must:
+- Include all relevant keywords or concepts found in the message, not just the most obvious one.
+- Normalize different ways of expressing the same idea (synonyms, slang, abbreviations, partial words).
+- Handle informal writing, spelling mistakes, emojis, and mixed language (e.g., English & Spanish).
+- Include **multiple concepts** if more than one intent is mentioned.
 
-📌 Examples of expected equivalences:
+🎯 Normalize to the following kinds of intents (non-exhaustive, examples only):
+- "sin azúcar", "sugar free", "no sugar", "low sugar", "sin azucar", "cero azúcar" → **"sin azúcar"**
+- "sin gluten", "gluten free", "celiac", "gluten-free" → **"sin gluten"**
+- "vegano", "vegan", "no animal products", "plant based", "🌱" → **"vegano"**
+- "vegetariano", "vegetarian", "no meat", "semi-veg" → **"vegetariano"**
+- "sin lactosa", "lactose free", "no dairy", "lactose intolerant" → **"sin lactosa"**
+- "saludable", "healthy", "light", "fit", "fitness", "comida sana" → **"saludable"**
+- "keto", "ketogenic", "low carb", "dieta cetogénica" → **"keto"**
+- "proteico", "high protein", "protein-rich", "más proteína" → **"proteico"**
 
-- "sin azúcar", "sugar free", "low sugar", "no sugar" → "sin azúcar"
-- "sin gluten", "gluten free", "celiac", "gluten-free" → "sin gluten"
-- "vegano", "vegan", "no animal products" → "vegano"
-- "vegetariano", "vegetarian", "no meat" → "vegetariano"
-- "sin lactosa", "lactose free", "lactose intolerant" → "sin lactosa"
-- "saludable", "light", "fitness", "healthy food" → "saludable"
-- "keto", "ketogenic", "low carb" → "keto"
-- "proteico", "high in protein", "with protein", "protein-rich" → "proteico"
-
-📤 If no intent related to dietary preferences, ingredients, or diet is detected, return an empty array: []
+📤 If no relevant dietary intent or concept is found, return an empty array: []
 
 🧾 User message:
 "${userMessage}"
 
-Respond only with the array in JSON format, without any additional explanation or text.
-`;
+Return only the JSON array with all relevant standardized concepts. Do not add any explanation or extra text.`;
 
     try {
       const completion = await this.openai.chat.completions.create({

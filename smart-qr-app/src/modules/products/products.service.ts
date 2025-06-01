@@ -25,7 +25,9 @@ export class ProductsService {
 
   async findAll(slug: string, page: number = 1, limit: number = 10): Promise<{ products: Product[]; total: number; page: number; limit: number }> {
     const rest = await this.restService.getRestaurants(slug);
-    return await this.productsRepository.findAllByRestaurant(rest.id, page, limit);
+    const products = await this.productsRepository.findAllByRestaurant(rest.id, page, limit);
+
+    return products;
   }
 
   async findOne(id: string, slug: string): Promise<Product> {

@@ -106,9 +106,9 @@ export class ProductsRepository {
       take: limit,
     });
 
-    if (!products.length) {
-      throw new NotFoundException(`No products found for restaurant ${restaurantId}`);
-    }
+    // if (!products.length) {
+    //   throw new NotFoundException(`No products found for restaurant ${restaurantId}`);
+    // }
 
     return { products, total, page, limit };
   }

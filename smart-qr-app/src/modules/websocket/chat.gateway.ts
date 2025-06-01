@@ -39,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessage(@MessageBody() MessageBody: MessageDto, @ConnectedSocket() client: Socket) {
     console.log('📥 Mensaje recibido en gateway:', MessageBody);
     const { message, slug } = MessageBody;
+
     const userId = this.sessionService.getUserId(client.id);
     if (!userId) {
       console.warn(`Socket ${client?.id ?? 'unknown'} no tiene userId asignado`);

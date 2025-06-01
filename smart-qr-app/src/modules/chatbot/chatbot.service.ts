@@ -10,6 +10,8 @@ export class ChatbotService {
   ) {}
 
   async generateReply({ message, slug }): Promise<string> {
+    // console.log('📥 Mensaje recibido:', message);
+    // console.log('🌐 Slug recibido:', slug);
     const cleaned = message
       .toLowerCase()
       .replace(/[^\w\s]/g, '')

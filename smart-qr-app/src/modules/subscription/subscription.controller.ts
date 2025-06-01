@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CancelSubscriptionDoc } from './swagger/subscription.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -21,10 +21,12 @@ export class SubscriptionController {
   }
 
   @Get()
+  @ApiBearerAuth()
   @Roles(Role.Owner)
   @UseGuards(AuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Get subscription by restaurant slug' })
   async getSubscriptionBySlug(@Param('slug') slug: string) {
+    console.log('Fetching subscription for slug:', slug);
     return this.subscriptionService.getByRestaurantSlug(slug);
   }
 }

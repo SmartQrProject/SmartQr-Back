@@ -75,7 +75,12 @@ export class RestaurantsService {
       await queryRunner.commitTransaction();
 
       //nodemailer
-      this.sendEmail4Creation(newRestaurants, newUser, 'created');
+      try {
+        await this.sendEmail4Creation(newRestaurants, newUser, 'created');
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
+        // Continue execution even if email fails
+      }
 
       return { url: stripe.url };
     } catch (error) {
@@ -175,8 +180,13 @@ export class RestaurantsService {
     const mergedRest = this.restaurantRepository.merge(slugExists, restaurantData);
     await this.restaurantRepository.save(mergedRest);
 
-    //nodemailer
-    this.sendEmail(slugExists, 'updated');
+    try {
+      await this.sendEmail(slugExists, 'updated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+
     return `Restaurante ${slug} data were updated.`;
   }
 
@@ -226,8 +236,12 @@ export class RestaurantsService {
       await queryRunner.manager.createQueryBuilder().update(Restaurant).set({ is_active: false, exist: false }).where('id = :id ', { id: slugExists.id }).execute();
       await queryRunner.manager.createQueryBuilder().update(User).set({ is_active: false, exist: false }).where('restaurantId = :id', { id: slugExists.id }).execute();
 
-      //nodemailer
-      this.sendEmail(slugExists, 'deleted');
+      try {
+        await this.sendEmail(slugExists, 'deleted'); //nodemailer
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
+        // Continue execution even if email fails
+      }
 
       await queryRunner.commitTransaction();
       console.log('Restaurante y usuarios desactivados correctamente');

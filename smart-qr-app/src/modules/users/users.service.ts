@@ -83,7 +83,14 @@ export class UsersService {
     }
 
     const updatedUser = this.usersRepository.patchById(id, rest, user, req);
-    this.sendEmail(rest, usuario, 'updated'); //nodemailer
+    
+    try {
+      await this.sendEmail(rest, usuario, 'updated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return updatedUser;
   }
 
@@ -114,7 +121,14 @@ export class UsersService {
     }
 
     const userDeleted = this.usersRepository.deleteById(id);
-    this.sendEmail(rest, usuario, 'deleted'); //nodemailer
+    
+    try {
+      await this.sendEmail(rest, usuario, 'deleted'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return userDeleted;
   }
 
@@ -157,7 +171,14 @@ export class UsersService {
     }
 
     const userCreated = await this.usersRepository.createUser(rest, newUser);
-    this.sendEmail(rest, userCreated, 'created'); //nodemailer
+    
+    try {
+      await this.sendEmail(rest, userCreated, 'created'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+    
     return userCreated;
   }
 

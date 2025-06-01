@@ -6,6 +6,7 @@ import { Category } from '../../shared/entities/category.entity';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 import { SequenceUpdateException } from '../../common/exceptions/sequence-update.exception';
 import { MailService } from 'src/common/services/mail.service';
+import { SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_USER } from 'src/config/env.loader';
 
 @Injectable()
 export class CategoriesService {
@@ -27,14 +28,17 @@ export class CategoriesService {
       }
     }
     const category = await this.categoriesRepository.createCategory(createCategoryDto, rest.id);
-    
+    console.log('SMTP_HOST:', SMTP_HOST);
+    console.log('SMTP_PORT:', SMTP_PORT);
+    console.log('SMTP_USER:', SMTP_USER);
+    console.log('SMTP_PASS:', SMTP_PASS);
     try {
       await this.sendEmail(rest, category, 'added'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return category;
   }
 
@@ -62,14 +66,14 @@ export class CategoriesService {
     }
 
     const category = await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
-    
+
     try {
       await this.sendEmail(rest, category, 'created'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return category;
   }
 
@@ -86,14 +90,14 @@ export class CategoriesService {
       }
     }
     await this.categoriesRepository.softDeleteCategory(id, rest.id);
-    
+
     try {
       await this.sendEmail(rest, category, 'un-activated'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return { message: `Category ${category.name} has been deleted successfully` };
   }
 

@@ -15,18 +15,26 @@ import {
   ArrayMaxSize,
   IsLatitude,
   IsLongitude,
+  IsInt,
+  Min,
+  Max,
+  ValidateNested,
 } from 'class-validator';
 import { EachLength } from './EachLength';
+import { TradingHoursDto } from './trading-hours.dto';
 
-export interface TradingHours {
-  mondayToFriday: { open: string; close: string };
-  saturday?: { open: string; close: string };
-  sunday?: { open: string; close: string };
-}
+export class OrderingTimesDto {
+  @ApiProperty({ example: 660, description: 'Pickup time in minutes (e.g., 11:00 AM = 660)' })
+  @IsInt()
+  @Min(0, { message: 'Pickup must be at least 0 minutes' })
+  @Max(1440, { message: 'Pickup must be at most 1440 minutes' })
+  pickup: number;
 
-export interface OrderingTimes {
-  pickup: string;
-  dinein: string;
+  @ApiProperty({ example: 1320, description: 'Dine-in time in minutes (e.g., 10:00 PM = 1320)' })
+  @IsInt()
+  @Min(0, { message: 'Dine-in must be at least 0 minutes' })
+  @Max(1440, { message: 'Dine-in must be at most 1440 minutes' })
+  dinein: number;
 }
 
 export class CompleteRestaurantsDto {
@@ -153,27 +161,29 @@ export class CompleteRestaurantsDto {
 
   @ApiPropertyOptional({
     description: 'Trading schedule (JSON type structure)',
-    type: Object,
+    type: TradingHoursDto,
     example: {
       mondayToFriday: { open: '09:00', close: '18:00' },
       saturday: { open: '10:00', close: '14:00' },
     },
   })
   @IsOptional()
-  @IsObject()
-  trading_hours?: TradingHours;
+  @ValidateNested()
+  @Type(() => TradingHoursDto)
+  trading_hours?: TradingHoursDto;
 
   @ApiPropertyOptional({
-    description: 'Ordering schedule (JSON type structure)',
-    type: Object,
+    description: 'Ordering schedule in minutes (0–1440)',
+    type: OrderingTimesDto,
     example: {
-      mondayToFriday: { open: '11:00', close: '22:00' },
-      saturday: { open: '11:00', close: '14:00' },
+      pickup: 660, // 11:00 AM
+      dinein: 1320, // 10:00 PM
     },
   })
   @IsOptional()
-  @IsObject()
-  ordering_times?: OrderingTimes;
+  @ValidateNested()
+  @Type(() => OrderingTimesDto)
+  ordering_times?: OrderingTimesDto;
 
   @ApiPropertyOptional({
     description: 'Indica si el restaurante debe comenzar con un periodo de prueba (trial)',

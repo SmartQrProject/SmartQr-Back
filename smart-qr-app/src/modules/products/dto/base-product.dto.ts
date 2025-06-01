@@ -12,13 +12,13 @@ export class BaseProductDto {
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Price must be a number with up to 2 decimal places' })
   @Min(0, { message: 'Price must be at least 0' })
-  @Max(99999999.99, { message: 'Price must not exceed 99,999,999.99' })
+  @Max(999999.99, { message: 'Price must not exceed 999,999.99' })
   @IsNotEmpty({ message: 'Product price is required' })
   @ApiProperty({
-    description: 'Product price (0 – 99,999,999.99) with up to 2 decimal places',
+    description: 'Product price (0 – 999,999.99) with up to 2 decimal places',
     example: 2.5,
     minimum: 0,
-    maximum: 99999999.99,
+    maximum: 999999.99,
   })
   price: number;
 

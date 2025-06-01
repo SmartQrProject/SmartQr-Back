@@ -19,9 +19,10 @@ export class Product {
   @Length(2, 100)
   name: string;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
   @IsDecimal()

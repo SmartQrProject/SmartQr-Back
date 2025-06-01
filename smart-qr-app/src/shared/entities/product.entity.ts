@@ -19,7 +19,7 @@ export class Product {
   @Length(2, 100)
   name: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { nullable: true, default: ' No description provided' })
   @IsString()
   @IsOptional()
   description?: string;

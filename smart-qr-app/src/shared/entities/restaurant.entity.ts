@@ -26,7 +26,7 @@ export class Restaurant {
   @IsUUID()
   id: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, default: 'owner' })
   @IsString()
   @Length(2, 100)
   name: string;

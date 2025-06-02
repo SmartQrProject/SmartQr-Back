@@ -49,6 +49,7 @@ export class OrdersService {
 
       const table = await queryRunner.manager.findOneBy(RestaurantTable, {
         code: createOrderDto.code,
+        restaurant: { id: restaurant.id },
       });
       if (!table) throw new NotFoundException('Table not found');
 
@@ -142,7 +143,7 @@ export class OrdersService {
       if (!order2Email) {
         throw new NotFoundException(`Order with ID ${savedOrder.id} not found`);
       }
-      
+
       try {
         await this.sendEmail(customer, restaurant, order2Email, 'created'); //nodemailer
       } catch (error) {
@@ -272,14 +273,14 @@ export class OrdersService {
 
       const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
       const returnedOrder = this.orderRepository.save(updatedOrder);
-      
+
       try {
         await this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
       } catch (error) {
         console.error('Failed to send email notification:', error);
         // Continue execution even if email fails
       }
-      
+
       await queryRunner.commitTransaction();
 
       return returnedOrder;

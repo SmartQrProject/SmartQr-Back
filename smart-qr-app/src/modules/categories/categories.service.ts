@@ -115,8 +115,7 @@ export class CategoriesService {
     const subject = `The category ${category.name} was ${accion} successfully. `;
     const textmsg = `Hello ${rest.owner_email},  A category for your products have been ${accion}.\n 
       Restaurant Name: ${rest.name} 
-      Category:  ${category.name} 
-                 ${category.secuenceNumber} `;
+      Category:  ${category.name} `;
     const htmlTemplate = 'basico';
     await this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
   }

@@ -322,8 +322,8 @@ export class OrdersService {
     `;
 
       const itemsText = order.items
-        .map((item) => `${this.formatString(item.product.name, 20)}  x ${this.formatString(item.quantity, 5)} = ${this.formatString(item.unit_price, 7)}$`)
-        .join('\n');
+        .map((item) => `${this.formatString(item.product.name, 30)}  x ${this.formatString(item.quantity, 5)} =  ${this.formatString(item.unit_price, 7)} u$d`)
+        .join('\n  ');
 
       const htmlTemplate = 'order';
 

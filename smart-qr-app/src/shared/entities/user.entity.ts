@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { IsEmail, IsString, IsUUID, Length } from 'class-validator';
 import { Restaurant } from './restaurant.entity';
 
@@ -16,7 +10,7 @@ export class User {
 
   @Column({ length: 100 })
   @IsString()
-  @Length(2, 100)
+  @Length(5, 100)
   name: string;
 
   @Column({ unique: true, length: 150 })
@@ -28,12 +22,23 @@ export class User {
   @Length(6, 100)
   password: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'staff' })
   @IsString()
-  role: string; // 'owner', 'admin', 'kitchen'
+  role: string; // 'superAdmin', 'owner', 'staff'
+
+  @Column({ nullable: true, length: 20 })
+  @IsString()
+  @Length(5, 20)
+  phone?: string;
 
   @CreateDateColumn()
   created_at: Date;
+
+  @Column({ default: true })
+  exist: boolean;
+
+  @Column({ default: true })
+  is_active: boolean;
 
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.users, {
     onDelete: 'CASCADE',

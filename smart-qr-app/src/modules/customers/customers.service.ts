@@ -1,26 +1,108 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Customer } from 'src/shared/entities/customer.entity';
+import { CustomersRepository } from './customers.repository';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { BcryptService } from 'src/common/services/bcrypt.service';
+import { JwtService } from 'src/common/services/jwt.service';
+import { MailService } from 'src/common/services/mail.service';
+import { LogInCustomerDto } from './dto/login-customer.dto';
+import { RestaurantsService } from '../restaurants/restaurants.service';
+import { CustomerResponseDto } from './dto/customer-response.dto';
 
 @Injectable()
 export class CustomersService {
-  create(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer';
+  constructor(
+    private readonly customersRepository: CustomersRepository,
+    private readonly bcryptService: BcryptService,
+    private readonly restaurantService: RestaurantsService,
+    private readonly jwtService: JwtService,
+    private mailService: MailService,
+  ) {}
+
+  async sincronizarAuth0(customer, slug) /*: Promise<CustomerResponseDto> */ {
+    const rest = await this.restaurantService.getRestaurants(slug);
+    return await this.customersRepository.sincronizarAuth0(customer, rest);
   }
 
-  findAll() {
-    return `This action returns all customers`;
+  // en principio no se usa - GEA
+  async validateUserFromToken(payload: any) {
+    // Podés verificar si existe en DB, sincronizar, etc.
+    return payload;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  // en principio no se usa - GEA
+  async syncCustomerFromToken(payload): Promise<Customer | void> {
+    // const customer = await this.customersRepository.findAuthId(payload.sub);
+
+    //if (customer) return customer;
+
+    // Si no existe, lo creamos
+    //const newCustomer = this.customersRepository.create(payload);
+    //return newCustomer;
+    return;
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  // GEA listo mayo-14
+  async create(createCustomer: CreateCustomerDto, slug): Promise<Omit<Customer, 'password'>> {
+    const rest = await this.restaurantService.getRestaurants(slug);
+    if (createCustomer.password !== createCustomer.confirmPassword) {
+      throw new ConflictException('❌ Passwords are not equals!!!');
+    }
+    return this.customersRepository.createCustomer(createCustomer, rest);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+  // FINALIZDO GEA MAYO-14
+  async getAllCustomers(
+    page,
+    limit,
+  ): Promise<{
+    page: number;
+    limit: number;
+    customers: Omit<Customer, 'password'>[];
+  }> {
+    return this.customersRepository.getAllCustomers(page, limit);
+  }
+
+  // FINALIZDO GEA MAYO-14
+  findOne(id, slug) {
+    return this.customersRepository.findById(id, slug);
+  }
+
+  // FINALIZDO GEA MAYO-14
+  update(id, updateCustomer: UpdateCustomerDto, req) {
+    return this.customersRepository.updateById(id, updateCustomer);
+  }
+
+  // FINALIZDO GEA MAYO-14
+  removeById(id, req): Promise<string> {
+    return this.customersRepository.removeById(id, req);
+  }
+
+  async customerLogin({ email, password }: LogInCustomerDto): Promise<object> {
+    const customer = await this.customersRepository.getCustomerByEmail(email);
+
+    if (!customer || !customer.exist || customer.auth0Id || !customer.password || !(await this.bcryptService.compare(password, customer.password))) {
+      throw new UnauthorizedException('Not valid Credentials');
+    }
+
+    const jwtPayLoad = {
+      sub: customer.id,
+      id: customer.id,
+      email: customer.email,
+    };
+
+    // const subject = 'Satisfactory Login to SmartQR';
+    // const textmsg = 'Your have been granted access to use the SmartQR App';
+    // const tipoEmail = 'login';
+    // this.mailService.sendMail(customer.email, subject, textmsg, tipoEmail);
+
+    const access_token = this.jwtService.generateToken(jwtPayLoad);
+    return { success: 'Logged Succesfully with token', access_token };
+  }
+
+  // FINALIZDO GEA MAYO-14-----
+  async updateById(id, customer): Promise<Omit<Customer, 'password'>> {
+    return this.customersRepository.updateById(id, customer);
   }
 }

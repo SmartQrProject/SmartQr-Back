@@ -9,17 +9,23 @@ export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request: Request = context.switchToHttp().getRequest();
 
+    if (typeof request.headers['authorization'] !== 'string') {
+      throw new UnauthorizedException('You must be Logged In or Authorization missing');
+    }
+
     const authHeader = request.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Token no proporcionado');
+    if (typeof authHeader !== 'string' || !authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Invalid or missing authorization/token header');
     }
 
     const token = authHeader.split(' ')[1];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const payload = this.jwtService.verifyToken(token);
-    if (!payload) throw new UnauthorizedException('Token inválido o expirado');
+    if (!token) {
+      throw new UnauthorizedException('Bearer token not found');
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const payload = this.jwtService.verifyToken(token);
+
+    if (!payload) throw new UnauthorizedException('Invalid token inválido or expired');
     (request as any).user = payload;
 
     return true;

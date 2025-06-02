@@ -1,26 +1,122 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoriesRepository } from './categories.repository';
+import { Category } from '../../shared/entities/category.entity';
+import { RestaurantsService } from '../restaurants/restaurants.service';
+import { SequenceUpdateException } from '../../common/exceptions/sequence-update.exception';
+import { MailService } from 'src/common/services/mail.service';
+import { SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_USER } from 'src/config/env.loader';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    private readonly categoriesRepository: CategoriesRepository,
+    private readonly restService: RestaurantsService,
+    private readonly mailService: MailService,
+  ) {}
+
+  async create(createCategoryDto: CreateCategoryDto, slug: string, req): Promise<Category> {
+    const rest = await this.restService.getRestaurants(slug);
+    //solo pueden crear superadmin cualquier categoria
+    //y el owner .
+    if (!req.user.roles.includes('superAdmin')) {
+      if (req.user.roles.includes('owner')) {
+        if (req.user.restaurant.id !== rest.id) {
+          throw new NotFoundException(`You can not update categories from other restaurant.`);
+        }
+      }
+    }
+    const category = await this.categoriesRepository.createCategory(createCategoryDto, rest.id);
+
+    try {
+      await this.sendEmail(rest, category, 'added'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+
+    return category;
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findAll(slug: string, page: number = 1, limit: number = 10): Promise<{ categories: Category[]; total: number; page: number; limit: number }> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.categoriesRepository.findAllByRestaurant(rest.id, page, limit);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: string, slug: string): Promise<Category> {
+    const rest = await this.restService.getRestaurants(slug);
+    return await this.categoriesRepository.findOneByIdAndRestaurant(id, rest.id);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: UpdateCategoryDto, slug: string, req): Promise<Category> {
+    const rest = await this.restService.getRestaurants(slug);
+
+    //solo pueden modidicar superadmin cualquier categoria
+    //sino solo el owner de las categorias de su restaurant.
+    if (!req.user.roles.includes('superAdmin')) {
+      if (req.user.roles.includes('owner')) {
+        if (req.user.restaurant.id !== rest.id) {
+          throw new NotFoundException(`You can not update categories from other restaurant.`);
+        }
+      }
+    }
+
+    const category = await this.categoriesRepository.updateCategory(id, updateCategoryDto, rest.id);
+
+    try {
+      await this.sendEmail(rest, category, 'created'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+
+    return category;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string, slug: string, req): Promise<{ message: string }> {
+    const rest = await this.restService.getRestaurants(slug);
+    const category = await this.categoriesRepository.findOneByIdAndRestaurant(id, rest.id);
+    //solo pueden eliminar superadmin cualquier categoria
+    // y el owner del restaurant
+    if (!req.user.roles.includes('superAdmin')) {
+      if (req.user.roles.includes('owner')) {
+        if (req.user.restaurant.id !== rest.id) {
+          throw new NotFoundException(`You can not update categories from other restaurant.`);
+        }
+      }
+    }
+    await this.categoriesRepository.softDeleteCategory(id, rest.id);
+
+    try {
+      await this.sendEmail(rest, category, 'un-activated'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+
+    return { message: `Category ${category.name} has been deleted successfully` };
+  }
+
+  async updateSequences(categories: { id: string; sequenceNumber: number }[], slug: string): Promise<{ message: string }> {
+    try {
+      const rest = await this.restService.getRestaurants(slug);
+      await this.categoriesRepository.updateCategorySequences(categories, rest.id);
+      return { message: 'Category sequences have been updated successfully' };
+    } catch (error) {
+      if (error instanceof SequenceUpdateException) {
+        throw error;
+      }
+      throw new SequenceUpdateException('Failed to update category sequences. Please ensure all category IDs are valid and try again.');
+    }
+  }
+
+  async sendEmail(rest, category, accion) {
+    const subject = `The category ${category.name} was ${accion} successfully. `;
+    const textmsg = `Hello ${rest.owner_email},  A category for your products have been ${accion}.\n 
+      Restaurant Name: ${rest.name} 
+      Category:  ${category.name} `;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(rest.owner_email, subject, textmsg, htmlTemplate);
   }
 }

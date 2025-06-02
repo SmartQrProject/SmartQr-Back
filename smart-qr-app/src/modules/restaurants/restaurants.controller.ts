@@ -1,27 +1,74 @@
-import { Controller, Post, Body, Get, Query, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, HttpCode, UseGuards, Patch, Param, Req, Delete } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  CreateRestaurantDoc,
+  DeleteRestaurantBySlugDoc,
+  GetAllRestaurantsDoc,
+  GetRestaurantDoc,
+  GetRestaurantPublicDoc,
+  PatchRestaurantBySlugDoc,
+} from './swagger/restaurants-doc.decorator';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { Roles } from 'src/common/decorators/roles.decorators';
+import { Role } from 'src/common/decorators/role.enum';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { PatchRestaurantsDto } from './dto/patch-restaurants.dto';
 
-@ApiTags('Db de restaurants')
+@ApiTags('Restaurants')
 @Controller('restaurants')
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
-  @ApiOperation({ summary: 'Crear una nueva Tienda' })
-  @ApiBody({ type: CreateRestaurantsDto })
-  @ApiResponse({ status: 200, description: 'Tienda creada con éxito' })
-  @HttpCode(200)
   @Post('create')
+  @HttpCode(200)
+  @CreateRestaurantDoc()
   async createRestaurants(@Body() dto: CreateRestaurantsDto) {
     return this.restaurantsService.createRestaurants(dto);
   }
 
-  @ApiOperation({ summary: 'Buscar una nueva Tienda' })
-  @ApiResponse({ status: 200, description: 'Tienda entrada con éxito' })
-  @HttpCode(200)
   @Get()
+  @HttpCode(200)
+  @Roles(Role.Owner, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @GetRestaurantDoc()
   async getRestaurants(@Query('slug') slug: string) {
     return this.restaurantsService.getRestaurants(slug);
+  }
+
+  @Get('public')
+  @HttpCode(200)
+  @GetRestaurantPublicDoc()
+  async getRestaurantsPublic(@Query('slug') slug: string) {
+    return this.restaurantsService.getRestaurantsPublic(slug);
+  }
+
+  @Patch(':slug')
+  @HttpCode(200)
+  @PatchRestaurantBySlugDoc()
+  @Roles(Role.Owner, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  async pachtRestaurantBySlug(@Param('slug') slug: string, @Body() restaurantData: PatchRestaurantsDto, @Req() req: Request): Promise<string> {
+    return this.restaurantsService.patchRestaurantBySlug(slug, restaurantData, req);
+  }
+
+  @Get('all')
+  @HttpCode(200)
+  @Roles(Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @GetAllRestaurantsDoc()
+  async getAllRestaurants() {
+    return this.restaurantsService.getAllRestaurants();
+  }
+
+  @Delete(':slug')
+  @HttpCode(200)
+  @DeleteRestaurantBySlugDoc()
+  @Roles(Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  async deleteRestaurantBySlug(@Param('slug') slug: string, @Req() req: Request): Promise<string> {
+    return this.restaurantsService.deleteRestaurantBySlug(slug, req);
   }
 }

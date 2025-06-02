@@ -1,12 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
-import { IsUUID, IsString, IsDecimal, Length } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { IsUUID, IsString, IsDecimal, Length, IsOptional, IsNumber, IsDate } from 'class-validator';
 import { Customer } from './customer.entity';
 import { RestaurantTable } from './restaurant-table.entity';
 import { OrderItem } from './order-item.entity';
@@ -18,23 +11,37 @@ export class Order {
   @IsUUID()
   id: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'inactive' })
   @IsString()
   @Length(2, 20)
   status: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'unpaid' })
   @IsString()
   @Length(2, 20)
   payStatus: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'dine-in' })
   @IsString()
   order_type: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
   @IsDecimal()
   total_price: number;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  @IsOptional()
+  @IsString()
+  payment_method?: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @IsNumber()
+  discount_applied: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @IsOptional()
+  @IsDate()
+  served_at?: Date;
 
   @ManyToOne(() => RestaurantTable, (table) => table.orders, { eager: true })
   table: RestaurantTable;
@@ -52,4 +59,10 @@ export class Order {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  rewardCode?: string;
+
+  @Column({ default: true })
+  exist: boolean;
 }

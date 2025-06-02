@@ -1,0 +1,131 @@
+{
+  "id": "7cbe2803-d598-4584-9fbc-8bc797074876",
+  "status": "completed",
+  "payStatus": "paid",
+  "order_type": "dine-in",
+  "total_price": "12.00",
+  "payment_method": null,
+  "discount_applied": "0.00",
+  "served_at": null,
+  "table": {
+    "id": "007875d6-f664-4ae1-8899-fe3986b8e63a",
+    "code": "T-01",
+    "is_active": true,
+    "exist": true,
+    "created_at": "2025-05-26T03:44:23.794Z"
+  },
+  "customer": {
+    "id": "d93848c1-d49d-4595-be1d-b56b4842907b",
+    "auth0Id": "google-oauth2|111957317329254676094",
+    "email": "amigogabrielernesto@gmail.com",
+    "name": "Gabriel Amigo",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocLldijcpa-ERYMsezM0TJiV4xDrmnTxdxKj8A0dIcIwbL6q6OCKBA=s96-c",
+    "password": null,
+    "phone": null,
+    "reward": 0,
+    "last_visit": null,
+    "visits_count": 0,
+    "created_at": "2025-05-26T12:57:08.802Z",
+    "modified_at": "2025-05-26T12:57:08.802Z",
+    "exist": true
+  },
+  "items": [
+    {
+      "id": "b5f9cb53-a266-41c0-85b8-884add170d9c",
+      "product": {
+        "id": "5aef182b-84be-45a0-a9c8-b53f6e5936c7",
+        "sequenceNumber": 0,
+        "name": "Tinto (Black Coffee)",
+        "description": "Traditional Colombian black coffee, simple and bold.",
+        "price": "1.50",
+        "image_url": "https://res.cloudinary.com/dsrcokjsp/image/upload/v1748234792/zlzu8szwh39motyergou.jpg",
+        "is_available": true,
+        "cost_price": null,
+        "details": [
+          "Sugar free",
+          "Gluten free"
+        ],
+        "created_at": "2025-05-26T04:46:33.383Z",
+        "exist": true
+      },
+      "quantity": 3,
+      "unit_price": "1.50",
+      "discount_applied": null,
+      "cost_price": null,
+      "exist": true
+    },
+    {
+      "id": "f860a13e-4244-42b2-8353-bbeba3395b2b",
+      "product": {
+        "id": "bb36e422-988d-478e-b6aa-332a05f36d9c",
+        "sequenceNumber": 0,
+        "name": "Torta de Plátano",
+        "description": "Sweet ripe plantain cake.",
+        "price": "2.00",
+        "image_url": "https://res.cloudinary.com/dsrcokjsp/image/upload/v1748215787/abidsigxw1u86foxahay.jpg",
+        "is_available": true,
+        "cost_price": null,
+        "details": [
+          "Gluten free",
+          "Vegan"
+        ],
+        "created_at": "2025-05-25T23:29:48.549Z",
+        "exist": true
+      },
+      "quantity": 1,
+      "unit_price": "2.00",
+      "discount_applied": null,
+      "cost_price": null,
+      "exist": true
+    },
+    {
+      "id": "c9b9dff4-e7c9-411e-9bbd-545072faeee8",
+      "product": {
+        "id": "c4f40b0d-0089-4197-be9d-a5285c333014",
+        "sequenceNumber": 0,
+        "name": "Papaya Banana Smoothie",
+        "description": "Smooth and sweet, perfect for mornings.",
+        "price": "2.50",
+        "image_url": "https://res.cloudinary.com/dsrcokjsp/image/upload/v1748216068/agc3n0okqdt2yiqe6yrl.jpg",
+        "is_available": true,
+        "cost_price": null,
+        "details": [
+          "Vegan"
+        ],
+        "created_at": "2025-05-25T23:34:28.655Z",
+        "exist": true
+      },
+      "quantity": 1,
+      "unit_price": "2.50",
+      "discount_applied": null,
+      "cost_price": null,
+      "exist": true
+    },
+    {
+      "id": "16c3a3fd-84e4-491e-bd25-2f383f74aa2b",
+      "product": {
+        "id": "5406a74d-6fca-4d58-a6ee-b7dadf6d42c9",
+        "sequenceNumber": 0,
+        "name": "Borojó Energy Shake",
+        "description": "Amazonian fruit blended with milk and cinnamon.",
+        "price": "3.00",
+        "image_url": "https://res.cloudinary.com/dsrcokjsp/image/upload/v1748216040/vitpbaid1jw6ihw5fkmb.jpg",
+        "is_available": true,
+        "cost_price": null,
+        "details": [
+          "Vegetarian"
+        ],
+        "created_at": "2025-05-25T23:34:01.714Z",
+        "exist": true
+      },
+      "quantity": 1,
+      "unit_price": "3.00",
+      "discount_applied": null,
+      "cost_price": null,
+      "exist": true
+    }
+  ],
+  "created_at": "2025-05-26T13:15:08.696Z",
+  "rewardCode": null,
+  "exist": true
+}

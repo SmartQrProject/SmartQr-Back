@@ -1,6 +1,8 @@
 import { config as dotenvConfig } from 'dotenv';
 
-dotenvConfig({ path: '.env.development' });
+if (process.env.NODE_ENV !== 'production') {
+  dotenvConfig({ path: '.env.development' });
+}
 
 export const DB_NAME = process.env.DB_NAME;
 export const DB_HOST = process.env.DB_HOST;
@@ -16,3 +18,30 @@ export const SALT_ROUNDS = Number(process.env.SALT_ROUNDS || '10');
 
 export const JWT_SECRET = process.env.JWT_SECRET;
 export const JWT_EXPIRE_TIME = process.env.JWT_EXPIRE_TIME || '1h';
+
+// export const AUTH0_SECRET = process.env.AUTH0_SECRET;
+// export const AUTH0_BASEURL = process.env.AUTH0_BASEURL;
+// export const AUTH0_CLIENTID = process.env.AUTH0_CLIENTID;
+export const AUTH0_ISSUER_URL = process.env.AUTH0_ISSUER_URL;
+export const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
+export const AUTH0_JWKS_URL = process.env.AUTH0_JWKS_URL;
+// export const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET;
+
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY!;
+export const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID;
+export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
+
+export const FRONTEND_URL = process.env.FRONTEND_URL;
+
+export const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+export const EMAIL_HOST = process.env.EMAIL_HOST;
+export const EMAIL_PORT = process.env.EMAIL_PORT;
+export const EMAIL_USER = process.env.EMAIL_USER;
+export const EMAIL_PASS = process.env.EMAIL_PASS;
+
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+export const SMTP_HOST = process.env.SMTP_HOST;
+export const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465', 10);
+export const SMTP_USER = process.env.SMTP_USER;
+export const SMTP_PASS = process.env.SMTP_PASS!;

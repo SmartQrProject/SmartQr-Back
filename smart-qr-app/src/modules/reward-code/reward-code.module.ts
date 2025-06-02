@@ -1,9 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Module, Res } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RewardCode } from 'src/shared/entities/reward-code.entity';
 import { RewardCodeService } from './reward-code.service';
 import { RewardCodeController } from './reward-code.controller';
+import { Restaurant } from 'src/shared/entities/restaurant.entity';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
-  controllers: [RewardCodeController],
+  imports: [TypeOrmModule.forFeature([RewardCode, Restaurant]), CommonModule],
   providers: [RewardCodeService],
+  controllers: [RewardCodeController],
+  exports: [RewardCodeService],
 })
 export class RewardCodeModule {}

@@ -22,7 +22,7 @@ export class RewardCode {
   @IsUUID()
   id: string;
 
-  @Column({ length: 50 })
+  @Column({ length: 50, unique: true })
   @IsString()
   @Length(4, 50)
   code: string;
@@ -44,4 +44,7 @@ export class RewardCode {
     onDelete: 'CASCADE',
   })
   restaurant: Restaurant;
+
+  @Column({ default: true })
+  exist: boolean;
 }

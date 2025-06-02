@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCategoryDto } from './create-category.dto';
+import { PartialType, PickType } from '@nestjs/swagger';
+import { BaseCategoryDto } from './base-category.dto';
 
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
+export class UpdateCategoryDto extends PartialType(PickType(BaseCategoryDto, ['name'] as const)) {}

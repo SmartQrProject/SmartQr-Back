@@ -318,12 +318,12 @@ export class OrdersService {
       - Discount      : ${order.discount_applied} %
       - Payment Status: ${order.payStatus}
       - Order Status  : ${order.status}
-
-    `;
+                                         
+      `;
 
       const itemsText = order.items
-        .map((item) => `${this.formatString(item.product.name, 30)}  x ${this.formatString(item.quantity, 5)} =  ${this.formatString(item.unit_price, 7)} u$d`)
-        .join('\n  ');
+        .map((item) => `${this.formatString(item.product.name, 20)}  x ${this.formatString(item.quantity, 5)} =  ${this.formatString(item.unit_price, 7)} u$d`)
+        .join('\n   ');
 
       const htmlTemplate = 'order';
 

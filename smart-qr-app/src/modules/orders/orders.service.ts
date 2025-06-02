@@ -144,12 +144,12 @@ export class OrdersService {
         throw new NotFoundException(`Order with ID ${savedOrder.id} not found`);
       }
 
-      try {
-        await this.sendEmail(customer, restaurant, order2Email, 'created'); //nodemailer
-      } catch (error) {
-        console.error('Failed to send email notification:', error);
-        // Continue execution even if email fails
-      }
+      // try {
+      //   await this.sendEmail(customer, restaurant, order2Email, 'created'); //nodemailer
+      // } catch (error) {
+      //   console.error('Failed to send email notification:', error);
+      //   // Continue execution even if email fails
+      // }
 
       return { order: order2Email, stripeSession: stripeSession.url };
     } catch (error) {
@@ -272,13 +272,15 @@ export class OrdersService {
       }
 
       const updatedOrder = this.orderRepository.merge(existingOrder, updateOrderDto);
-      const returnedOrder = this.orderRepository.save(updatedOrder);
+      const returnedOrder = await this.orderRepository.save(updatedOrder);
 
-      try {
-        await this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
-      } catch (error) {
-        console.error('Failed to send email notification:', error);
-        // Continue execution even if email fails
+      if (returnedOrder.status == 'completed') {
+        try {
+          await this.sendEmail(updatedOrder.customer, rest, updatedOrder, 'updated'); //nodemailer
+        } catch (error) {
+          console.error('Failed to send email notification:', error);
+          // Continue execution even if email fails
+        }
       }
 
       await queryRunner.commitTransaction();
@@ -305,7 +307,7 @@ export class OrdersService {
 
   async sendEmail(customer: Customer, restaurant: Restaurant, order: Order, accion: string): Promise<void> {
     try {
-      const subject = `Your Order #${order.id} was ${accion} and has been sent to preparation.`;
+      const subject = `Your Order #${order.id} was ${accion}.`;
 
       const headerText = `
       Hello ${customer.name},
@@ -313,7 +315,7 @@ export class OrdersService {
       The following Order has been ${accion}.
       - Restaurant    : ${restaurant.name}
       - Total Amount  : ${order.total_price} u$d
-      - Discount      : ${order.discount_applied}
+      - Discount      : ${order.discount_applied} %
       - Payment Status: ${order.payStatus}
       - Order Status  : ${order.status}
 
@@ -343,8 +345,27 @@ export class OrdersService {
 
     order.status = 'pending'; // <-- Aquí definís el nuevo estado
     order.payStatus = 'paid'; // (opcional) si usás este campo también
+    const savedOrder = await this.orderRepository.save(order);
 
-    return this.orderRepository.save(order);
+    // Generacion email al cliente con su Order
+    const order2Email = await this.orderRepository.findOne({
+      where: { id: savedOrder.id, exist: true },
+      relations: ['items', 'restaurant', 'customer'],
+    });
+    if (!order2Email) {
+      throw new NotFoundException(`Order with ID ${savedOrder.id} not found`);
+    }
+
+    console.log(order2Email);
+
+    try {
+      await this.sendEmail(order2Email.customer, order2Email.restaurant, order2Email, 'created'); //nodemailer
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      // Continue execution even if email fails
+    }
+
+    return savedOrder;
   }
 
   formatString(value, lon) {

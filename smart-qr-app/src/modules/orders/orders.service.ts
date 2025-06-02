@@ -323,11 +323,11 @@ export class OrdersService {
 
       const itemsText = order.items
         .map((item) => `${this.formatString(item.product.name, 20)}  x ${this.formatString(item.quantity, 5)} =  ${this.formatString(item.unit_price, 7)} u$d`)
-        .join('\n   ');
+        .join('\n');
 
       const htmlTemplate = 'order';
 
-      await this.mailService.sendMail(customer.email, subject, headerText + itemsText, htmlTemplate);
+      await this.mailService.sendMail(customer.email, subject, headerText + '\n' + itemsText, htmlTemplate);
     } catch (error) {
       console.error(`❌ Error sending email to ${customer.email}:`, error.message);
     }

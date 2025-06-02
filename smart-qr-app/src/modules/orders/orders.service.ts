@@ -322,12 +322,12 @@ export class OrdersService {
       `;
 
       const itemsText = order.items
-        .map((item) => `${this.formatString(item.product.name, 20)}  x ${this.formatString(item.quantity, 5)} =  ${this.formatString(item.unit_price, 7)} u$d`)
-        .join('\n   ');
+        .map((item) => `${this.formatString(item.product.name, 20)}  x ${this.formatString(item.quantity, 5)} =  ${this.formatString(item.unit_price, 7, true)} u$d`)
+        .join('\n');
 
       const htmlTemplate = 'order';
 
-      await this.mailService.sendMail(customer.email, subject, headerText + itemsText, htmlTemplate);
+      await this.mailService.sendMail(customer.email, subject, headerText.trimEnd() + '\n' + itemsText, htmlTemplate);
     } catch (error) {
       console.error(`❌ Error sending email to ${customer.email}:`, error.message);
     }
@@ -368,8 +368,8 @@ export class OrdersService {
     return savedOrder;
   }
 
-  formatString(value, lon) {
-    const str = String(value); // asegura que sea string
-    return str.slice(0, lon).padEnd(lon, ' ');
+  formatString(value, lon, alignRight = false) {
+    const str = String(value).slice(0, lon);
+    return alignRight ? str.padStart(lon, ' ') : str.padEnd(lon, ' ');
   }
 }

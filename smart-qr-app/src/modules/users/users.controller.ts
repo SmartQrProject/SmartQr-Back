@@ -21,7 +21,7 @@ export class UsersController {
   @ModifyUserByIdDoc()
   @Roles(Role.Owner, Role.Staff)
   @UseGuards(AuthGuard, RolesGuard)
-  async modifyUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() user: Partial<PutUserDto>, @Req() req: Request): Promise<User> {
+  async modifyUserById(@Param('slug') slug: string, @Param('id', ParseUUIDPipe) id: string, @Body() user: PutUserDto, @Req() req: Request): Promise<User> {
     return this.usersService.modifyUserById(id, slug, user, req);
   }
 

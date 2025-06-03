@@ -30,21 +30,20 @@ export class MailService {
     let templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html'); // default
     let html = '';
 
-    if (tipoEmail == 'basico') {
+    console.log('tipo de mail:', tipoEmail);
+    if (tipoEmail === 'basico') {
       templatePath = path.join('src/common/emailTemplates/generalEmailTemplate.html');
-      let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-      let html = htmlTemplate.replace('{{name}}', to);
-      html = html.replace('{{text}}', text);
+      const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+      html = htmlTemplate.replace('{{name}}', to).replace('{{text}}', text);
     }
-
-    if (tipoEmail == 'order') {
+    if (tipoEmail === 'order') {
       templatePath = path.join('src/common/emailTemplates/orderEmailTemplate.html');
-      let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-      let html = htmlTemplate.replace('{{name}}', to);
-      html = html.replace('{{text}}', text);
+      const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+      html = htmlTemplate.replace('{{name}}', to).replace('{{text}}', text);
+      console.log('Order email template loaded:', htmlTemplate);
     }
 
-    if (tipoEmail == 'report' && reportData) {
+    if (tipoEmail === 'report' && reportData) {
       html = this.generateHtmlReport(reportData);
     }
 

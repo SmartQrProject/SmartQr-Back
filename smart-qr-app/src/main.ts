@@ -13,7 +13,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
-  app.use(new TraceMiddleware().use);
+  //app.use(new TraceMiddleware().use);
   app.use(new LoggerMiddleware().use);
   app.useGlobalPipes(
     new ValidationPipe({

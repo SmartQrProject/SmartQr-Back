@@ -47,9 +47,12 @@ export class OrdersService {
       });
       if (!restaurant) throw new NotFoundException('Restaurant not found');
 
-      const table = await queryRunner.manager.findOneBy(RestaurantTable, {
-        code: createOrderDto.code,
-        restaurant: { id: restaurant.id },
+      const table = await queryRunner.manager.findOne(RestaurantTable, {
+        where: {
+          code: createOrderDto.code,
+          restaurant: { id: restaurant.id },
+        },
+        relations: ['restaurant'],
       });
       if (!table) throw new NotFoundException('Table not found');
 

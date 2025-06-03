@@ -28,7 +28,6 @@ export class CustomersController {
   @UseGuards(JwtAuth0Guard)
   @SyncAuth0Doc()
   async sincronizarAuth0(@Body() customer: Auth0CustomerDto, @Param('slug') slug: string): Promise<CustomerResponseDto> {
-    console.log('sincronizarAuth0', customer);
     return this.customersService.sincronizarAuth0(customer, slug);
   }
 

@@ -40,6 +40,8 @@ export class UsersService {
       roles: user.role,
       slug: user.restaurant.slug,
       restaurant: user.restaurant,
+      name: user.name,
+      phone: user.phone,
     };
 
     const access_token = this.jwtService.generateToken(jwtPayLoad);
@@ -83,14 +85,14 @@ export class UsersService {
     }
 
     const updatedUser = this.usersRepository.patchById(id, rest, user, req);
-    
+
     try {
       await this.sendEmail(rest, usuario, 'updated'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return updatedUser;
   }
 
@@ -121,14 +123,14 @@ export class UsersService {
     }
 
     const userDeleted = this.usersRepository.deleteById(id);
-    
+
     try {
       await this.sendEmail(rest, usuario, 'deleted'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return userDeleted;
   }
 
@@ -171,14 +173,14 @@ export class UsersService {
     }
 
     const userCreated = await this.usersRepository.createUser(rest, newUser);
-    
+
     try {
       await this.sendEmail(rest, userCreated, 'created'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return userCreated;
   }
 

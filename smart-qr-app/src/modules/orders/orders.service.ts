@@ -46,14 +46,14 @@ export class OrdersService {
         slug: slug,
       });
       if (!restaurant) throw new NotFoundException('Restaurant not found');
-
+      console.log('Restaurant found:', restaurant);
       const table = await queryRunner.manager.findOne(RestaurantTable, {
         where: {
           code: createOrderDto.code,
           restaurant: { id: restaurant.id },
         },
-        relations: ['restaurant'],
       });
+      console.log(table);
       if (!table) throw new NotFoundException('Table not found');
 
       // 2. Obtener y validar productos
@@ -116,7 +116,7 @@ export class OrdersService {
         total_price: totalPrice,
         items: orderItems,
       });
-
+      console.log('New Order:', newOrder);
       const savedOrder = await queryRunner.manager.save(Order, newOrder);
       const stripeLineItems = orderItems.map((item) => {
         const discountedUnitPrice = discountPercentage ? item.unit_price - (item.unit_price * discountPercentage) / 100 : item.unit_price;

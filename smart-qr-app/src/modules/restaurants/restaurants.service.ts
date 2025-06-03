@@ -271,8 +271,7 @@ export class RestaurantsService {
     const subject = `Restaurant and Owner User were successfully created ${newRestaurants.name}`;
     const textmsg = `Hello ${newUser.name},  Your Restaurant have been updated and your profile have been created.
 
-      Usuario: ${newUser.email} 
-      Password: ${newUser.password}`;
+      \n\nUser: ${newUser.email} `;
     const htmlTemplate = 'basico';
     await this.mailService.sendMail(newUser.email, subject, textmsg, htmlTemplate);
   }

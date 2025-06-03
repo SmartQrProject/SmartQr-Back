@@ -62,7 +62,7 @@ export class MailService {
     }
   }
 
-  private generateHtmlReport(reportData: ReportsDto): string {
+  public generateHtmlReport(reportData: ReportsDto): string {
     const salesTotal = reportData.getSalesTotalWeek;
     const topProduct = reportData.getTopProductsWeek;
     const leastSoldP = reportData.getLeastSoldProductsWeek;
@@ -94,121 +94,179 @@ export class MailService {
       .join('');
 
     return `
-      <html>
-        <body>
-          <!-- reporte sales Total -->
-          <div style="font-family: Arial, sans-serif; margin-bottom: 30px;">
-            <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
-              🔝  Week Summary
-            </h2>
-            <p style="font-size: 14px; color: #333; margin-top: 10px;">
-            <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px;">Concept</th>
-                <th style="padding: 8px;">Indicator</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Total Sales U$s</td><td style="text-align: right;">${salesTotal.toFixed(2)}$</td></tr>
-              <tr><td>New Customers</td><td style="text-align: right;">${customersT.newCustomers}</td></tr>
-              <tr><td>% of New Customers</td><td style="text-align: right;">${customersT.newPercentage.toFixed(1)}%</td></tr>
-              <tr><td>Returning Customers</td><td style="text-align: right;">${customersT.returningCustomers}</td></tr>
-              <tr><td>% of Returning Cust</td><td style="text-align: right;">${customersT.returningPercentage.toFixed(1)}%</td></tr>
-            </tbody>
-          </table>
-            </p>
-          </div>
+<html>
+  <body style="font-family: 'Segoe UI', sans-serif; background-color: #f4f4f4; color: #333; padding: 0; margin: 0;">
+    <div style="padding: 40px;">
 
-          <!-- reporte productos mas vendidos -->
-          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
-            🔝 Most Sold Products in the week
-          </h2>
-          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px;">Producto</th>
-                <th style="padding: 8px;">Cantidad</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows1}
-            </tbody>
-          </table>
+      <h1 style="text-align: center; color: #2c3e50;">📊 Weekly Report</h1>
 
-          <!-- reporte productos menos vendidos -->
-          <h2 style="color: #e74c3c; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
-            ⬇️ Lowest-selling Products in the week
-          </h2>
-          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px;">Product</th>
-                <th style="padding: 8px;">Quantities</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows2}
-            </tbody>
-          </table>
+      <!-- 🔝 Week Summary -->
+      <div style="margin-top: 40px;">
+        <div style="background-color: #4CAF50; color: white; padding: 10px 15px; border-radius: 6px; font-size: 18px;">
+          🔝 Week Summary
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 10px; border: 1px solid #ccc;">Concept</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Indicator</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 10px; border: 1px solid #eee;">Total Sales U$S</td><td style="padding: 10px; text-align: right;">${salesTotal.toFixed(2)}$</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #eee;">New Customers</td><td style="padding: 10px; text-align: right;">${customersT.newCustomers}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #eee;">% of New Customers</td><td style="padding: 10px; text-align: right;">${customersT.newPercentage.toFixed(1)}%</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #eee;">Returning Customers</td><td style="padding: 10px; text-align: right;">${customersT.returningCustomers}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #eee;">% of Returning Cust</td><td style="padding: 10px; text-align: right;">${customersT.returningPercentage.toFixed(1)}%</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-          <!-- categorias mas vendidas productos mas vendidos -->
-          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
-            🔝 Categories with Most Incomes in the week
-          </h2>
-          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px;">Category</th>
-                <th style="padding: 8px;">Total U$D</th>
-                <th style="padding: 8px;">Percentage</th>
-                <th style="padding: 8px;">Quantity</th>
-                <th style="padding: 8px;">Avge Price U$D</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows3}
-            </tbody>
-          </table>
+      <!-- 🔥 Most Sold Products -->
+      <div style="margin-top: 40px; break-inside: avoid; page-break-inside: avoid;">
+        <div style="background-color: #2196F3; color: white; padding: 10px 15px; border-radius: 6px; font-size: 18px;">
+          🔥 Most Sold Products
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 10px; border: 1px solid #ccc;">Product</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Quantity</th>
+            </tr>
+          </thead>
+          <tbody>${rows1}</tbody>
+        </table>
+      </div>
 
-          <!-- reporte Dias de la semana con mas ventas -->
-          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
-            🔝 Distribution of the Sales Qties by day
-          </h2>
-          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px;">Week Day</th>
-                <th style="padding: 8px;">Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows4}
-            </tbody>
-          </table>
+      <!-- 📉 Lowest-selling Products -->
+      <div style="margin-top: 40px; break-inside: avoid; page-break-inside: avoid;">
+        <div style="background-color: #e74c3c; color: white; padding: 10px 15px; border-radius: 6px; font-size: 18px;">
+          📉 Lowest-selling Products
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 10px; border: 1px solid #ccc;">Product</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Quantity</th>
+            </tr>
+          </thead>
+          <tbody>${rows2}</tbody>
+        </table>
+      </div>
 
-          <!-- reporte de clientes -->
-          <h2 style="color: #4CAF50; font-size: 24px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">
-            🔝 Customers of the Week
-          </h2>
-          <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 8px;">Customer Email</th>
-                <th style="padding: 8px;">Customer Name</th>
-                <th style="padding: 8px;">Total # Orders</th>
-                <th style="padding: 8px;">Total Spent U$S</th>
-                <th style="padding: 8px;">Average Spent U$S</th>
-                <th style="padding: 8px;">Days from Last Visit</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows5}
-            </tbody>
-          </table>
+      <!-- 🏷️ Top Categories -->
+      <div style="margin-top: 40px; break-inside: avoid; page-break-inside: avoid;">
+        <div style="background-color: #9C27B0; color: white; padding: 10px 15px; border-radius: 6px; font-size: 18px;">
+          🏷️ Top Categories by Revenue
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 10px; border: 1px solid #ccc;">Category</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Total U$D</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Percentage</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Quantity</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Avg Price</th>
+            </tr>
+          </thead>
+          <tbody>${rows3}</tbody>
+        </table>
+      </div>
 
-        </body>
-      </html>
-    `;
+      <!-- 📆 Sales by Day -->
+      <div style="margin-top: 40px; break-inside: avoid; page-break-inside: avoid;">
+        <div style="background-color: #FF9800; color: white; padding: 10px 15px; border-radius: 6px; font-size: 18px;">
+          📆 Sales by Day
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 10px; border: 1px solid #ccc;">Day</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Sales Count</th>
+            </tr>
+          </thead>
+          <tbody>${rows4}</tbody>
+        </table>
+      </div>
+
+      <!-- 👥 Top Customers -->
+      <div style="margin-top: 40px; break-inside: avoid; page-break-inside: avoid;">
+  <div style="background-color: #607D8B; color: white; padding: 10px 15px; border-radius: 6px; font-size: 18px;">
+    👥 Top Customers
+  </div>
+<table style="width: 100%; border-collapse: collapse; margin-top: 10px; page-break-inside: avoid;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 10px; border: 1px solid #ccc;">Email</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Name</th>
+              <th style="padding: 10px; border: 1px solid #ccc;"># Orders</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Total Spent</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Avg. Order</th>
+              <th style="padding: 10px; border: 1px solid #ccc;">Days Since Last Visit</th>
+            </tr>
+          </thead>
+          <tbody>${rows5}</tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <p style="text-align: center; margin-top: 50px; font-size: 12px; color: #999;">
+        Report generated automatically by <strong>Smart-QR</strong>
+      </p>
+    </div>
+  </body>
+</html>
+`;
+  }
+
+  async sendMailWithAttachment(to: string, subject: string, text: string, html: string, attachment: { filename: string; content: Buffer }) {
+    await this.transporter.sendMail({
+      from: `"Smart-QR" <${SMTP_USER}>`,
+      to,
+      subject,
+      text,
+      html,
+      attachments: [attachment],
+    });
+  }
+
+  public generateHtmlReportWithCover(reportData: ReportsDto, restaurantName: string, fromStr: string, toStr: string): string {
+    const htmlContent = this.generateHtmlReport(reportData);
+
+    return `
+  <html>
+   <head>
+    <style>
+      table, tr, td, th {
+        page-break-inside: avoid !important;
+        word-break: break-word;
+      }
+
+      div {
+        page-break-inside: avoid;
+      }
+    </style>
+  </head>
+    <body style="font-family: 'Segoe UI', sans-serif; color: #333;">
+      <div style="max-width: 800px; margin: auto; padding: 40px;">
+        <!-- Portada -->
+        <!-- Portada centrada sin página en blanco -->
+<div style="display: flex; justify-content: center; align-items: center; text-align: center; height: 400px; flex-direction: column;">
+  <img src="https://res.cloudinary.com/dsrcokjsp/image/upload/v1748937749/y33ykcfyqlzebprecoep.png" alt="SmartQR Logo" style="max-height: 80px; margin-bottom: 20px;" />
+  <h1 style="font-size: 32px; color: #2c3e50; margin: 0;">Weekly Performance Report</h1>
+  <h2 style="font-size: 20px; color: #4CAF50; margin: 10px 0;">${restaurantName}</h2>
+  <p style="font-size: 16px; margin: 0;">From ${fromStr.split('T')[0]} to ${toStr.split('T')[0]}</p>
+  <hr style="width: 60%; margin-top: 30px; border: none; border-top: 1px solid #ccc;" />
+</div>
+
+
+
+       </div>
+
+  ${htmlContent}
+
+    </body>
+  </html>
+  `;
   }
 }

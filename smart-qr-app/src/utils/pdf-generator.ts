@@ -1,0 +1,19 @@
+import * as puppeteer from 'puppeteer';
+
+export async function generatePdfBuffer(html: string): Promise<Buffer> {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
+
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: 'networkidle0' });
+  const buffer = await page.pdf({
+    format: 'A4',
+    printBackground: true,
+    margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' },
+  });
+
+  await browser.close();
+  return Buffer.from(buffer);
+}

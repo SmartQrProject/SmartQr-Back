@@ -8,6 +8,7 @@ import * as dayjs from 'dayjs';
 import { MailService } from 'src/common/services/mail.service';
 import { ReportsDto } from '../../modules/cron/dto/reportes.dto';
 import { todo } from 'node:test';
+import { generatePdfBuffer } from 'src/utils/pdf-generator';
 
 @Injectable()
 export class ReportsCronService {
@@ -19,7 +20,7 @@ export class ReportsCronService {
   ) {}
 
   @Cron('59 23 * * *')
-  //@Cron('*/5 * * * *')
+  //@Cron('* * * * *')
   async reportsMail() {
     const to = dayjs().subtract(1, 'day').endOf('day');
     const from = to.subtract(6, 'day').startOf('day');
@@ -73,7 +74,14 @@ export class ReportsCronService {
         };
         const subject = `Your daily summary of Bussiness Performance in ${resto.name}`;
         const headerText = `Hello ${resto.owner_email}`;
-        await this.mailService.sendMail(resto.owner_email, subject, headerText, 'report', todoLosReportes);
+        const html = this.mailService.generateHtmlReport(todoLosReportes);
+        const pdfHtml = this.mailService.generateHtmlReportWithCover(todoLosReportes, resto.name, fromStr, toStr);
+        const pdfBuffer = await generatePdfBuffer(pdfHtml);
+
+        await this.mailService.sendMailWithAttachment(resto.owner_email, subject, headerText, html, {
+          filename: `weekly-report-${slug}.pdf`,
+          content: pdfBuffer,
+        });
       } catch (err) {
         console.error(`❌ Error al generar el reporte para ${slug}:`, err.message);
       }

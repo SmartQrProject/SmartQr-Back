@@ -122,6 +122,7 @@ export class SubscriptionService {
 
     if (!subscription) return null;
 
+    subscription.plan = subscription.isTrial ? 'Essentials Trial' : 'Monthly Membership';
     return {
       subscriptionId: subscription.id,
       stripeSubscriptionId: subscription.stripeSubscriptionId,

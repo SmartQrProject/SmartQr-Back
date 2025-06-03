@@ -47,13 +47,21 @@ export class OrdersService {
       });
       if (!restaurant) throw new NotFoundException('Restaurant not found');
       console.log('Restaurant found:', restaurant);
-      const table = await queryRunner.manager.findOne(RestaurantTable, {
+      let table = await queryRunner.manager.findOne(RestaurantTable, {
         where: {
           code: createOrderDto.code,
           restaurant: { id: restaurant.id },
         },
       });
       console.log(table);
+      if (!table) {
+        table = await queryRunner.manager.findOne(RestaurantTable, {
+          where: {
+            code: 'counter',
+            restaurant: { id: restaurant.id },
+          },
+        });
+      }
       if (!table) throw new NotFoundException('Table not found');
 
       // 2. Obtener y validar productos

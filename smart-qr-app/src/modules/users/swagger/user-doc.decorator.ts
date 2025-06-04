@@ -6,32 +6,38 @@ import { PutUserDto } from '../dto/put-user.dto';
 export function ModifyUserByIdDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'Modify users data' }),
+    ApiOperation({ summary: 'Modify users data. Sends email to the restaurant owner' }),
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiParam({
       name: 'id',
       description: 'User ID',
-      example: '20966491-1959-40ce-96f9-5c391d79fb1f',
+      example: 'XXXXX491-1959-40ce-96f9-5c391d79fb1f',
       required: true,
     }),
     ApiBody({ type: PutUserDto }),
+    ApiResponse({ status: 404, description: '❌ No users found  with id or is blocked !!' }),
+    ApiResponse({ status: 404, description: '❌ restaurant ${slug} found !!' }),
+    ApiResponse({ status: 404, description: '❌ Email already in use: ${user.email} !!' }),
+    ApiResponse({ status: 409, description: 'Passwords are not equals!!!' }),
   );
 }
 
 export function CreateUserDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'Users App creation' }),
+    ApiOperation({ summary: 'Users App creation. Sends an email to restaurant owner' }),
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
+    ApiResponse({ status: 409, description: '❌ Passwords are not equals!!!' }),
+    ApiResponse({ status: 409, description: '❌ User ${newUser.email} already exists!!' }),
   );
 }
 //
@@ -45,7 +51,7 @@ export function GetAllUsersDoc() {
     ApiQuery({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiQuery({
@@ -77,8 +83,8 @@ export function GetAllUsersDoc() {
               created_at: '2024-03-20T12:34:56.789Z',
               restaurant: {
                 id: '550e8400-e29b-41d4-a716-446655440000',
-                name: 'Test Cafe',
-                slug: 'test-cafe',
+                name: 'Eli Cafe',
+                slug: 'eli-cafe',
               },
             },
           ],
@@ -104,7 +110,7 @@ export function GetAllUsersDoc() {
       description: 'Restaurant not found',
       schema: {
         example: {
-          message: 'Restaurant with slug test-cafe not found',
+          message: 'Restaurant with slug eli-cafe not found',
           error: 'Not Found',
           statusCode: 404,
         },
@@ -209,6 +215,8 @@ export function DeleteUserByIdDoc() {
       example: '20966491-1959-40ce-96f9-5c391d79fb1f',
       required: true,
     }),
+    ApiResponse({ status: 404, description: '❌ No users found  with id or is blocked !!' }),
+    ApiResponse({ status: 404, description: '❌ restaurant ${slug} found !!' }),
   );
 }
 
@@ -254,10 +262,10 @@ export function UserLoginDoc() {
         },
         testAmigoRestoOwner: {
           value: {
-            email: 'amigogabrielernesto@yahoo.com',
+            email: 'amigogabrielernesto@gmail.com',
             password: 'Clave123%%',
           },
-          summary: 'AmigoResto Owner credentials',
+          summary: 'Riviera Owner credentials',
         },
       },
     }),
@@ -284,7 +292,7 @@ export function UserLoginDoc() {
     }),
     ApiResponse({
       status: 401,
-      description: 'Invalid credentials',
+      description: 'Not valid Credentials',
       schema: {
         example: {
           message: 'Invalid email or password',

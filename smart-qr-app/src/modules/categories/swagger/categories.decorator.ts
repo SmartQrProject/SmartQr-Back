@@ -8,12 +8,12 @@ export function CreateCategoryDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Create a new category',
-      description: 'Creates a new category for the restaurant menu. Requires owner authentication.',
+      description: 'Creates a new category for the restaurant menu. Requires owner authentication. Sends email notificacion to the Restaurant Owner',
     }),
     ApiParam({
       name: 'slug',
       description: 'Unique identifier of the restaurant',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiBody({
@@ -42,8 +42,8 @@ export function CreateCategoryDoc() {
           products: [],
           restaurant: {
             id: '550e8400-e29b-41d4-a716-446655440000',
-            name: 'Test Cafe',
-            slug: 'test-cafe',
+            name: 'Eli Cafe',
+            slug: 'eli-cafe',
           },
         },
       },
@@ -64,19 +64,23 @@ export function CreateCategoryDoc() {
       description: 'Restaurant not found',
       schema: {
         example: {
-          message: 'Restaurant with slug test-cafe not found',
+          message: 'Restaurant with slug eli-cafe not found',
           error: 'Not Found',
           statusCode: 404,
         },
       },
     }),
     ApiResponse({
+      status: 404,
+      description: 'You can not update categories from other restaurant.',
+    }),
+
+    ApiResponse({
       status: 409,
       description: 'Category name already exists',
       schema: {
         example: {
           message: 'A category with the name "Beverages" already exists in this restaurant',
-
           error: 'Conflict',
           statusCode: 409,
         },
@@ -94,7 +98,7 @@ export function GetAllCategoriesDoc() {
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiQuery({
@@ -118,7 +122,7 @@ export function GetAllCategoriesDoc() {
         example: {
           categories: [
             {
-              id: '123e4567-e89b-12d3-a456-426614174000',
+              id: 'XXXXX567-e89b-12d3-a456-426614174000',
               name: 'Beverages',
               created_at: '2024-03-20T15:30:00.000Z',
               updated_at: '2024-03-20T15:30:00.000Z',
@@ -158,7 +162,7 @@ export function GetAllCategoriesDoc() {
       description: 'Restaurant not found',
       schema: {
         example: {
-          message: 'Restaurant with slug test-cafe not found',
+          message: 'Restaurant with slug eli-cafe not found',
           error: 'Not Found',
           statusCode: 404,
         },
@@ -176,13 +180,13 @@ export function GetCategoryByIdDoc() {
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiParam({
       name: 'id',
       description: 'Category ID',
-      example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+      example: 'XXXXX676-d3d2-472a-8b7c-785f455a80ab',
     }),
     ApiResponse({
       status: 200,
@@ -243,7 +247,7 @@ export function UpdateCategoryDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Update category',
-      description: 'Updates a specific category information. You can update the name and/or sequence number.',
+      description: 'Updates a specific category information. You can update the name and/or sequence number. Sends email notificacion to the Restaurant Owner',
     }),
     ApiParam({
       name: 'slug',
@@ -254,7 +258,7 @@ export function UpdateCategoryDoc() {
     ApiParam({
       name: 'id',
       description: 'Category ID',
-      example: 'e97d1673-1891-488d-88cb-b33534028375',
+      example: 'XXXXX673-1891-488d-88cb-b33534028375',
     }),
     ApiBody({
       type: UpdateCategoryDto,
@@ -332,6 +336,11 @@ export function UpdateCategoryDoc() {
         },
       },
     }),
+
+    ApiResponse({
+      status: 404,
+      description: 'You can not update categories from other restaurant.',
+    }),
   );
 }
 
@@ -340,7 +349,7 @@ export function DeleteCategoryDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Delete category',
-      description: 'Deletes a specific category and its associated products from the restaurant menu.',
+      description: 'Deletes a specific category and its associated products from the restaurant menu. Sends email notificacion to the Restaurant Owner',
     }),
     ApiParam({
       name: 'slug',
@@ -383,6 +392,10 @@ export function DeleteCategoryDoc() {
           statusCode: 404,
         },
       },
+    }),
+    ApiResponse({
+      status: 404,
+      description: 'You can not update categories from other restaurant.',
     }),
   );
 }

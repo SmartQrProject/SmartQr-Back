@@ -34,7 +34,7 @@ export class RestaurantTablesService {
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner') || req.user.roles.includes('staff')) {
         if (req.user.restaurant.id !== rest.id) {
-          throw new NotFoundException(`You can visualize Tables from other restaurants.`);
+          throw new NotFoundException(`You can not visualize Tables from other restaurants.`);
         }
       }
     }
@@ -93,14 +93,14 @@ export class RestaurantTablesService {
     }
 
     const deletedTable = this.restTableRepository.deleteById(rest, id);
-    
+
     try {
       await this.sendEmail(rest, deletedTable, 'updated'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return deletedTable;
   }
   //====================================================================
@@ -118,14 +118,14 @@ export class RestaurantTablesService {
     }
 
     const updatedTable = this.restTableRepository.updateById(rest, id, updateRestaurantTable);
-    
+
     try {
       await this.sendEmail(rest, updatedTable, 'updated'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
-    
+
     return updatedTable;
   }
 

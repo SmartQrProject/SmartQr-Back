@@ -97,7 +97,7 @@ export class RewardCodeService {
     const reward = await this.findOne(id, slug);
     reward.exist = false;
     await this.rewardCodeRepo.save(reward);
-    return { message: 'Code logically deleted' };
+    return { message: 'RewardCode logically deleted' };
   }
 
   async deactivateCode(code: string): Promise<void> {

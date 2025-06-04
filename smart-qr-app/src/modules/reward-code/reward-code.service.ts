@@ -68,22 +68,33 @@ export class RewardCodeService {
       .getMany();
   }
 
-  async findOne(id: string): Promise<RewardCode> {
+  async findOne(id: string, slug: string): Promise<RewardCode> {
     const reward = await this.rewardCodeRepo.findOne({
-      where: { id, exist: true },
+      where: {
+        id,
+        exist: true,
+        restaurant: {
+          slug,
+        },
+      },
+      relations: ['restaurant'],
     });
-    if (!reward) throw new NotFoundException('Code not found');
+
+    if (!reward) {
+      throw new NotFoundException(`Code not found or does not belong to restaurant with slug '${slug}'`);
+    }
+
     return reward;
   }
 
-  async update(id: string, data: Partial<RewardCode>): Promise<RewardCode> {
-    const reward = await this.findOne(id);
+  async update(id: string, data: Partial<RewardCode>, slug): Promise<RewardCode> {
+    const reward = await this.findOne(id, slug);
     Object.assign(reward, data);
     return this.rewardCodeRepo.save(reward);
   }
 
-  async remove(id: string): Promise<{ message: string }> {
-    const reward = await this.findOne(id);
+  async remove(id: string, slug): Promise<{ message: string }> {
+    const reward = await this.findOne(id, slug);
     reward.exist = false;
     await this.rewardCodeRepo.save(reward);
     return { message: 'Code logically deleted' };
@@ -99,7 +110,18 @@ export class RewardCodeService {
     await this.rewardCodeRepo.save(reward);
   }
 
-  async findOneByCode(code: string): Promise<RewardCode | null> {
-    return this.rewardCodeRepo.findOne({ where: { code, exist: true, isActive: true } });
+  async findOneByCode(code: string, slug: string): Promise<RewardCode | null> {
+    const reward = await this.rewardCodeRepo.findOne({
+      where: {
+        code,
+        exist: true,
+        isActive: true,
+        restaurant: {
+          slug,
+        },
+      },
+      relations: ['restaurant'],
+    });
+    return reward;
   }
 }

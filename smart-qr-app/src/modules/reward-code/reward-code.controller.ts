@@ -56,12 +56,12 @@ export class RewardCodeController {
   @UseGuards(AuthGuard, RolesGuard)
   @DeleteRewardCodeDoc()
   async remove(@Param('slug') slug: string, @Param('id') id: string) {
-    return this.rewardCodeService.remove(id);
+    return this.rewardCodeService.remove(id, slug);
   }
 
   @Get('code/:code')
   @GetRewardCodeByCodeDoc()
   async findOneByCode(@Param('slug') slug: string, @Param('code') code: string) {
-    return this.rewardCodeService.findOneByCode(code);
+    return this.rewardCodeService.findOneByCode(code, slug);
   }
 }

@@ -101,7 +101,7 @@ export class OrdersService {
       // 3,5. Aplicar código de recompensa
       let discountPercentage = 0;
       if (createOrderDto.rewardCode) {
-        const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode);
+        const rewardCode = await this.rewardCodeService.findOneByCode(createOrderDto.rewardCode, slug);
 
         if (!rewardCode || !rewardCode.isActive || !rewardCode.exist) {
           throw new BadRequestException('Invalid or already used reward code');

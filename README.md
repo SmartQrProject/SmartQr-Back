@@ -106,5 +106,5 @@ Swagger documentation will be at `http://localhost:3000/api`
 
 
 <div align="center">
-Made with ❤️ by [Your Name]
+Made by Smart-QR
 </div> 

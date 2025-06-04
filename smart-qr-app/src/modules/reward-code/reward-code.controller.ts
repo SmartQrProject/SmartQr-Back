@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Put, Delete, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { RewardCodeService } from './reward-code.service';
 import { CreateRewardCodeDto } from './dto/create-reward-code.dto';
 import { ApiParam } from '@nestjs/swagger';

@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiBody, ApiResponse, ApiQuery, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiQuery, ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import { CreateRestaurantsDto } from '../dto/create-restaurants.dto';
+import { PatchRestaurantsDto } from '../dto/patch-restaurants.dto';
 
 export function CreateRestaurantDoc() {
   return applyDecorators(
@@ -12,13 +13,15 @@ export function CreateRestaurantDoc() {
       type: CreateRestaurantsDto,
       description: 'Restaurant and owner data',
       examples: {
-        testCafe: {
+        eliCafe: {
           summary: 'Example of restaurant creation',
           value: {
-            name: 'Test Cafe',
-            slug: 'test-cafe',
+            name: 'Eli Cafe',
+            slug: 'eli-cafe',
+            owner_name: 'John Smith',
             owner_email: 'smartqr2@gmail.com',
-            owner_pass: '!Example123',
+            owner_pass: 'Clave123$$',
+            isTrial: false
           },
         },
       },
@@ -29,8 +32,8 @@ export function CreateRestaurantDoc() {
       schema: {
         example: {
           id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Test Cafe',
-          slug: 'test-cafe',
+          name: 'Eli Cafe',
+          slug: 'eli-cafe',
           owner_email: 'smartqr2@gmail.com',
           created_at: '2024-03-20T12:34:56.789Z',
           updated_at: '2024-03-20T12:34:56.789Z',
@@ -51,13 +54,13 @@ export function GetRestaurantDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Get restaurant information',
-      description: 'Retrieves restaurant data and its categories/products using its unique slug.',
+      description: 'Retrieves restaurant data and its categories/products using its unique slug. Requires Owner or SuperAdmin role.',
     }),
-    ApiQuery({
+    ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
-      required: true,
+      example: 'eli-cafe',
+      required: true
     }),
     ApiResponse({
       status: 200,
@@ -65,13 +68,29 @@ export function GetRestaurantDoc() {
       schema: {
         example: {
           id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Test Cafe',
-          slug: 'test-cafe',
+          name: 'Eli Cafe',
+          slug: 'eli-cafe',
           owner_email: 'smartqr2@gmail.com',
           created_at: '2024-03-20T12:34:56.789Z',
           updated_at: '2024-03-20T12:34:56.789Z',
           exist: true,
           is_active: true,
+          banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+          address: 'Argentina, Posadas, Misiones, N3300, Argentina',
+          phone: '1111111',
+          description: 'Authentic Colombian coffee, artisan pastries, and a warm, cozy atmosphere',
+          tags: ['Coffee Specialties', 'Breakfast & Brunch'],
+          trading_hours: {
+            mondayToFriday: { open: '12:20', close: '18:26' },
+            saturday: { open: '', close: '' },
+            sunday: { open: '', close: '' }
+          },
+          ordering_times: {
+            dinein: '',
+            pickup: '20'
+          },
+          latitude: '-27.421255',
+          longitude: '-55.935053',
           categories: [
             {
               id: '7d1e3cd8-2a0d-4a40-8b2e-4e1c9578c8f3',
@@ -82,21 +101,23 @@ export function GetRestaurantDoc() {
         },
       },
     }),
+    ApiResponse({ status: 401, description: 'Unauthorized - Missing or invalid token' }),
+    ApiResponse({ status: 403, description: 'Forbidden - User does not have required role' }),
     ApiResponse({ status: 404, description: 'Restaurant not found' }),
   );
 }
 
 export function GetRestaurantPublicDoc() {
   return applyDecorators(
-    ApiQuery({
+    ApiParam({
       name: 'slug',
       required: true,
       description: 'Unique restaurant identifier',
-      example: 'eli-cafe',
+      example: 'eli-cafe'
     }),
     ApiOperation({
       summary: 'Get public data of a restaurant by slug',
-      description: 'Retrieves public data of a restaurant including address, contact, categories and products',
+      description: 'Retrieves public data of a restaurant including address, contact, categories and products. No authentication required.',
     }),
     ApiResponse({
       status: 200,
@@ -104,8 +125,8 @@ export function GetRestaurantPublicDoc() {
       schema: {
         type: 'object',
         properties: {
-          name: { type: 'string', example: 'Smart Qr Oficial' },
-          slug: { type: 'string', example: 'test-cafe' },
+          name: { type: 'string', example: 'Eli Cafe' },
+          slug: { type: 'string', example: 'eli-cafe' },
           is_active: { type: 'boolean', example: true },
           banner: {
             type: 'string',
@@ -181,60 +202,36 @@ export function GetRestaurantPublicDoc() {
   );
 }
 
-//PatchRestaurantBySlugDoc
 export function PatchRestaurantBySlugDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: 'Modify Name and Onwers email for a Restaurant',
-      description: 'Updates Name and Owner_Email. You should provide SLUG to access the data',
+      summary: 'Update restaurant information',
+      description: 'Updates restaurant information. Requires Owner or SuperAdmin role. The following fields can be updated: name, banner, address, phone, description, tags, trading_hours, ordering_times, longitude, latitude, is_active',
+    }),
+    ApiParam({
+      name: 'slug',
+      description: 'Unique restaurant identifier',
+      example: 'eli-cafe',
+      required: true
     }),
     ApiBody({
-      type: CreateRestaurantsDto,
-      description: 'Restaurant and owner data',
+      type: PatchRestaurantsDto,
+      description: 'Restaurant data to update',
       examples: {
-        FreeTrial3: {
-          summary: 'Example of restaurant FreeTrail3 with all fields',
-          value: {
-            name: 'free trial3',
-            banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
-            address: 'Argentina, Posadas, Misiones, N3300, Argentina',
-            phone: null,
-            description: null,
-            tags: ['Vegan', 'Vegetariano'],
-            subscriptionId: '456fe464-7131-4371-b281-f427a1de820e',
-            trading_hours: null,
-            ordering_times: null,
-            isTrial: false,
-            longitude: '-55.935053',
-            latitude: '-27.421255',
-            is_active: true,
-            exist: true,
-          },
-        },
-        EliCafe: {
-          summary: 'Example of restaurant EliCafe with all fields',
+        eliCafe: {
+          summary: 'Example of restaurant update',
           value: {
             name: 'Eli Cafe',
-            banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1748236814/banners/touzqyjfxwn6uua3xrzi.jpg',
+            banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
             address: 'Argentina, Posadas, Misiones, N3300, Argentina',
             phone: '1111111',
             description: 'Authentic Colombian coffee, artisan pastries, and a warm, cozy atmosphere — your perfect coffee break starts here.',
             tags: ['Coffee Specialties', 'Breakfast & Brunch'],
-            subscriptionId: null,
             trading_hours: {
-              sunday: {
-                open: '',
-                close: '',
-              },
-              saturday: {
-                open: '',
-                close: '',
-              },
-              mondayToFriday: {
-                open: '12:20',
-                close: '18:26',
-              },
+              sunday: { open: '', close: '' },
+              saturday: { open: '', close: '' },
+              mondayToFriday: { open: '12:20', close: '18:26' },
             },
             ordering_times: {
               dinein: '',
@@ -242,41 +239,36 @@ export function PatchRestaurantBySlugDoc() {
             },
             latitude: '-27.421255',
             longitude: '-55.935053',
-            isTrial: false,
-            is_active: true,
-            exist: true,
-          },
-        },
-        FreeTrail: {
-          summary: 'Example of restaurant FreeTrail with all fields',
-          value: {
-            name: 'Free Trail',
-            banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
-            address: 'Colonial Place, Grand Falls-Windsor, Newfoundland and Labrador A2B 1E2, Canada',
-            phone: '3232323232',
-            description: 'Grand Falls-Windsor 5 Stars Hotel',
-            tags: ['Italian & Pizza'],
-            subscriptionId: '3b6dc820-ef13-4c35-9d50-b824f05b8535',
-            trading_hours: null,
-            ordering_times: null,
-            isTrial: true,
-            latitude: '48.950815',
-            longitude: '-55.666373',
-            is_active: true,
-            exist: true,
+            is_active: true
           },
         },
       },
     }),
     ApiResponse({
       status: 200,
-      description: 'Restaurant successfully created',
+      description: 'Restaurant successfully updated',
       schema: {
         example: {
           id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Test Cafe',
-          slug: 'test-cafe',
+          name: 'Eli Cafe',
+          slug: 'eli-cafe',
           owner_email: 'smartqr2@gmail.com',
+          banner: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
+          address: 'Argentina, Posadas, Misiones, N3300, Argentina',
+          phone: '1111111',
+          description: 'Authentic Colombian coffee, artisan pastries, and a warm, cozy atmosphere',
+          tags: ['Coffee Specialties', 'Breakfast & Brunch'],
+          trading_hours: {
+            mondayToFriday: { open: '12:20', close: '18:26' },
+            saturday: { open: '', close: '' },
+            sunday: { open: '', close: '' }
+          },
+          ordering_times: {
+            dinein: '',
+            pickup: '20'
+          },
+          latitude: '-27.421255',
+          longitude: '-55.935053',
           created_at: '2024-03-20T12:34:56.789Z',
           updated_at: '2024-03-20T12:34:56.789Z',
           exist: true,
@@ -284,49 +276,54 @@ export function PatchRestaurantBySlugDoc() {
         },
       },
     }),
-    ApiResponse({
-      status: 400,
-      description: 'Invalid data or slug already exists',
-    }),
+    ApiResponse({ status: 400, description: 'Invalid data' }),
+    ApiResponse({ status: 401, description: 'Unauthorized - Missing or invalid token' }),
+    ApiResponse({ status: 403, description: 'Forbidden - User does not have required role' }),
+    ApiResponse({ status: 404, description: 'Restaurant not found' }),
   );
 }
 
-//PatchRestaurantBySlugDoc
 export function DeleteRestaurantBySlugDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: 'Delete Name and Onwers email for a Restaurant',
-      description: 'De-activates the restaurant. You should provide SLUG to access the data',
+      summary: 'Delete a restaurant',
+      description: 'De-activates the restaurant. Requires SuperAdmin role.',
     }),
-
+    ApiParam({
+      name: 'slug',
+      description: 'Unique restaurant identifier',
+      example: 'eli-cafe',
+      required: true
+    }),
     ApiResponse({
       status: 200,
-      description: 'Restaurant successfully Delete',
+      description: 'Restaurant successfully deleted',
       schema: {
         example: {
           id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Test Cafe',
-          slug: 'test-cafe',
+          name: 'Eli Cafe',
+          slug: 'eli-cafe',
           owner_email: 'smartqr2@gmail.com',
           created_at: '2024-03-20T12:34:56.789Z',
           updated_at: '2024-03-20T12:34:56.789Z',
           exist: true,
-          is_active: true,
+          is_active: false,
         },
       },
     }),
-    ApiResponse({
-      status: 400,
-      description: 'Invalid data or slug dont exist',
-    }),
+    ApiResponse({ status: 400, description: 'Invalid data or slug does not exist' }),
+    ApiResponse({ status: 401, description: 'Unauthorized - Missing or invalid token' }),
+    ApiResponse({ status: 403, description: 'Forbidden - User does not have required role' }),
   );
 }
+
 export const GetAllRestaurantsDoc = () =>
   applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'Get all restaurants',
-      description: 'Returns all registered restaurants with basic info',
+      description: 'Returns all registered restaurants with basic info. Requires SuperAdmin role.',
     }),
     ApiOkResponse({
       description: 'Array of restaurants',
@@ -338,22 +335,20 @@ export const GetAllRestaurantsDoc = () =>
             id: { type: 'string', format: 'uuid', example: '9f07cf57-82e3-4050-8beb-ed7f011b1794' },
             name: { type: 'string', example: 'Eli Cafe' },
             slug: { type: 'string', example: 'eli-cafe' },
-            owner_email: { type: 'string', format: 'email', example: 'elicafe@gmail.com' },
+            owner_email: { type: 'string', format: 'email', example: 'smartqr2@gmail.com' },
             is_active: { type: 'boolean', example: true },
-            created_at: { type: 'string', format: 'date-time', example: '2025-05-16T06:16:47.629Z' },
+            created_at: { type: 'string', format: 'date-time', example: '2024-03-20T12:34:56.789Z' },
             subscription: { type: 'string', nullable: true, example: null },
             exist: { type: 'boolean', example: true },
             banner: {
               type: 'string',
               format: 'uri',
-              example: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1748134217/banners/zj631kav9gxmqqpqxz3s.jpg',
+              example: 'https://res.cloudinary.com/dsrcokjsp/image/upload/v1747862758/lovmpbsgq7ymbzyib5zv.png',
             },
           },
         },
       },
     }),
-    ApiResponse({
-      status: 401,
-      description: 'Unauthorized',
-    }),
+    ApiResponse({ status: 401, description: 'Unauthorized - Missing or invalid token' }),
+    ApiResponse({ status: 403, description: 'Forbidden - User does not have required role' }),
   );

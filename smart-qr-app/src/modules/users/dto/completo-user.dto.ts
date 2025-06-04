@@ -68,7 +68,7 @@ export class CompleteUserDto {
   // role: string;/////////////////////////////////////////////
 
   @IsOptional()
-  @Transform(({ value }) => String(value))
+  @Transform(({ value }) => value === '' ? undefined : value)
   @Length(6, 40, {
     message: 'The phone number must be between 6 and 40 characters',
   })
@@ -77,7 +77,7 @@ export class CompleteUserDto {
     message: 'Phone number format is invalid. It may include +, digits, spaces, parentheses, and hyphens.',
   })
   @ApiPropertyOptional({
-    description: 'Phone number +countryCode Area Code, Number',
+    description: 'Phone number +countryCode Area Code, Number. Empty strings will be treated as if the field was not sent.',
     example: '+54 93487 424050',
   })
   phone?: string;

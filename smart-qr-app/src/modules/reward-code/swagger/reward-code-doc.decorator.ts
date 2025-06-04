@@ -146,7 +146,7 @@ export function DeleteRewardCodeDoc() {
     SlugParam,
     IdParam,
     ApiOperation({ summary: 'RewardCode to be logically deleted' }),
-    ApiResponse({ status: 200, description: 'RewardCode logically deleted' }),
+    ApiResponse({ status: 200, description: 'RewardCode logically deleted', example: 'XXXXX5RBUT' }),
     ApiResponse({
       status: 404,
       description: 'Reward code not found',

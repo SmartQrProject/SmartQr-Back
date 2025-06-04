@@ -7,7 +7,7 @@ Technologies, LIbraries & Services
 * NodeMailer
   
 Links
-* App URL: smart-qr.tech
+* App URL: https://smart-qr.tech
 * Github: 
   * https://github.com/SmartQrProject/SmartQr-Front
   * https://github.com/SmartQrProject/SmartQr-Back.git
@@ -15,10 +15,10 @@ Links
 * FrontEnd: https://smart-qr-front.vercel.app
 * Supabase: https://supabase.com/dashboard/project/jyizhxqcenlvxdxvwxhi
 * Hostinger
-  * domain: smart-qr.tech
+  * domain: https://smart-qr.tech
   * email: info@smart-qr.tech
 
-Cuentas
+Accounts
   * In al cases it was used our main gmail account: smartqr2@gmail.com 
      * Supabase
      * Auth0

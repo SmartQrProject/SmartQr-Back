@@ -16,7 +16,7 @@ export function ModifyUserByIdDoc() {
     ApiParam({
       name: 'id',
       description: 'User ID',
-      example: 'XXXXX491-1959-40ce-96f9-5c391d79fb1f',
+      example: '95f1894e-b071-46ea-9bf2-ca41a6e1ad53',
       required: true,
     }),
     ApiBody({ type: PutUserDto }),
@@ -75,14 +75,14 @@ export function GetAllUsersDoc() {
         example: {
           users: [
             {
-              id: '550e8400-e29b-41d4-a716-446655440000',
+              id: '95f1894e-b071-46ea-9bf2-ca41a6e1ad53',
               email: 'smartqr2@gmail.com',
               name: 'owner Test Cafe',
               role: 'owner',
               is_active: true,
               created_at: '2024-03-20T12:34:56.789Z',
               restaurant: {
-                id: '550e8400-e29b-41d4-a716-446655440000',
+                id: '531a7844-b425-4f90-b161-a78ce748f977',
                 name: 'Eli Cafe',
                 slug: 'eli-cafe',
               },
@@ -130,7 +130,7 @@ export function GetActiveStaff() {
     ApiQuery({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiQuery({
@@ -154,16 +154,16 @@ export function GetActiveStaff() {
         example: {
           users: [
             {
-              id: '550e8400-e29b-41d4-a716-446655440000',
+              id: '95f1894e-b071-46ea-9bf2-ca41a6e1ad53',
               email: 'smartqr2@gmail.com',
               name: 'owner Test Cafe',
               role: 'owner',
               created_at: '2024-03-20T12:34:56.789Z',
               is_active: 'owner',
               restaurant: {
-                id: '550e8400-e29b-41d4-a716-446655440000',
-                name: 'Test Cafe',
-                slug: 'test-cafe',
+                id: '531a7844-b425-4f90-b161-a78ce748f977',
+                name: 'Eli Cafe',
+                slug: 'eli-cafe',
               },
             },
           ],
@@ -206,13 +206,13 @@ export function DeleteUserByIdDoc() {
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiParam({
       name: 'id',
       description: 'User ID',
-      example: '20966491-1959-40ce-96f9-5c391d79fb1f',
+      example: '3788d5db-d28b-4898-a82b-294eb397970b',
       required: true,
     }),
     ApiResponse({ status: 404, description: '❌ No users found  with id or is blocked !!' }),
@@ -238,12 +238,12 @@ export function UserLoginDoc() {
           summary: 'Test Cafe owner credentials',
         },
 
-        testCafeStaff: {
+        elicafeOwner: {
           value: {
-            email: 'amigop@gmail.com',
+            email: 'testsmartqr@gmail.com',
             password: 'Clave123$$',
           },
-          summary: 'Test Cafe staff credentials',
+          summary: 'Eli Cafe Owner credentials',
         },
 
         testSuperAdmin: {
@@ -275,13 +275,13 @@ export function UserLoginDoc() {
       schema: {
         example: {
           user: {
-            id: '550e8400-e29b-41d4-a716-446655440000',
-            email: 'smartqr2@gmail.com',
-            name: 'owner Test Cafe',
+            id: '3788d5db-d28b-4898-a82b-294eb397970b',
+            email: 'testsmartqr@gmail.com',
+            name: 'owner Eli Cafe',
             role: 'owner',
             created_at: '2024-03-20T12:34:56.789Z',
             restaurant: {
-              id: '550e8400-e29b-41d4-a716-446655440000',
+              id: '531a7844-b425-4f90-b161-a78ce748f977',
               name: 'Test Cafe',
               slug: 'test-cafe',
             },

@@ -20,7 +20,7 @@ export function CustomerIdParam() {
   return ApiParam({
     name: 'id',
     description: 'Unique identifier for the Customer',
-    example: 'xxxxx',
+    example: 'ab79bc88-5ce2-4414-bb4e-29b766b63b6a',
     required: true,
   });
 }
@@ -28,18 +28,18 @@ export function CustomerIdParam() {
 export function SyncAuth0Doc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ 
+    ApiOperation({
       summary: 'Create or Update data coming from Auth0',
-      description: 'Synchronizes or creates a customer based on Auth0 authentication data'
+      description: 'Synchronizes or creates a customer based on Auth0 authentication data',
     }),
     ApiBody({ type: Auth0CustomerDto }),
-    ApiResponse({ 
-      status: 200, 
+    ApiResponse({
+      status: 200,
       description: 'Customer synchronized successfully',
-      type: CustomerResponseDto 
+      type: CustomerResponseDto,
     }),
     ApiResponse({ status: 400, description: 'Invalid Auth0 data' }),
-    CustomerSlugParam()
+    CustomerSlugParam(),
   );
 }
 
@@ -47,14 +47,14 @@ export function CreateCustomerDoc() {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new customer account' }),
     ApiBody({ type: CreateCustomerDto }),
-    ApiResponse({ 
-      status: 201, 
+    ApiResponse({
+      status: 201,
       description: 'Customer created successfully',
-      type: CustomerResponseDto 
+      type: CustomerResponseDto,
     }),
     ApiResponse({ status: 400, description: 'Invalid customer data' }),
     ApiResponse({ status: 409, description: 'Email already exists' }),
-    CustomerSlugParam()
+    CustomerSlugParam(),
   );
 }
 
@@ -62,52 +62,52 @@ export function SignInCustomerDoc() {
   return applyDecorators(
     ApiOperation({ summary: 'Customer Login (email and password)' }),
     ApiBody({ type: LogInCustomerDto }),
-    ApiResponse({ 
-      status: 200, 
+    ApiResponse({
+      status: 200,
       description: 'Login successful',
       schema: {
         properties: {
           access_token: { type: 'string' },
-          customer: { $ref: '#/components/schemas/CustomerResponseDto' }
-        }
-      }
+          customer: { $ref: '#/components/schemas/CustomerResponseDto' },
+        },
+      },
     }),
     ApiResponse({ status: 401, description: 'Invalid credentials' }),
-    CustomerSlugParam()
+    CustomerSlugParam(),
   );
 }
 
 export function GetAllCustomersDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ 
+    ApiOperation({
       summary: 'Get paginated list of customers',
-      description: 'Returns a paginated list of customers with their basic information, excluding passwords'
+      description: 'Returns a paginated list of customers with their basic information, excluding passwords',
     }),
     ApiQuery({
       name: 'page',
       required: false,
       type: Number,
       description: 'Page number (default: 1)',
-      example: 1
+      example: 1,
     }),
     ApiQuery({
       name: 'limit',
       required: false,
       type: Number,
       description: 'Items per page (default: 5)',
-      example: 5
+      example: 5,
     }),
-    ApiResponse({ 
-      status: 200, 
+    ApiResponse({
+      status: 200,
       description: 'List of customers retrieved successfully',
       schema: {
         properties: {
           page: { type: 'number', example: 1 },
           limit: { type: 'number', example: 5 },
-          customers: { 
+          customers: {
             type: 'array',
-            items: { 
+            items: {
               type: 'object',
               properties: {
                 id: { type: 'string' },
@@ -122,46 +122,46 @@ export function GetAllCustomersDoc() {
                 created_at: { type: 'string', format: 'date-time' },
                 modified_at: { type: 'string', format: 'date-time' },
                 exist: { type: 'boolean' },
-                isActive: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      }
+                isActive: { type: 'boolean' },
+              },
+            },
+          },
+        },
+      },
     }),
     ApiResponse({ status: 404, description: 'No customers found' }),
-    CustomerSlugParam()
+    CustomerSlugParam(),
   );
 }
 
 export function GetCustomerByIdDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ 
+    ApiOperation({
       summary: 'Get customer details by ID',
-      description: 'Retrieves detailed customer information including order history'
+      description: 'Retrieves detailed customer information including order history',
     }),
-    ApiResponse({ 
-      status: 200, 
+    ApiResponse({
+      status: 200,
       description: 'Customer found',
-      type: CustomerResponseDto
+      type: CustomerResponseDto,
     }),
     ApiResponse({ status: 404, description: 'Customer not found' }),
     CustomerSlugParam(),
-    CustomerIdParam()
+    CustomerIdParam(),
   );
 }
 
 export function UpdateCustomerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ 
+    ApiOperation({
       summary: 'Update customer data',
-      description: 'Updates customer information, returns customer data without password'
+      description: 'Updates customer information, returns customer data without password',
     }),
     ApiBody({ type: UpdateCustomerDto }),
-    ApiResponse({ 
-      status: 200, 
+    ApiResponse({
+      status: 200,
       description: 'Customer updated successfully',
       schema: {
         type: 'object',
@@ -178,14 +178,14 @@ export function UpdateCustomerDoc() {
           created_at: { type: 'string', format: 'date-time' },
           modified_at: { type: 'string', format: 'date-time' },
           exist: { type: 'boolean' },
-          isActive: { type: 'boolean' }
-        }
-      }
+          isActive: { type: 'boolean' },
+        },
+      },
     }),
     ApiResponse({ status: 400, description: 'Invalid update data' }),
     ApiResponse({ status: 404, description: 'Customer not found' }),
     CustomerSlugParam(),
-    CustomerIdParam()
+    CustomerIdParam(),
   );
 }
 
@@ -193,12 +193,12 @@ export function DeleteCustomerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({ summary: 'Delete a customer (soft delete)' }),
-    ApiResponse({ 
-      status: 200, 
-      description: 'Customer deleted successfully' 
+    ApiResponse({
+      status: 200,
+      description: 'Customer deleted successfully',
     }),
     ApiResponse({ status: 404, description: 'Customer not found' }),
     CustomerSlugParam(),
-    CustomerIdParam()
+    CustomerIdParam(),
   );
 }

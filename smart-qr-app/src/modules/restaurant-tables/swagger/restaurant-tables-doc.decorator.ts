@@ -14,7 +14,7 @@ const SlugParam = ApiParam({
 const IdParam = ApiParam({
   name: 'id',
   description: 'Table ID',
-  example: 'XXXXX676-d3d2-472a-8b7c-785f455a80ab',
+  example: '4a176832-c856-483f-9f6f-4c179c525664',
 });
 
 export function FindAllTablesDoc() {
@@ -36,14 +36,14 @@ export function FindAllTablesDoc() {
           limit: 5,
           restaurantTables: [
             {
-              id: '7026591f-9a52-4cbe-8e62-607ee3ec347b',
+              id: '4a176832-c856-483f-9f6f-4c179c525664',
               code: 'Salon-01',
               is_active: true,
               exist: true,
               created_at: '2025-06-04T11:13:56.658Z',
             },
             {
-              id: '9a2525ef-48a4-44dd-8924-7822c97af3e4',
+              id: '966fda39-b946-4bb7-ada6-6814bd1d2303',
               code: 'Salon-02',
               is_active: true,
               exist: true,

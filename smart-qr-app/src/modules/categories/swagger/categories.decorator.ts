@@ -122,7 +122,7 @@ export function GetAllCategoriesDoc() {
         example: {
           categories: [
             {
-              id: 'XXXXX567-e89b-12d3-a456-426614174000',
+              id: '4946f52b-cb25-400f-a864-e3c69b5801ee',
               name: 'Beverages',
               created_at: '2024-03-20T15:30:00.000Z',
               updated_at: '2024-03-20T15:30:00.000Z',
@@ -130,7 +130,7 @@ export function GetAllCategoriesDoc() {
               exist: true,
               products: [
                 {
-                  id: 'abc12345-e89b-12d3-a456-426614174000',
+                  id: '423d2446-e06d-4823-9861-fa78545599b1',
                   name: 'Coca Cola',
                   price: 2.5,
                   description: 'Regular Coca Cola',
@@ -186,7 +186,7 @@ export function GetCategoryByIdDoc() {
     ApiParam({
       name: 'id',
       description: 'Category ID',
-      example: 'XXXXX676-d3d2-472a-8b7c-785f455a80ab',
+      example: '4946f52b-cb25-400f-a864-e3c69b5801ee',
     }),
     ApiResponse({
       status: 200,
@@ -258,7 +258,7 @@ export function UpdateCategoryDoc() {
     ApiParam({
       name: 'id',
       description: 'Category ID',
-      example: 'XXXXX673-1891-488d-88cb-b33534028375',
+      example: 'e8577034-cb84-4d0b-a5c1-40b5af779984',
     }),
     ApiBody({
       type: UpdateCategoryDto,
@@ -290,7 +290,7 @@ export function UpdateCategoryDoc() {
       description: 'Category updated successfully',
       schema: {
         example: {
-          id: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+          id: 'e8577034-cb84-4d0b-a5c1-40b5af779984',
           name: 'Hot Beverages',
           created_at: '2024-03-20T15:30:00.000Z',
           updated_at: '2024-03-20T15:35:00.000Z',
@@ -298,7 +298,7 @@ export function UpdateCategoryDoc() {
           exist: true,
           products: [
             {
-              id: 'abc12345-e89b-12d3-a456-426614174000',
+              id: '8a02defe-246d-48f4-bd32-bc7c7c03b98d',
               name: 'Coca Cola',
               price: 2.5,
               description: 'Regular Coca Cola',
@@ -308,8 +308,8 @@ export function UpdateCategoryDoc() {
           ],
           restaurant: {
             id: '550e8400-e29b-41d4-a716-446655440000',
-            name: 'Test Cafe',
-            slug: 'test-cafe',
+            name: 'Eli Cafe',
+            slug: 'eli-cafe',
           },
         },
       },
@@ -330,7 +330,7 @@ export function UpdateCategoryDoc() {
       description: 'Category or restaurant not found',
       schema: {
         example: {
-          message: 'Category with ID c2917676-d3d2-472a-8b7c-785f455a80ab not found in restaurant test-cafe',
+          message: 'Category with ID 8a02defe-246d-48f4-bd32-bc7c7c03b98d not found in restaurant eli-cafe',
           error: 'Not Found',
           statusCode: 404,
         },
@@ -354,13 +354,13 @@ export function DeleteCategoryDoc() {
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiParam({
       name: 'id',
       description: 'Category ID',
-      example: 'c2917676-d3d2-472a-8b7c-785f455a80ab',
+      example: '3dcdec73-c5f4-4336-bca4-720d5c3a67c9',
     }),
     ApiResponse({
       status: 200,
@@ -387,7 +387,7 @@ export function DeleteCategoryDoc() {
       description: 'Category or restaurant not found',
       schema: {
         example: {
-          message: 'Category with ID c2917676-d3d2-472a-8b7c-785f455a80ab not found in restaurant test-cafe',
+          message: 'Category with ID 3dcdec73-c5f4-4336-bca4-720d5c3a67c9 not found in restaurant test-cafe',
           error: 'Not Found',
           statusCode: 404,
         },
@@ -410,7 +410,7 @@ export function UpdateCategorySequenceDoc() {
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
-      example: 'test-cafe',
+      example: 'eli-cafe',
       required: true,
     }),
     ApiBody({
@@ -426,10 +426,10 @@ export function UpdateCategorySequenceDoc() {
       },
       examples: {
         reorderCategories: {
-          summary: 'Reorder Hot Beverages and Cold Beverages categories',
+          summary: 'Reorder Colombian Desserts and Natural Juices & Smoothies categories',
           value: [
-            { id: 'c2917676-d3d2-472a-8b7c-785f455a80ab', sequenceNumber: 1 },
-            { id: '7d1e3cd8-2a0d-4a40-8b2e-4e1c9578c8f3', sequenceNumber: 2 },
+            { id: '3dcdec73-c5f4-4336-bca4-720d5c3a67c9', sequenceNumber: 1 },
+            { id: '4946f52b-cb25-400f-a864-e3c69b5801ee', sequenceNumber: 2 },
           ],
         },
       },

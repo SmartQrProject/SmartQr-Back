@@ -15,7 +15,7 @@ const SlugParam = ApiParam({
 const IdParam = ApiParam({
   name: 'id',
   description: 'Reward Code ID',
-  example: 'XXXXX-d3d2-472a-8b7c-785f455a80ab',
+  example: 'd504d61a-02ad-4b28-957d-ac1b2f52bf48',
   required: true,
 });
 
@@ -49,8 +49,8 @@ export function CreateRewardCodeDoc() {
       schema: {
         example: {
           RewardCode: {
-            id: '2fd8cf5a-6f79-41fe-9c00-2d8e4346310c',
-            code: 'RZKTE2L8SA',
+            id: 'd504d61a-02ad-4b28-957d-ac1b2f52bf48',
+            code: 'Q8T4FMEE62',
             percentage: 10,
           },
         },
@@ -73,24 +73,24 @@ export function GetAllRewardCodesDoc() {
         example: {
           RewardCode: [
             {
-              id: '72787f87-2801-4a0c-b3d1-ed09313ff6c2',
-              code: 'T2Y8TW9YDP',
+              id: 'd504d61a-02ad-4b28-957d-ac1b2f52bf48',
+              code: 'Q8T4FMEE62',
               isActive: true,
               percentage: 10,
               created_at: '2025-06-04T06:44:06.653Z',
               restaurant: {
-                slug: 'riviera',
+                slug: 'eli-cafe',
               },
               exist: true,
             },
             {
-              id: '895d7f5b-c8a5-4657-b633-4bce0d1d4aac',
-              code: 'A54UYXBSBS',
+              id: 'ca805624-d34b-4c59-bf62-cd93fc43d13c',
+              code: 'EMUKB28UX5',
               isActive: true,
               percentage: 10,
               created_at: '2025-06-04T07:00:09.698Z',
               restaurant: {
-                slug: 'riviera',
+                slug: 'eli-cafe',
               },
               exist: true,
             },
@@ -146,7 +146,7 @@ export function DeleteRewardCodeDoc() {
     SlugParam,
     IdParam,
     ApiOperation({ summary: 'RewardCode to be logically deleted' }),
-    ApiResponse({ status: 200, description: 'RewardCode logically deleted', example: 'XXXXX5RBUT' }),
+    ApiResponse({ status: 200, description: 'RewardCode logically deleted', example: '5S8RWK42F7' }),
     ApiResponse({
       status: 404,
       description: 'Reward code not found',
@@ -171,13 +171,13 @@ export function GetRewardCodeByCodeDoc() {
       schema: {
         example: {
           RewardCode: {
-            id: '2fd8cf5a-6f79-41fe-9c00-2d8e4346310c',
-            code: 'RZKTE2L8SA',
+            id: 'c1c1a06b-3c84-47cc-8f80-519a8a3f3075',
+            code: '5S8RWK42F7',
             isActive: true,
             percentage: 10,
             created_at: '2025-06-04T06:44:37.353Z',
             restaurant: {
-              id: '62245249-6cdd-4c2c-af40-2569bb10c72a',
+              id: '531a7844-b425-4f90-b161-a78ce748f977',
               name: 'Eli Cafe',
               slug: 'eli-cafe',
               owner_email: 'elicafe@gmail.com',

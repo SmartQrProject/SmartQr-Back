@@ -46,14 +46,14 @@ export class OrdersService {
         slug: slug,
       });
       if (!restaurant) throw new NotFoundException('Restaurant not found');
-      console.log('Restaurant found:', restaurant);
+      //console.log('Restaurant found:', restaurant);
       let table = await queryRunner.manager.findOne(RestaurantTable, {
         where: {
           code: createOrderDto.code,
           restaurant: { id: restaurant.id },
         },
       });
-      console.log(table);
+      //console.log(table);
       if (!table) {
         table = await queryRunner.manager.findOne(RestaurantTable, {
           where: {
@@ -124,7 +124,7 @@ export class OrdersService {
         total_price: totalPrice,
         items: orderItems,
       });
-      console.log('New Order:', newOrder);
+      //console.log('New Order:', newOrder);
       const savedOrder = await queryRunner.manager.save(Order, newOrder);
       const stripeLineItems = orderItems.map((item) => {
         const discountedUnitPrice = discountPercentage ? item.unit_price - (item.unit_price * discountPercentage) / 100 : item.unit_price;
@@ -367,7 +367,7 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${savedOrder.id} not found`);
     }
 
-    console.log(order2Email);
+    //console.log(order2Email);
 
     try {
       await this.sendEmail(order2Email.customer, order2Email.restaurant, order2Email, 'created'); //nodemailer

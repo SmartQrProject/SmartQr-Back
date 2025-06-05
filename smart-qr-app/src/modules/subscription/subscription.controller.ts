@@ -25,7 +25,7 @@ export class SubscriptionController {
   @UseGuards(AuthGuard, RolesGuard)
   @GetSubscriptionDoc()
   async getSubscriptionBySlug(@Param('slug') slug: string) {
-    console.log('Fetching subscription for slug:', slug);
+    // console.log('Fetching subscription for slug:', slug);
     return this.subscriptionService.getByRestaurantSlug(slug);
   }
 }

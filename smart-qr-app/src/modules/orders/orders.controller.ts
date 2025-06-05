@@ -19,8 +19,8 @@ export class OrdersController {
   @UseGuards(JwtAuth0Guard)
   @CreateOrderDoc()
   async create(@Param('slug') slug: string, @Body() createOrderDto: CreateOrderDto) {
-    console.log('Creating order for slug:', slug);
-    console.log('CreateOrderDto:', createOrderDto);
+    //console.log('Creating order for slug:', slug);
+    // console.log('CreateOrderDto:', createOrderDto);
     return this.ordersService.create(createOrderDto, slug);
   }
 

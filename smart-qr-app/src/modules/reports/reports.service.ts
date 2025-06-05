@@ -180,7 +180,7 @@ export class ReportsService {
     const customers = await this.customerRepo
       .createQueryBuilder('c')
       .leftJoin('c.orders', 'o', 'o.exist = true')
-      .where('c.restaurantId = :restaurantId', { restaurantId: restaurant.id })
+      .where('o.restaurantId = :restaurantId', { restaurantId: restaurant.id })
       .andWhere('c.exist = true')
       .select('c.id', 'id')
       .addSelect('c.name', 'name')

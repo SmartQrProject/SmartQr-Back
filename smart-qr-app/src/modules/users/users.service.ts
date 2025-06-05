@@ -175,13 +175,23 @@ export class UsersService {
     const userCreated = await this.usersRepository.createUser(rest, newUser);
 
     try {
-      await this.sendEmail(rest, userCreated, 'created'); //nodemailer
+      await this.sendEmail2(rest, userCreated, 'created'); //nodemailer
     } catch (error) {
       console.error('Failed to send email notification:', error);
       // Continue execution even if email fails
     }
 
     return userCreated;
+  }
+
+  async sendEmail2(rest, user, accion) {
+    const subject = `The user ${user.name} was ${accion} successfully. `;
+    const textmsg = `Hello ${user.name},  A user for your restaurant have been ${accion}.
+    
+      Restaurant Name: ${rest.name} 
+      User:  ${user.name} -  ${user.email} `;
+    const htmlTemplate = 'basico';
+    await this.mailService.sendMail(user.email, subject, textmsg, htmlTemplate);
   }
 
   async sendEmail(rest, user, accion) {

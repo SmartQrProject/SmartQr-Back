@@ -35,9 +35,7 @@ export class ReportsController {
   async getSales(@Param('slug') slug: string, @Query() query: GetSalesDto) {
     const { from, to } = query;
     const total = await this.reportsService.getSalesTotal(from, to, slug);
-    console.log('from', from);
-    console.log('to', to);
-    console.log('total', total);
+
     return { total };
   }
 

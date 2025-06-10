@@ -70,6 +70,16 @@ $ mau deploy
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
+## Migration workflow
+
+This project uses TypeORM migrations to update the database schema. After deploying a new version of the application, run:
+
+```bash
+$ npm run typeorm:run
+```
+
+Running this command ensures that all pending migrations are executed in the production database.
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:

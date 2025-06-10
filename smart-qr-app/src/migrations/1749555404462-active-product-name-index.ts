@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class activeProductNameIndexYYYYMMDDHHMMSS implements MigrationInterface {
-  name = 'activeProductNameIndexYYYYMMDDHHMMSS';
+export class ActiveProductNameIndex1749555404462 implements MigrationInterface {
+  name = 'ActiveProductNameIndex1749555404462';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_products_name_restaurant"`);

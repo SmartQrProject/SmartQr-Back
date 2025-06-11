@@ -68,7 +68,7 @@ export class RestaurantsService {
           password: await this.bcryptService.hash(dto.owner_pass),
           role: 'owner',
           name: dto.owner_name,
-          restaurant: newRestaurants,
+          restaurants: [newRestaurants],
         }),
       );
       const stripe = await this.stripeService.createSubscriptionSession(newRestaurants.slug, dto.isTrial);

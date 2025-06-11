@@ -22,7 +22,7 @@ export class CategoriesService {
     //y el owner .
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can not update categories from other restaurant.`);
         }
       }
@@ -56,7 +56,7 @@ export class CategoriesService {
     //sino solo el owner de las categorias de su restaurant.
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can not update categories from other restaurant.`);
         }
       }
@@ -81,7 +81,7 @@ export class CategoriesService {
     // y el owner del restaurant
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can not update categories from other restaurant.`);
         }
       }

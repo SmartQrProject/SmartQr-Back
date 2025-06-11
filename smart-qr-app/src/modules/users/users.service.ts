@@ -26,8 +26,6 @@ export class UsersService {
       !user ||
       !user.exist ||
       !user.is_active ||
-      /*!rest ||
-      user.restaurant.id !== rest.id ||*/
       !(await this.bcryptService.compare(password, user.password))
     ) {
       throw new UnauthorizedException('Not valid Credentials');
@@ -38,8 +36,7 @@ export class UsersService {
       id: user.id,
       email: user.email,
       roles: user.role,
-      slug: user.restaurant.slug,
-      restaurant: user.restaurant,
+      restaurants: user.restaurants,
       name: user.name,
       phone: user.phone,
     };
@@ -61,7 +58,7 @@ export class UsersService {
       throw new NotFoundException(`❌ restaurant ${slug} found !!`);
     }
 
-    if (usuario && usuario.restaurant.id !== rest.id) {
+    if (usuario && !usuario.restaurants.some((r) => r.id === rest.id)) {
       throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
     }
 
@@ -108,13 +105,13 @@ export class UsersService {
       throw new NotFoundException(`❌ restaurant ${slug} found !!`);
     }
 
-    if (usuario && usuario.restaurant.id !== rest.id) {
+    if (usuario && !usuario.restaurants.some((r) => r.id === rest.id)) {
       throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
     }
 
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can not in-activate this User .`);
         }
       } else {

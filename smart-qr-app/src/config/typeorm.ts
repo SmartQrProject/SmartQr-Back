@@ -12,7 +12,7 @@ const config = {
   autoLoadEntities: true,
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
-  synchronize: true,
+  synchronize: false,
   logging: false,
   //logger: 'advanced-console',
   //logNotifications: true,

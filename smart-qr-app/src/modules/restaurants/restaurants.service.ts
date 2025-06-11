@@ -38,12 +38,15 @@ export class RestaurantsService {
         throw new BadRequestException('Restaurant already Registered');
       }
 
-      // Validar email único
-      const emailExists = await queryRunner.manager.findOneBy(User, {
-        email: dto.owner_email,
+      // Revisar si ya existe un usuario con ese email
+      const emailExists = await queryRunner.manager.findOne(User, {
+        where: { email: dto.owner_email },
+        relations: { restaurants: true },
       });
+
+      let ownerUser: User | null = null;
       if (emailExists) {
-        throw new BadRequestException(`Email User alread exists ${dto.owner_email}`);
+        ownerUser = emailExists;
       }
 
       const newRestaurants = await queryRunner.manager.save(
@@ -62,21 +65,28 @@ export class RestaurantsService {
           restaurant: newRestaurants,
         }),
       );
-      const newUser = await queryRunner.manager.save(
-        queryRunner.manager.create(User, {
-          email: dto.owner_email,
-          password: await this.bcryptService.hash(dto.owner_pass),
-          role: 'owner',
-          name: dto.owner_name,
-          restaurants: [newRestaurants],
-        }),
-      );
+
+      let newUser: User;
+      if (ownerUser) {
+        ownerUser.restaurants = [...ownerUser.restaurants, newRestaurants];
+        newUser = await queryRunner.manager.save(ownerUser);
+      } else {
+        newUser = await queryRunner.manager.save(
+          queryRunner.manager.create(User, {
+            email: dto.owner_email,
+            password: await this.bcryptService.hash(dto.owner_pass),
+            role: 'owner',
+            name: dto.owner_name,
+            restaurants: [newRestaurants],
+          }),
+        );
+      }
       const stripe = await this.stripeService.createSubscriptionSession(newRestaurants.slug, dto.isTrial);
       await queryRunner.commitTransaction();
 
       //nodemailer
       try {
-        await this.sendEmail4Creation(newRestaurants, newUser, 'created');
+        await this.sendEmail4Creation(newRestaurants, newUser, ownerUser ? 'assigned' : 'created');
       } catch (error) {
         console.error('Failed to send email notification:', error);
         // Continue execution even if email fails
@@ -268,10 +278,15 @@ export class RestaurantsService {
   }
 
   async sendEmail4Creation(newRestaurants: Restaurant, newUser, accion) {
-    const subject = `Restaurant and Owner User were successfully created ${newRestaurants.name}`;
-    const textmsg = `Hello ${newUser.name},  Your Restaurant have been updated and your profile have been created.
+    const isNewUser = accion === 'created';
+    const subject = isNewUser ? `Restaurant and Owner User were successfully created ${newRestaurants.name}` : `Restaurant ${newRestaurants.name} assigned successfully`;
+    const textmsg = isNewUser
+      ? `Hello ${newUser.name},  Your Restaurant has been created and your profile has been created.
 
-      \n\nUser: ${newUser.email} `;
+User: ${newUser.email} `
+      : `Hello ${newUser.name},  A new restaurant has been added to your account.
+
+Restaurant: ${newRestaurants.name}`;
     const htmlTemplate = 'basico';
     await this.mailService.sendMail(newUser.email, subject, textmsg, htmlTemplate);
   }

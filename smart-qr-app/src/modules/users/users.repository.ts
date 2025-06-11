@@ -15,10 +15,12 @@ export class UsersRepository {
   ) {}
 
   async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<User> {
-    const user = await this.userRepository.findOneBy({
-      id: id,
-      restaurant: { id: rest.id },
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.restaurants', 'restaurant')
+      .where('user.id = :id', { id })
+      .andWhere('restaurant.id = :restId', { restId: rest.id })
+      .getOne();
 
     if (!user || !user.exist) {
       throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
@@ -41,7 +43,7 @@ export class UsersRepository {
   async deleteById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['restaurant'],
+      relations: ['restaurants'],
     });
 
     if (!user || !user.exist) {
@@ -65,12 +67,14 @@ export class UsersRepository {
     total: number;
   }> {
     const skip = (page - 1) * limit;
-    const [usuarios, total] = await this.userRepository.findAndCount({
-      skip,
-      take: limit,
-      where: { restaurant: { id: rest.id } },
-      order: { name: 'ASC' },
-    });
+    const [usuarios, total] = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.restaurants', 'restaurant')
+      .where('restaurant.id = :restId', { restId: rest.id })
+      .orderBy('user.name', 'ASC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
     if (!usuarios) {
       throw new NotFoundException('❌ No users found');
@@ -92,16 +96,16 @@ export class UsersRepository {
     total: number;
   }> {
     const skip = (page - 1) * limit;
-    const [usuarios, total] = await this.userRepository.findAndCount({
-      skip,
-      take: limit,
-      where: {
-        role: 'staff',
-        exist: true,
-        restaurant: { id: rest.id },
-      },
-      order: { name: 'ASC' },
-    });
+    const [usuarios, total] = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.restaurants', 'restaurant')
+      .where('restaurant.id = :restId', { restId: rest.id })
+      .andWhere('user.role = :role', { role: 'staff' })
+      .andWhere('user.exist = :exist', { exist: true })
+      .orderBy('user.name', 'ASC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
     if (!usuarios) {
       throw new NotFoundException('❌ No users found');
@@ -120,7 +124,7 @@ export class UsersRepository {
     }
 
     userToCreate.password = hash;
-    userToCreate.restaurant = rest;
+    userToCreate.restaurants = [rest];
     const user2BeCreated = this.userRepository.create(userToCreate);
     await this.userRepository.save(user2BeCreated);
     const { password, ...userSinPass } = userToCreate;
@@ -131,7 +135,7 @@ export class UsersRepository {
   async getUserByEmail(email: string): Promise<User | null> {
     const usuario = await this.userRepository.findOne({
       where: { email: email, exist: true },
-      relations: ['restaurant'],
+      relations: ['restaurants'],
     });
 
     return usuario;
@@ -141,7 +145,7 @@ export class UsersRepository {
   async getUserById(id: string): Promise<User | null> {
     const usuario = await this.userRepository.findOne({
       where: { id: id, exist: true },
-      relations: ['restaurant'],
+      relations: ['restaurants'],
     });
 
     return usuario;

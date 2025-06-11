@@ -22,12 +22,7 @@ export class UsersService {
     /*const rest = await this.restService.getRestaurants(slug);*/
     const user = await this.usersRepository.getUserByEmail(email);
 
-    if (
-      !user ||
-      !user.exist ||
-      !user.is_active ||
-      !(await this.bcryptService.compare(password, user.password))
-    ) {
+    if (!user || !user.exist || !user.is_active || !(await this.bcryptService.compare(password, user.password))) {
       throw new UnauthorizedException('Not valid Credentials');
     }
 
@@ -179,6 +174,11 @@ export class UsersService {
     }
 
     return userCreated;
+  }
+
+  async checkEmail(email: string): Promise<{ exists: boolean }> {
+    const user = await this.usersRepository.getUserByEmail(email);
+    return { exists: !!user };
   }
 
   async sendEmail2(rest, user, accion) {

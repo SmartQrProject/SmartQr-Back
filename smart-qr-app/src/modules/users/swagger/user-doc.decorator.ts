@@ -303,3 +303,22 @@ export function UserLoginDoc() {
     }),
   );
 }
+
+export function CheckEmailDoc() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Verify if an email already exists' }),
+    ApiQuery({
+      name: 'email',
+      description: 'Email to verify',
+      example: 'owner@example.com',
+      required: true,
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Returns whether the email exists',
+      schema: {
+        example: { exists: true },
+      },
+    }),
+  );
+}

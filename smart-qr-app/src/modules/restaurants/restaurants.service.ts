@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
+import { CreateRestaurantsExistingDto } from './dto/create-restaurants-existing.dto';
 import { User } from 'src/shared/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
@@ -95,6 +96,71 @@ export class RestaurantsService {
       } catch (error) {
         console.error('Failed to send email notification:', error);
         // Continue execution even if email fails
+      }
+
+      return { url: stripe.url };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async createRestaurantExistingOwner(
+    dto: CreateRestaurantsExistingDto,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const sanitizedSlug = dto.slug.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+
+      const slugExists = await queryRunner.manager.findOneBy(Restaurant, {
+        slug: sanitizedSlug,
+      });
+      if (slugExists) {
+        throw new BadRequestException('Restaurant already Registered');
+      }
+
+      const ownerUser = await queryRunner.manager.findOne(User, {
+        where: { email: dto.owner_email },
+        relations: { restaurants: true },
+      });
+      if (!ownerUser) {
+        throw new BadRequestException('Owner email not registered');
+      }
+
+      const newRestaurant = await queryRunner.manager.save(
+        queryRunner.manager.create(Restaurant, {
+          name: dto.name,
+          slug: sanitizedSlug,
+          owner_email: dto.owner_email,
+          wasTrial: dto.isTrial,
+        }),
+      );
+
+      await queryRunner.manager.save(
+        queryRunner.manager.create(RestaurantTable, {
+          code: 'counter',
+          restaurant: newRestaurant,
+        }),
+      );
+
+      ownerUser.restaurants = [...ownerUser.restaurants, newRestaurant];
+      const updatedUser = await queryRunner.manager.save(ownerUser);
+
+      const stripe = await this.stripeService.createSubscriptionSession(
+        newRestaurant.slug,
+        dto.isTrial,
+      );
+      await queryRunner.commitTransaction();
+
+      try {
+        await this.sendEmail4Creation(newRestaurant, updatedUser, 'assigned');
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
       }
 
       return { url: stripe.url };

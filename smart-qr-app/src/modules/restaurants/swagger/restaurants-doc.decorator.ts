@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiBody, ApiResponse, ApiQuery, ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import { CreateRestaurantsDto } from '../dto/create-restaurants.dto';
+import { CreateRestaurantsExistingDto } from '../dto/create-restaurants-existing.dto';
 import { PatchRestaurantsDto } from '../dto/patch-restaurants.dto';
 
 export function CreateRestaurantDoc() {
@@ -42,6 +43,39 @@ export function CreateRestaurantDoc() {
           is_active: true,
         },
       },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid data or slug already exists',
+    }),
+  );
+}
+
+export function CreateRestaurantExistingDoc() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Create a restaurant for an existing owner',
+      description:
+        'Creates a new restaurant and assigns it to an already registered owner user.',
+    }),
+    ApiBody({
+      type: CreateRestaurantsExistingDto,
+      description: 'Restaurant data for existing owner',
+      examples: {
+        eliCafe: {
+          summary: 'Example of restaurant creation for existing owner',
+          value: {
+            name: 'Eli Cafe',
+            slug: 'eli-cafe',
+            owner_email: 'smartqr2@gmail.com',
+            isTrial: false,
+          },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Restaurant successfully created',
     }),
     ApiResponse({
       status: 400,

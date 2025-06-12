@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Query, HttpCode, UseGuards, Patch, Param, Req, Delete } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
+import { CreateRestaurantsExistingDto } from './dto/create-restaurants-existing.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import {
   CreateRestaurantDoc,
@@ -9,6 +10,7 @@ import {
   GetRestaurantDoc,
   GetRestaurantPublicDoc,
   PatchRestaurantBySlugDoc,
+  CreateRestaurantExistingDoc,
 } from './swagger/restaurants-doc.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
@@ -26,6 +28,15 @@ export class RestaurantsController {
   @CreateRestaurantDoc()
   async createRestaurants(@Body() dto: CreateRestaurantsDto) {
     return this.restaurantsService.createRestaurants(dto);
+  }
+
+  @Post('create-existing')
+  @HttpCode(200)
+  @CreateRestaurantExistingDoc()
+  async createRestaurantExisting(
+    @Body() dto: CreateRestaurantsExistingDto,
+  ) {
+    return this.restaurantsService.createRestaurantExistingOwner(dto);
   }
 
   @Get()

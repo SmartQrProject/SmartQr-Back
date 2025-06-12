@@ -11,7 +11,8 @@ export function CreateRestaurantDoc() {
     }),
     ApiBody({
       type: CreateRestaurantsDto,
-      description: 'Restaurant and owner data',
+      description:
+        'Restaurant data. If owner_email belongs to an existing user, only name, slug, owner_email and isTrial are required.',
       examples: {
         eliCafe: {
           summary: 'Example of restaurant creation',
@@ -21,7 +22,7 @@ export function CreateRestaurantDoc() {
             owner_name: 'John Smith',
             owner_email: 'smartqr2@gmail.com',
             owner_pass: 'Clave123$$',
-            isTrial: false
+            isTrial: false,
           },
         },
       },

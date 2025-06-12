@@ -21,7 +21,7 @@ export function CreateRestaurantDoc() {
             owner_name: 'John Smith',
             owner_email: 'smartqr2@gmail.com',
             owner_pass: 'Clave123$$',
-            isTrial: false
+            isTrial: false,
           },
         },
       },
@@ -56,11 +56,11 @@ export function GetRestaurantDoc() {
       summary: 'Get restaurant information',
       description: 'Retrieves restaurant data and its categories/products using its unique slug. Requires Owner or SuperAdmin role.',
     }),
-    ApiParam({
+    ApiQuery({
       name: 'slug',
       description: 'Unique restaurant identifier',
       example: 'eli-cafe',
-      required: true
+      required: true,
     }),
     ApiResponse({
       status: 200,
@@ -83,11 +83,11 @@ export function GetRestaurantDoc() {
           trading_hours: {
             mondayToFriday: { open: '12:20', close: '18:26' },
             saturday: { open: '', close: '' },
-            sunday: { open: '', close: '' }
+            sunday: { open: '', close: '' },
           },
           ordering_times: {
             dinein: '',
-            pickup: '20'
+            pickup: '20',
           },
           latitude: '-27.421255',
           longitude: '-55.935053',
@@ -113,7 +113,7 @@ export function GetRestaurantPublicDoc() {
       name: 'slug',
       required: true,
       description: 'Unique restaurant identifier',
-      example: 'eli-cafe'
+      example: 'eli-cafe',
     }),
     ApiOperation({
       summary: 'Get public data of a restaurant by slug',
@@ -207,13 +207,14 @@ export function PatchRestaurantBySlugDoc() {
     ApiBearerAuth(),
     ApiOperation({
       summary: 'Update restaurant information',
-      description: 'Updates restaurant information. Requires Owner or SuperAdmin role. The following fields can be updated: name, banner, address, phone, description, tags, trading_hours, ordering_times, longitude, latitude, is_active',
+      description:
+        'Updates restaurant information. Requires Owner or SuperAdmin role. The following fields can be updated: name, banner, address, phone, description, tags, trading_hours, ordering_times, longitude, latitude, is_active',
     }),
     ApiParam({
       name: 'slug',
       description: 'Unique restaurant identifier',
       example: 'eli-cafe',
-      required: true
+      required: true,
     }),
     ApiBody({
       type: PatchRestaurantsDto,
@@ -239,7 +240,7 @@ export function PatchRestaurantBySlugDoc() {
             },
             latitude: '-27.421255',
             longitude: '-55.935053',
-            is_active: true
+            is_active: true,
           },
         },
       },
@@ -261,11 +262,11 @@ export function PatchRestaurantBySlugDoc() {
           trading_hours: {
             mondayToFriday: { open: '12:20', close: '18:26' },
             saturday: { open: '', close: '' },
-            sunday: { open: '', close: '' }
+            sunday: { open: '', close: '' },
           },
           ordering_times: {
             dinein: '',
-            pickup: '20'
+            pickup: '20',
           },
           latitude: '-27.421255',
           longitude: '-55.935053',
@@ -294,7 +295,7 @@ export function DeleteRestaurantBySlugDoc() {
       name: 'slug',
       description: 'Unique restaurant identifier',
       example: 'eli-cafe',
-      required: true
+      required: true,
     }),
     ApiResponse({
       status: 200,

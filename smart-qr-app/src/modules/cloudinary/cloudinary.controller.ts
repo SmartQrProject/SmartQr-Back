@@ -30,7 +30,6 @@ export class CloudinaryController {
     )
     file: Express.Multer.File,
   ): Promise<string> {
-    /////////////////////////////////////////////////////////////////////////////////////////chequear
     return await this.cloudinaryService.updateImg(file);
   }
 }

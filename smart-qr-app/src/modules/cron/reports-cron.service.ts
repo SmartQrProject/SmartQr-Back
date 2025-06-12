@@ -7,7 +7,6 @@ import { Restaurant } from 'src/shared/entities/restaurant.entity';
 import * as dayjs from 'dayjs';
 import { MailService } from 'src/common/services/mail.service';
 import { ReportsDto } from '../../modules/cron/dto/reportes.dto';
-import { todo } from 'node:test';
 import { generatePdfBuffer } from 'src/utils/pdf-generator';
 
 @Injectable()

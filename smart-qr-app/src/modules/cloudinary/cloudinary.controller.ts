@@ -4,7 +4,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { ValidateImagePipe } from 'src/pipes/validateImage.pipe';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UploadImageDoc } from './sawagger/cloudinary.decorator';
+import { UploadImageDoc } from './swagger/cloudinary.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/common/decorators/role.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';

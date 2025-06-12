@@ -6,7 +6,7 @@ import { User } from 'src/shared/entities/user.entity';
 import { PutUserDto } from './dto/put-user.dto';
 import { SignInUserDto } from './dto/signIn-user.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { CreateUserDoc, DeleteUserByIdDoc, GetAllUsersDoc, UserLoginDoc, ModifyUserByIdDoc, GetActiveStaff } from './swagger/user-doc.decorator';
+import { CreateUserDoc, DeleteUserByIdDoc, GetAllUsersDoc, UserLoginDoc, ModifyUserByIdDoc, GetActiveStaff, CheckEmailDoc } from './swagger/user-doc.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/common/decorators/role.enum';
@@ -15,6 +15,13 @@ import { Role } from 'src/common/decorators/role.enum';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('check-email')
+  @HttpCode(200)
+  @CheckEmailDoc()
+  async checkEmail(@Query('email') email: string): Promise<{ exists: boolean }> {
+    return this.usersService.checkEmail(email);
+  }
 
   @Patch(':slug/:id')
   @HttpCode(200)

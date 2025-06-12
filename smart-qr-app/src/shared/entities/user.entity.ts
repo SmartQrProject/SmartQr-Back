@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, JoinTable } from 'typeorm';
 import { IsEmail, IsString, IsUUID, Length } from 'class-validator';
 import { Restaurant } from './restaurant.entity';
 
@@ -40,8 +40,13 @@ export class User {
   @Column({ default: true })
   is_active: boolean;
 
-  @ManyToOne(() => Restaurant, (restaurant) => restaurant.users, {
+  @ManyToMany(() => Restaurant, (restaurant) => restaurant.users, {
     onDelete: 'CASCADE',
   })
-  restaurant: Restaurant;
+  @JoinTable({
+    name: 'user_restaurants',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'restaurantId', referencedColumnName: 'id' },
+  })
+  restaurants: Restaurant[];
 }

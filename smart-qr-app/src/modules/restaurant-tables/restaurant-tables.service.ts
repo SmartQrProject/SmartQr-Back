@@ -33,7 +33,7 @@ export class RestaurantTablesService {
     //y el owner y el staff las mesas de su propio restaurant.
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner') || req.user.roles.includes('staff')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can not visualize Tables from other restaurants.`);
         }
       }
@@ -54,7 +54,7 @@ export class RestaurantTablesService {
     //y el owner y el staff las mesas de su propio restaurant.
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can NOT create  Tables for other restaurants.`);
         }
       }
@@ -70,7 +70,7 @@ export class RestaurantTablesService {
     //y el owner y el staff las mesas de su propio restaurant.
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner') || req.user.roles.includes('staff')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can visualize Tables from other restaurants.`);
         }
       }
@@ -86,7 +86,7 @@ export class RestaurantTablesService {
     //y el owner las mesas de su propio restaurant.
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can NOT visualize Tables from other restaurants.`);
         }
       }
@@ -111,7 +111,7 @@ export class RestaurantTablesService {
     //y el owner las mesas de su propio restaurant.
     if (!req.user.roles.includes('superAdmin')) {
       if (req.user.roles.includes('owner') || req.user.roles.includes('staff')) {
-        if (req.user.restaurant.id !== rest.id) {
+        if (!req.user.restaurants.some((r) => r.id === rest.id)) {
           throw new NotFoundException(`You can NOT visualize Tables from other restaurants.`);
         }
       }

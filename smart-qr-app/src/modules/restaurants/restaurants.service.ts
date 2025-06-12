@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateRestaurantsDto } from './dto/create-restaurants.dto';
+import { CreateRestaurantsExistingDto } from './dto/create-restaurants-existing.dto';
 import { User } from 'src/shared/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Restaurant } from 'src/shared/entities/restaurant.entity';
@@ -38,12 +39,15 @@ export class RestaurantsService {
         throw new BadRequestException('Restaurant already Registered');
       }
 
-      // Validar email único
-      const emailExists = await queryRunner.manager.findOneBy(User, {
-        email: dto.owner_email,
+      // Revisar si ya existe un usuario con ese email
+      const emailExists = await queryRunner.manager.findOne(User, {
+        where: { email: dto.owner_email },
+        relations: { restaurants: true },
       });
+
+      let ownerUser: User | null = null;
       if (emailExists) {
-        throw new BadRequestException(`Email User alread exists ${dto.owner_email}`);
+        ownerUser = emailExists;
       }
 
       const newRestaurants = await queryRunner.manager.save(
@@ -62,24 +66,101 @@ export class RestaurantsService {
           restaurant: newRestaurants,
         }),
       );
-      const newUser = await queryRunner.manager.save(
-        queryRunner.manager.create(User, {
-          email: dto.owner_email,
-          password: await this.bcryptService.hash(dto.owner_pass),
-          role: 'owner',
-          name: dto.owner_name,
-          restaurant: newRestaurants,
-        }),
-      );
+
+      let newUser: User;
+      if (ownerUser) {
+        ownerUser.restaurants = [...ownerUser.restaurants, newRestaurants];
+        newUser = await queryRunner.manager.save(ownerUser);
+      } else {
+        if (!dto.owner_name || !dto.owner_pass) {
+          throw new BadRequestException(
+            'owner_name and owner_pass are required for new users',
+          );
+        }
+        newUser = await queryRunner.manager.save(
+          queryRunner.manager.create(User, {
+            email: dto.owner_email,
+            password: await this.bcryptService.hash(dto.owner_pass),
+            role: 'owner',
+            name: dto.owner_name,
+            restaurants: [newRestaurants],
+          }),
+        );
+      }
       const stripe = await this.stripeService.createSubscriptionSession(newRestaurants.slug, dto.isTrial);
       await queryRunner.commitTransaction();
 
       //nodemailer
       try {
-        await this.sendEmail4Creation(newRestaurants, newUser, 'created');
+        await this.sendEmail4Creation(newRestaurants, newUser, ownerUser ? 'assigned' : 'created');
       } catch (error) {
         console.error('Failed to send email notification:', error);
         // Continue execution even if email fails
+      }
+
+      return { url: stripe.url };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async createRestaurantExistingOwner(
+    dto: CreateRestaurantsExistingDto,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const sanitizedSlug = dto.slug.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+
+      const slugExists = await queryRunner.manager.findOneBy(Restaurant, {
+        slug: sanitizedSlug,
+      });
+      if (slugExists) {
+        throw new BadRequestException('Restaurant already Registered');
+      }
+
+      const ownerUser = await queryRunner.manager.findOne(User, {
+        where: { email: dto.owner_email },
+        relations: { restaurants: true },
+      });
+      if (!ownerUser) {
+        throw new BadRequestException('Owner email not registered');
+      }
+
+      const newRestaurant = await queryRunner.manager.save(
+        queryRunner.manager.create(Restaurant, {
+          name: dto.name,
+          slug: sanitizedSlug,
+          owner_email: dto.owner_email,
+          wasTrial: dto.isTrial,
+        }),
+      );
+
+      await queryRunner.manager.save(
+        queryRunner.manager.create(RestaurantTable, {
+          code: 'counter',
+          restaurant: newRestaurant,
+        }),
+      );
+
+      ownerUser.restaurants = [...ownerUser.restaurants, newRestaurant];
+      const updatedUser = await queryRunner.manager.save(ownerUser);
+
+      const stripe = await this.stripeService.createSubscriptionSession(
+        newRestaurant.slug,
+        dto.isTrial,
+      );
+      await queryRunner.commitTransaction();
+
+      try {
+        await this.sendEmail4Creation(newRestaurant, updatedUser, 'assigned');
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
       }
 
       return { url: stripe.url };
@@ -268,10 +349,15 @@ export class RestaurantsService {
   }
 
   async sendEmail4Creation(newRestaurants: Restaurant, newUser, accion) {
-    const subject = `Restaurant and Owner User were successfully created ${newRestaurants.name}`;
-    const textmsg = `Hello ${newUser.name},  Your Restaurant have been updated and your profile have been created.
+    const isNewUser = accion === 'created';
+    const subject = isNewUser ? `Restaurant and Owner User were successfully created ${newRestaurants.name}` : `Restaurant ${newRestaurants.name} assigned successfully`;
+    const textmsg = isNewUser
+      ? `Hello ${newUser.name},  Your Restaurant has been created and your profile has been created.
 
-      \n\nUser: ${newUser.email} `;
+User: ${newUser.email} `
+      : `Hello ${newUser.name},  A new restaurant has been added to your account.
+
+Restaurant: ${newRestaurants.name}`;
     const htmlTemplate = 'basico';
     await this.mailService.sendMail(newUser.email, subject, textmsg, htmlTemplate);
   }

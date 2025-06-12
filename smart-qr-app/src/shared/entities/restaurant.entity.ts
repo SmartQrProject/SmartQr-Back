@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, JoinColumn, ManyToMany } from 'typeorm';
 import { IsArray, IsBoolean, IsEmail, IsObject, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 import { User } from './user.entity';
 import { Order } from './order.entity';
@@ -47,7 +47,7 @@ export class Restaurant {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => User, (user) => user.restaurant, { cascade: true })
+  @ManyToMany(() => User, (user) => user.restaurants, { cascade: true })
   users: User[];
 
   @OneToMany(() => Order, (order) => order.restaurant)

@@ -71,6 +71,11 @@ export class RestaurantsService {
         ownerUser.restaurants = [...ownerUser.restaurants, newRestaurants];
         newUser = await queryRunner.manager.save(ownerUser);
       } else {
+        if (!dto.owner_name || !dto.owner_pass) {
+          throw new BadRequestException(
+            'owner_name and owner_pass are required for new users',
+          );
+        }
         newUser = await queryRunner.manager.save(
           queryRunner.manager.create(User, {
             email: dto.owner_email,

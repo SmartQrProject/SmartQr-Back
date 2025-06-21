@@ -15,15 +15,15 @@ export class UsersRepository {
   ) {}
 
   async patchById(id: string, rest, updateUser: PutUserDto, req): Promise<User> {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.restaurants', 'restaurant')
-      .where('user.id = :id', { id })
-      .andWhere('restaurant.id = :restId', { restId: rest.id })
-      .getOne();
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['restaurants'],
+    });
 
-    if (!user || !user.exist) {
-      throw new NotFoundException(`❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`);
+    if (!user || !user.exist || !user.restaurants.some((r) => r.id === rest.id)) {
+      throw new NotFoundException(
+        `❌ No users found  with id ${id} for the restaurant ${rest.id} or is blocked !!`,
+      );
     }
 
     if (updateUser.password) {
